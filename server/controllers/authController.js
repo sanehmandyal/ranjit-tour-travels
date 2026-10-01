@@ -37,12 +37,11 @@ export const login = async (req, res, next) => {
     const cleanEmail = email.toLowerCase().trim();
     const masterAdminEmail = (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim();
     const masterAdminPass = (process.env.ADMIN_PASSWORD || 'Ranjit#Amb@2026!Secure').replace(/^["']|["']$/g, '').trim();
-    const isMasterAdmin = cleanEmail === masterAdminEmail && (password === masterAdminPass || password === 'Ranjit#Amb@2026!Secure');
 
     let user = await User.findOne({ email: cleanEmail });
 
-    // Auto-bootstrap superadmin if not found in MongoDB
-    if (!user && isMasterAdmin) {
+    // Auto-bootstrap superadmin if not found in MongoDB and master credentials supplied
+    if (!user && cleanEmail === masterAdminEmail && (password === masterAdminPass || password === 'Ranjit#Amb@2026!Secure')) {
       user = new User({
         name: process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
         email: cleanEmail,
@@ -58,15 +57,12 @@ export const login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
-    let isMatch = await user.comparePassword(password);
-
-    // Self-heal: If hash in database was outdated but master credential matches, update password and allow login
-    if (!isMatch && isMasterAdmin) {
-      user.password = password;
-      await user.save();
-      isMatch = true;
+    if (!user.isActive) {
+      return res.status(403).json({ success: false, message: 'Your account has been deactivated. Please contact administrator.' });
     }
 
+    // Authenticate exclusively with the user's active password in MongoDB
+    const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }

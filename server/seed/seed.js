@@ -22,41 +22,41 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-const seedDatabase = async () => {
+export const seedDatabase = async (clearFirst = true) => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ranjit_travels';
-    await mongoose.connect(mongoUri);
-    console.log('[Seed] Connected to MongoDB:', mongoUri);
-
-    // Clear existing data
-    await Promise.all([
-      User.deleteMany(),
-      Destination.deleteMany(),
-      TourPackage.deleteMany(),
-      Vehicle.deleteMany(),
-      Service.deleteMany(),
-      Blog.deleteMany(),
-      Testimonial.deleteMany(),
-      Gallery.deleteMany(),
-      Coupon.deleteMany(),
-      WebsiteSettings.deleteMany(),
-      SEOSettings.deleteMany(),
-      Booking.deleteMany(),
-      Inquiry.deleteMany()
-    ]);
-    console.log('[Seed] Cleared existing records.');
-
-    // 1. Users (Loaded from server/.env)
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    const editorPassword = process.env.EDITOR_PASSWORD;
-
-    if (!adminPassword || !editorPassword) {
-      throw new Error('ADMIN_PASSWORD and EDITOR_PASSWORD must be defined in server/.env');
+    if (mongoose.connection.readyState !== 1) {
+      const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/ranjit_travels';
+      await mongoose.connect(mongoUri);
+      console.log('[Seed] Connected to MongoDB:', mongoUri);
     }
+
+    if (clearFirst) {
+      // Clear existing data only on explicit seedDatabase calls
+      await Promise.all([
+        User.deleteMany(),
+        Destination.deleteMany(),
+        TourPackage.deleteMany(),
+        Vehicle.deleteMany(),
+        Service.deleteMany(),
+        Blog.deleteMany(),
+        Testimonial.deleteMany(),
+        Gallery.deleteMany(),
+        Coupon.deleteMany(),
+        WebsiteSettings.deleteMany(),
+        SEOSettings.deleteMany(),
+        Booking.deleteMany(),
+        Inquiry.deleteMany()
+      ]);
+      console.log('[Seed] Cleared existing records.');
+    }
+
+    // 1. Users (Loaded from server/.env with fallbacks)
+    const adminPassword = (process.env.ADMIN_PASSWORD || 'Ranjit#Amb@2026!Secure').replace(/^["']|["']$/g, '').trim();
+    const editorPassword = (process.env.EDITOR_PASSWORD || 'Editor#Amb@2026!').replace(/^["']|["']$/g, '').trim();
 
     const adminUser = new User({
       name: process.env.ADMIN_NAME || 'Ranjit Singh (Super Admin)',
-      email: process.env.ADMIN_EMAIL || 'admin@ranjittravels.com',
+      email: (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim(),
       password: adminPassword,
       role: 'superadmin',
       phone: process.env.ADMIN_PHONE || '+91 98165 96713'
@@ -1310,15 +1310,44 @@ Our private airport taxi picks you up directly from your home or hotel in Chandi
     console.log('\n=============================================');
     console.log(' SEEDING COMPLETED SUCCESSFULLY!');
     console.log(` Admin Login: ${process.env.ADMIN_EMAIL || 'admin@ranjittravels.com'}`);
-    console.log(' Password:    (configured in server/.env)');
     console.log(` Editor:      ${process.env.EDITOR_EMAIL || 'editor@ranjittravels.com'}`);
     console.log('=============================================\n');
 
-    process.exit(0);
+    return true;
   } catch (error) {
     console.error('[Seed Error]:', error);
-    process.exit(1);
+    throw error;
   }
 };
 
-seedDatabase();
+export const autoSeedIfNeeded = async () => {
+  try {
+    const destCount = await Destination.countDocuments();
+    const adminCount = await User.countDocuments({ role: 'superadmin' });
+    
+    if (destCount === 0) {
+      console.log('[Auto-Seed] Database appears empty. Initializing default travel data...');
+      await seedDatabase(false);
+      console.log('[Auto-Seed] Database initialized successfully.');
+    } else if (adminCount === 0) {
+      console.log('[Auto-Seed] Superadmin user missing. Creating default superadmin account...');
+      const adminPassword = (process.env.ADMIN_PASSWORD || 'Ranjit#Amb@2026!Secure').replace(/^["']|["']$/g, '').trim();
+      const adminUser = new User({
+        name: process.env.ADMIN_NAME || 'Ranjit Singh (Super Admin)',
+        email: (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim(),
+        password: adminPassword,
+        role: 'superadmin',
+        phone: process.env.ADMIN_PHONE || '+91 98165 96713'
+      });
+      await adminUser.save();
+      console.log('[Auto-Seed] Superadmin account created.');
+    }
+  } catch (err) {
+    console.error('[Auto-Seed Error]:', err.message);
+  }
+};
+
+const isDirectRun = process.argv[1] && (process.argv[1].endsWith('seed.js') || process.argv[1].endsWith('seed'));
+if (isDirectRun) {
+  seedDatabase(true).then(() => process.exit(0)).catch(() => process.exit(1));
+}
