@@ -1,0 +1,260 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #ffffff;
+  --color-ink-card: #ffffff;
+  --color-ink-elevated: #f8fafc;
+  --color-ink-border: #e2e8f0;
+  
+  --color-sand: #0f172a;
+  --color-sand-muted: #64748b;
+  
+  /* Sea Green Palette */
+  --color-gold: #0d9488;
+  --color-gold-light: #14b8a6;
+  --color-gold-dark: #0f766e;
+  --color-gold-pale: #f0fdfa;
+  
+  --color-turquoise: #059669;
+  --color-turquoise-glow: rgba(13, 148, 136, 0.15);
+  
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  selection-background-color: #0d9488;
+  selection-color: #ffffff;
+}
+
+::selection {
+  background: #0d9488;
+  color: #ffffff;
+}
+
+/* Typography styles */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* Background Topographic Texture on White with Soft Gradient Orbs */
+.bg-topo-pattern {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(circle at 10% 15%, rgba(13, 148, 136, 0.08) 0%, transparent 35%),
+    radial-gradient(circle at 90% 40%, rgba(20, 184, 166, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 85%, rgba(5, 150, 105, 0.07) 0%, transparent 45%),
+    repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 40px, rgba(13, 148, 136, 0.02) 41px, transparent 42px);
+}
+
+/* Glassmorphism Classes */
+.bg-glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(13, 148, 136, 0.06);
+}
+
+.bg-glass-teal {
+  background: rgba(240, 253, 250, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  box-shadow: 0 8px 24px -4px rgba(13, 148, 136, 0.1);
+}
+
+.bg-glass-dark {
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0d9488;
+}
+
+/* Glass UI Elements */
+.inp {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.7rem 0.95rem;
+  color: #0f172a;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.inp-with-icon {
+  padding-left: 2.6rem !important;
+}
+
+.inp::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.inp:focus {
+  outline: none;
+  background: #ffffff;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15), 0 2px 8px rgba(13, 148, 136, 0.08);
+}
+
+.inp-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2.2rem;
+}
+
+/* Buttons with Glass Accents */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.925rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.925rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: rgba(240, 253, 250, 0.95);
+  border-color: #0d9488;
+  color: #0f766e;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.15);
+}
+
+.btn-turquoise {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.925rem;
+  padding: 0.75rem 1.4rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.btn-turquoise:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(5, 150, 105, 0.4);
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* Glassmorphic Travel Card */
+.travel-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 1.125rem;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 20px -2px rgba(15, 23, 42, 0.05),
+    0 0 0 1px rgba(13, 148, 136, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.travel-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(13, 148, 136, 0.4);
+  box-shadow: 
+    0 20px 35px -6px rgba(13, 148, 136, 0.14),
+    0 0 0 1px rgba(13, 148, 136, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 1);
+}
+
+/* Route Line Dashes */
+@keyframes dashPulse {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animate-route-dash {
+  stroke-dasharray: 8 6;
+  animation: dashPulse 2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
