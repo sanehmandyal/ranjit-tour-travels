@@ -878,6 +878,154 @@ function WebsiteSettingsEditor() {
   );
 }
 
+// 5. Change Password Component
+function ChangePasswordSection({ user }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ success: false, msg: '' });
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    setStatus({ success: false, msg: '' });
+
+    if (newPassword.length < 6) {
+      return setStatus({ success: false, msg: 'New password must be at least 6 characters long.' });
+    }
+    if (newPassword !== confirmPassword) {
+      return setStatus({ success: false, msg: 'New password and confirm password do not match.' });
+    }
+
+    setLoading(true);
+    try {
+      const res = await api.put('/auth/change-password', {
+        currentPassword,
+        newPassword
+      });
+      setStatus({ success: true, msg: res.data.message || 'Password successfully changed! Your new password is now active.' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err) {
+      setStatus({ success: false, msg: msg(err) });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Account Info Card */}
+      <div className="travel-card p-6 bg-glass border-white/10">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-gold/15 text-gold flex items-center justify-center border border-gold/30 font-bold font-display text-lg">
+            {user?.name?.charAt(0) || 'A'}
+          </div>
+          <div>
+            <h3 className="font-display font-bold text-lg text-sand">{user?.name}</h3>
+            <span className="text-xs text-sand-muted">{user?.email}</span>
+            <span className="inline-block ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gold/20 text-gold uppercase">
+              {user?.role}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Change Password Form Card */}
+      <form onSubmit={handleChangePassword} className="travel-card p-6 sm:p-8 bg-glass space-y-5">
+        <div className="border-b border-white/10 pb-4">
+          <h3 className="font-display font-bold text-lg text-sand flex items-center gap-2">
+            <Lock size={18} className="text-gold" />
+            <span>Update Admin Password</span>
+          </h3>
+          <p className="text-xs text-sand-muted mt-1">
+            Once changed, your new password will be required for all future logins. The previous password will no longer work.
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-sand-muted mb-1.5 uppercase tracking-wider">
+            Current Password *
+          </label>
+          <div className="relative flex items-center">
+            <input
+              type={showCurrent ? 'text' : 'password'}
+              required
+              className="inp pr-10"
+              placeholder="Enter current active password"
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowCurrent(!showCurrent)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sand-muted hover:text-sand"
+            >
+              {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
+            </button>
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-sand-muted mb-1.5 uppercase tracking-wider">
+              New Password *
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type={showNew ? 'text' : 'password'}
+                required
+                className="inp pr-10"
+                placeholder="Min 6 characters"
+                value={newPassword}
+                onChange={e => setNewPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sand-muted hover:text-sand"
+              >
+                {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-sand-muted mb-1.5 uppercase tracking-wider">
+              Confirm New Password *
+            </label>
+            <input
+              type="password"
+              required
+              className="inp"
+              placeholder="Re-enter new password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {status.msg && (
+          <div className={`p-3.5 rounded-xl text-xs font-medium ${status.success ? 'bg-emerald-500/20 border border-emerald-400/40 text-emerald-200' : 'bg-red-500/20 border border-red-400/40 text-red-200'}`}>
+            {status.msg}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary w-full sm:w-auto font-bold !py-2.5 !px-6"
+        >
+          {loading ? 'Saving New Password…' : 'Save & Update Password'}
+        </button>
+      </form>
+    </div>
+  );
+}
+
 // 6. Main Admin Layout
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -915,7 +1063,8 @@ export default function Admin() {
     { key: 'blogs', label: 'Blog CMS', icon: FileText },
     ...(!isEditor ? [
       { key: 'settings', label: 'Website Settings', icon: SettingsIcon }
-    ] : [])
+    ] : []),
+    { key: 'security', label: 'Change Password', icon: Lock }
   ];
 
   return (
@@ -976,7 +1125,7 @@ export default function Admin() {
               <Menu size={20} />
             </button>
             <h2 className="font-display font-bold text-lg text-sand capitalize">
-              {activeTab.replace('-', ' ')}
+              {activeTab === 'security' ? 'Security & Password' : activeTab.replace('-', ' ')}
             </h2>
           </div>
 
@@ -1014,6 +1163,8 @@ export default function Admin() {
             <AdminDashboard />
           ) : activeTab === 'settings' ? (
             <WebsiteSettingsEditor />
+          ) : activeTab === 'security' ? (
+            <ChangePasswordSection user={user} />
           ) : (
             <ResourceList key={activeTab} resource={activeTab} />
           )}

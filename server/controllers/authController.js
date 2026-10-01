@@ -34,7 +34,25 @@ export const login = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide both email and password.' });
     }
-    const user = await User.findOne({ email });
+    const cleanEmail = email.toLowerCase().trim();
+    let user = await User.findOne({ email: cleanEmail });
+
+    // Auto-bootstrap default superadmin if not yet created in MongoDB
+    if (!user && cleanEmail === (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim()) {
+      const defaultPassword = process.env.ADMIN_PASSWORD || 'Ranjit#Amb@2026!Secure';
+      if (password === defaultPassword) {
+        user = new User({
+          name: process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
+          email: cleanEmail,
+          password: defaultPassword,
+          role: 'superadmin',
+          phone: process.env.ADMIN_PHONE || '+919816596713',
+          isActive: true
+        });
+        await user.save();
+      }
+    }
+
     if (!user) {
       return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
@@ -48,6 +66,31 @@ export const login = async (req, res, next) => {
       token,
       user: { id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone }
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Please provide both current and new password.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+    }
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect. Please enter your valid current password.' });
+    }
+    user.password = newPassword;
+    await user.save();
+    res.json({ success: true, message: 'Password updated successfully! Your new password is now active and required for all future logins.' });
   } catch (err) {
     next(err);
   }
