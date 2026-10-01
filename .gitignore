@@ -1,10 +1,25 @@
-node_modules
+# Dependencies
+node_modules/
+
+# Environment files (Never commit real secrets)
 .env
-.env.*
-*.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 server/.env
 client/.env
-dist
+*.env
+
+# Allow sample template files
+!.env.example
+!server/.env.example
+!client/.env.example
+
+# Build Outputs
+dist/
+build/
+
+# Uploads
 server/uploads/*
 !server/uploads/.gitkeep
-
