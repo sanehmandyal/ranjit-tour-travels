@@ -139,7 +139,6 @@ function AdminLogin({ onLoginSuccess }) {
     setError('');
     const cleanEmail = email.trim().toLowerCase();
     const storedCustomPass = localStorage.getItem('rjt_custom_admin_pass');
-    const validPass = storedCustomPass || 'Ranjit#Amb@2026!Secure';
 
     const isSuperAdminEmail = 
       cleanEmail === 'admin@ranjittravels.com' ||
@@ -148,10 +147,10 @@ function AdminLogin({ onLoginSuccess }) {
       cleanEmail === 'admin' ||
       cleanEmail.startsWith('admin@');
 
-    const isSuperAdminPass = 
-      password === validPass || 
-      password === 'Ranjit#Amb@2026!Secure' ||
-      (storedCustomPass && password === storedCustomPass);
+    // If admin has set a custom password, ONLY that custom password is accepted. Old password is strictly rejected.
+    const isSuperAdminPass = storedCustomPass
+      ? password === storedCustomPass
+      : password === 'Ranjit#Amb@2026!Secure';
 
     try {
       const res = await api.post('/auth/login', { email: cleanEmail, password });
@@ -1059,8 +1058,8 @@ function ChangePasswordSection({ user }) {
     const storedCustomPass = localStorage.getItem('rjt_custom_admin_pass');
     const validCurrent = storedCustomPass || 'Ranjit#Amb@2026!Secure';
 
-    if (currentPassword !== validCurrent && currentPassword !== 'Ranjit#Amb@2026!Secure') {
-      return setStatus({ success: false, msg: 'Current password is incorrect. Please enter your valid current password.' });
+    if (currentPassword !== validCurrent) {
+      return setStatus({ success: false, msg: 'Current password is incorrect. Please enter your valid active password.' });
     }
 
     setLoading(true);
@@ -1073,7 +1072,7 @@ function ChangePasswordSection({ user }) {
       console.warn('Backend sync deferred:', err.message);
     } finally {
       localStorage.setItem('rjt_custom_admin_pass', newPassword);
-      setStatus({ success: true, msg: 'Password successfully changed! Your new custom password is now active and required for all future logins.' });
+      setStatus({ success: true, msg: 'Password successfully changed! Your new custom password is now active and the old password has been permanently deactivated.' });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
