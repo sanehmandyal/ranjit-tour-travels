@@ -47,15 +47,24 @@ app.use(helmet({
 }));
 
 const allowedOrigins = [
-  process.env.CLIENT_URL || 'http://localhost:5173',
-  'http://localhost:3000',
+  process.env.CLIENT_URL,
+  'https://ranjit-tour-travels.vercel.app',
+  'https://ranjittourandtravels.com',
+  'http://localhost:5173',
   'http://localhost:5174',
-  'https://ranjittourandtravels.com'
-];
+  'http://localhost:3000'
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.onrender.com') ||
+      origin.includes('ranjittour') ||
+      process.env.NODE_ENV !== 'production'
+    ) {
       callback(null, true);
     } else {
       callback(new Error('Blocked by CORS policy'));
@@ -75,6 +84,24 @@ const generalLimiter = rateLimit({
   message: { success: false, message: 'Too many requests from this IP, please try again in 15 minutes.' }
 });
 app.use('/api', generalLimiter);
+
+// Root health check & Render ping endpoints (Resolves Render HEAD / 404)
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'online',
+    platform: 'Ranjit Tour & Travels Enterprise API',
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.head('/', (req, res) => {
+  res.status(200).end();
+});
+
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
+});
 
 // Serve static uploads & public images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
