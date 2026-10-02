@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Background Glassmorphic Glow -->
+    <radialGradient id="bgGlow" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#0f766e" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#042f2e" stop-opacity="0"/>
+    </radialGradient>
+    
+    <!-- Shield Glass Gradient -->
+    <linearGradient id="glassShield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.25"/>
+      <stop offset="40%" stop-color="#14b8a6" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <!-- Glass Rim Border -->
+    <linearGradient id="glassRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="30%" stop-color="#2dd4bf" stop-opacity="0.7"/>
+      <stop offset="70%" stop-color="#10b981" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.6"/>
+    </linearGradient>
+
+    <!-- Gold Accent Rim -->
+    <linearGradient id="goldRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#14b8a6"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+
+    <!-- Mountain Gradient -->
+    <linearGradient id="mountainGrad" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#99f6e4"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+
+    <!-- Top Specular Highlight -->
+    <linearGradient id="specular" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Ambient Glow -->
+  <circle cx="60" cy="55" r="50" fill="url(#bgGlow)"/>
+
+  <!-- Glass Shield Outer Contour -->
+  <path d="M 60 12 C 85 12 102 20 102 45 C 102 78 78 98 60 108 C 42 98 18 78 18 45 C 18 20 35 12 60 12 Z"
+        fill="url(#glassShield)"
+        stroke="url(#glassRim)"
+        stroke-width="2.5"
+        filter="url(#glow)"/>
+
+  <!-- Inner Compass Circle -->
+  <circle cx="60" cy="55" r="28" fill="none" stroke="url(#goldRim)" stroke-width="1.8" stroke-dasharray="3 1.5"/>
+  <circle cx="60" cy="55" r="32" fill="none" stroke="#2dd4bf" stroke-width="0.8" stroke-opacity="0.6"/>
+
+  <!-- Mountain Peaks (Himalayas) -->
+  <path d="M 40 64 L 50 48 L 56 56 L 62 43 L 70 54 L 74 50 L 80 64 Z" fill="url(#mountainGrad)" opacity="0.95"/>
+  <path d="M 50 48 L 56 56 L 62 43 L 70 54" stroke="#ffffff" stroke-width="1" fill="none"/>
+
+  <!-- Compass Star Needle -->
+  <!-- North Point -->
+  <polygon points="60,25 64,52 60,49" fill="#ffffff"/>
+  <polygon points="60,25 56,52 60,49" fill="#2dd4bf"/>
+  
+  <!-- South Point -->
+  <polygon points="60,85 64,58 60,61" fill="#0f766e"/>
+  <polygon points="60,85 56,58 60,61" fill="#14b8a6"/>
+
+  <!-- East Point -->
+  <polygon points="90,55 63,59 66,55" fill="#fef08a"/>
+  <polygon points="90,55 63,51 66,55" fill="#2dd4bf"/>
+
+  <!-- West Point -->
+  <polygon points="30,55 57,59 54,55" fill="#14b8a6"/>
+  <polygon points="30,55 57,51 54,55" fill="#ffffff"/>
+
+  <!-- Center Glass Pearl / Compass Axis -->
+  <circle cx="60" cy="55" r="5" fill="#2dd4bf" stroke="#ffffff" stroke-width="1.5" filter="url(#glow)"/>
+  <circle cx="58.5" cy="53.5" r="1.5" fill="#ffffff"/>
+
+  <!-- Direction Letters -->
+  <text x="60" y="21" font-family="'Outfit', sans-serif" font-size="7" font-weight="900" fill="#ffffff" text-anchor="middle">N</text>
+  <text x="60" y="94" font-family="'Outfit', sans-serif" font-size="6" font-weight="800" fill="#99f6e4" text-anchor="middle">S</text>
+  <text x="96" y="57" font-family="'Outfit', sans-serif" font-size="6" font-weight="800" fill="#fef08a" text-anchor="middle">E</text>
+  <text x="24" y="57" font-family="'Outfit', sans-serif" font-size="6" font-weight="800" fill="#99f6e4" text-anchor="middle">W</text>
+
+  <!-- Top Specular Glass Sheen -->
+  <path d="M 35 17 Q 60 14 85 17" stroke="url(#specular)" stroke-width="2" stroke-linecap="round" fill="none"/>
+</svg>

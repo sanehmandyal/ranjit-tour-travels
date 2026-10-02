@@ -6,10 +6,11 @@ import {
   Settings as SettingsIcon, Globe, LogOut, Plus, Edit2, 
   Trash2, Search, Check, X, Shield, ChevronRight, Menu, Upload, RefreshCw,
   Lock, Mail, Eye, EyeOff, Compass, ArrowRight, ArrowLeft,
-  Phone, MessageCircle
+  Phone, MessageCircle, Sparkles, TrendingUp, CheckCircle2, Clock,
+  DollarSign, Activity, ChevronDown
 } from 'lucide-react';
 import { api, msg, img } from '../api.js';
-import { Loading, ErrorBox } from '../components/ui.jsx';
+import { Loading, ErrorBox, Logo } from '../components/ui.jsx';
 import { 
   DEFAULT_PACKAGES, 
   DEFAULT_DESTINATIONS, 
@@ -189,35 +190,37 @@ function AdminLogin({ onLoginSuccess }) {
         <img
           src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=2000&q=80"
           alt="Himalayan Mountains"
-          className="w-full h-full object-cover object-center filter brightness-[0.4] scale-105"
+          className="w-full h-full object-cover object-center filter brightness-[0.35] scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-950/85" />
       </div>
 
       {/* Ambient Glowing Orbs */}
-      <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-teal-500/15 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-emerald-500/15 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/4 left-1/3 w-[500px] h-[500px] bg-teal-500/15 blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/3 w-[500px] h-[500px] bg-emerald-500/15 blur-[150px] rounded-full pointer-events-none" />
 
       {/* Glassmorphic Login Card */}
       <div className="relative z-10 max-w-md w-full">
         <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden text-white">
           {/* Top Edge Specular Reflection */}
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
 
           {/* Header Brand Badge */}
           <div className="text-center mb-8">
-            <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-emerald-600 p-0.5 shadow-lg shadow-teal-500/25 flex items-center justify-center mx-auto mb-4">
-              <div className="w-full h-full bg-slate-900/90 rounded-[14px] flex items-center justify-center backdrop-blur-md">
-                <Compass className="w-7 h-7 text-teal-300 animate-spin-slow" />
-              </div>
+            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500/30 to-emerald-600/30 p-1 backdrop-blur-xl border border-teal-400/50 shadow-xl shadow-teal-500/30 flex items-center justify-center mx-auto mb-4 group">
+              <img
+                src="/favicon.svg"
+                alt="Ranjit Tour & Travels"
+                className="w-12 h-12 object-contain drop-shadow-md"
+              />
               <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse" />
             </div>
 
             <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Ranjit Tour & Travels
             </h1>
-            <span className="inline-flex items-center gap-1 text-[11px] font-mono text-teal-300 uppercase tracking-widest font-bold mt-1.5 px-3 py-0.5 rounded-full bg-teal-500/15 border border-teal-400/30">
-              <Shield size={12} className="text-teal-300" />
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-teal-300 uppercase tracking-widest font-bold mt-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/40 backdrop-blur-md">
+              <Shield size={13} className="text-teal-300" />
               <span>Enterprise Admin Portal</span>
             </span>
           </div>
@@ -225,14 +228,14 @@ function AdminLogin({ onLoginSuccess }) {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                 Admin Email
               </label>
               <div className="relative flex items-center">
                 <input
                   type="email"
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-xl py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl py-2.5 pl-10 pr-3.5 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 transition backdrop-blur-md"
                   placeholder="admin@ranjittravels.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -242,14 +245,14 @@ function AdminLogin({ onLoginSuccess }) {
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
+              <label className="block text-[11px] font-bold text-slate-200 mb-1.5 uppercase tracking-wider">
                 Password
               </label>
               <div className="relative flex items-center">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="w-full bg-white/10 border border-white/20 rounded-xl py-2.5 pl-10 pr-10 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-400/40 focus:border-teal-400 transition"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl py-2.5 pl-10 pr-10 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400 transition backdrop-blur-md"
                   placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
@@ -267,7 +270,7 @@ function AdminLogin({ onLoginSuccess }) {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-500/20 border border-red-400/40 rounded-xl text-xs text-red-200 font-medium">
+              <div className="p-3 bg-red-500/25 border border-red-400/50 rounded-xl text-xs text-red-200 font-medium backdrop-blur-md">
                 {error}
               </div>
             )}
@@ -275,7 +278,7 @@ function AdminLogin({ onLoginSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full !bg-gradient-to-r !from-teal-500 !to-emerald-600 hover:!from-teal-400 hover:!to-emerald-500 !text-white !py-3 rounded-xl font-bold shadow-lg shadow-teal-900/50 mt-2 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white py-3 rounded-xl font-bold shadow-lg shadow-teal-950/60 mt-2 flex items-center justify-center gap-2 transition hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
             >
               <span>{loading ? 'Authenticating…' : 'Access Control Center'}</span>
               <ArrowRight size={17} />
@@ -286,7 +289,7 @@ function AdminLogin({ onLoginSuccess }) {
           <div className="mt-6 pt-5 border-t border-white/15 text-center">
             <Link
               to="/"
-              className="text-xs text-slate-400 hover:text-white transition inline-flex items-center gap-1.5 font-medium"
+              className="text-xs text-slate-300 hover:text-teal-300 transition inline-flex items-center gap-1.5 font-medium"
             >
               <ArrowLeft size={14} />
               <span>Back to Public Website</span>
@@ -298,7 +301,7 @@ function AdminLogin({ onLoginSuccess }) {
   );
 }
 
-// 2. Resource Item Editor (Add / Edit Form)
+// 2. Resource Item Editor (Add / Edit Form with Glassmorphism)
 function ResourceEditor({ resource, item, onDone }) {
   const fields = RESOURCE_FIELDS[resource] || [];
   const [form, setForm] = useState(() => {
@@ -379,12 +382,22 @@ function ResourceEditor({ resource, item, onDone }) {
   };
 
   return (
-    <form onSubmit={handleSave} className="travel-card p-6 bg-glass space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
-        <h3 className="font-display font-bold text-xl text-sand">
-          {item?._id ? `Edit ${resource.slice(0, -1)}` : `Create New ${resource.slice(0, -1)}`}
-        </h3>
-        <button type="button" onClick={onDone} className="btn-secondary text-xs">
+    <form onSubmit={handleSave} className="bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden text-white">
+      {/* Specular Edge Highlight */}
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <span className="text-[10px] font-mono text-teal-300 font-bold uppercase tracking-wider block">Content Editor</span>
+          <h3 className="font-display font-bold text-xl sm:text-2xl text-white mt-0.5">
+            {item?._id ? `Edit ${resource.slice(0, -1)}` : `Create New ${resource.slice(0, -1)}`}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={onDone}
+          className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-slate-200 transition backdrop-blur-md cursor-pointer"
+        >
           Cancel
         </button>
       </div>
@@ -395,32 +408,47 @@ function ResourceEditor({ resource, item, onDone }) {
 
           if (f.type === 'bool') {
             return (
-              <label key={f.key} className="flex items-center gap-3 p-3 bg-ink-elevated rounded-xl cursor-pointer">
+              <label key={f.key} className="flex items-center gap-3 p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl cursor-pointer transition backdrop-blur-md">
                 <input
                   type="checkbox"
                   checked={!!val}
                   onChange={e => setForm(setVal(form, f.key, e.target.checked))}
-                  className="accent-gold w-4 h-4"
+                  className="accent-teal-500 w-4 h-4 cursor-pointer"
                 />
-                <span className="text-xs font-semibold text-sand">{f.label}</span>
+                <span className="text-xs font-semibold text-slate-200">{f.label}</span>
               </label>
             );
           }
 
           if (f.type === 'image') {
             return (
-              <div key={f.key} className="space-y-2">
-                <label className="block text-xs font-semibold text-sand-muted uppercase">{f.label}</label>
-                <div className="flex items-center gap-4">
+              <div key={f.key} className="space-y-2 sm:col-span-2">
+                <label className="block text-[11px] font-bold text-teal-300 uppercase tracking-wider">{f.label}</label>
+                <div className="flex flex-wrap items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
                   {val && (
-                    <img src={img(val)} alt="" className="w-16 h-16 object-cover rounded-lg border border-gold/30" />
+                    <div className="relative w-24 h-24 rounded-xl overflow-hidden border-2 border-teal-400/50 shadow-lg flex-shrink-0">
+                      <img src={img(val)} alt="" className="w-full h-full object-cover" />
+                    </div>
                   )}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={e => e.target.files[0] && handleFileUpload(f.key, e.target.files[0])}
-                    className="text-xs text-sand-muted"
-                  />
+                  <div className="flex-1 min-w-[200px] space-y-2">
+                    <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/40 text-teal-200 text-xs font-bold cursor-pointer transition">
+                      <Upload size={14} />
+                      <span>{uploading ? 'Processing Image…' : 'Upload From Device / Phone'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => e.target.files[0] && handleFileUpload(f.key, e.target.files[0])}
+                        className="hidden"
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-white/10 border border-white/15 rounded-xl py-2 px-3 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400"
+                      value={typeof val === 'string' ? val : ''}
+                      onChange={e => setForm(setVal(form, f.key, e.target.value))}
+                      placeholder="Or paste external image URL..."
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -429,26 +457,32 @@ function ResourceEditor({ resource, item, onDone }) {
           if (f.type === 'image_list') {
             return (
               <div key={f.key} className="sm:col-span-2 space-y-2">
-                <label className="block text-xs font-semibold text-sand-muted uppercase">{f.label}</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => e.target.files[0] && handleFileUpload('images', e.target.files[0])}
-                  className="text-xs text-sand-muted mb-2"
-                />
-                <div className="flex flex-wrap gap-2">
-                  {(form.images || []).map((pic, idx) => (
-                    <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10">
-                      <img src={img(pic)} alt="" className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => setForm({ ...form, images: form.images.filter((_, i) => i !== idx) })}
-                        className="absolute top-0 right-0 bg-red-600 text-white text-[10px] w-4 h-4 flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                <label className="block text-[11px] font-bold text-teal-300 uppercase tracking-wider">{f.label}</label>
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md space-y-3">
+                  <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/40 text-teal-200 text-xs font-bold cursor-pointer transition">
+                    <Upload size={14} />
+                    <span>{uploading ? 'Uploading Photo…' : 'Add Vehicle Photo'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={e => e.target.files[0] && handleFileUpload('images', e.target.files[0])}
+                      className="hidden"
+                    />
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    {(form.images || []).map((pic, idx) => (
+                      <div key={idx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-white/20 shadow-md group">
+                        <img src={img(pic)} alt="" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setForm({ ...form, images: form.images.filter((_, i) => i !== idx) })}
+                          className="absolute top-1 right-1 bg-red-600/90 text-white rounded-md w-5 h-5 flex items-center justify-center text-xs opacity-80 hover:opacity-100 transition"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             );
@@ -457,15 +491,15 @@ function ResourceEditor({ resource, item, onDone }) {
           if (f.type === 'destination_ref') {
             return (
               <div key={f.key}>
-                <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">{f.label}</label>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">{f.label}</label>
                 <select
-                  className="inp inp-select"
+                  className="w-full bg-slate-900/80 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition"
                   value={val || ''}
                   onChange={e => setForm(setVal(form, f.key, e.target.value))}
                 >
-                  <option value="">Select Destination Region</option>
+                  <option value="" className="bg-slate-900 text-slate-300">Select Destination Region</option>
                   {destinations.map(d => (
-                    <option key={d._id} value={d._id}>{d.name} ({d.state})</option>
+                    <option key={d._id} value={d._id} className="bg-slate-900 text-white">{d.name} ({d.state})</option>
                   ))}
                 </select>
               </div>
@@ -475,15 +509,15 @@ function ResourceEditor({ resource, item, onDone }) {
           if (f.type === 'select') {
             return (
               <div key={f.key}>
-                <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">{f.label}</label>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">{f.label}</label>
                 <select
-                  className="inp inp-select"
+                  className="w-full bg-slate-900/80 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition"
                   value={val || ''}
                   onChange={e => setForm(setVal(form, f.key, e.target.value))}
                 >
-                  <option value="">Select Option</option>
+                  <option value="" className="bg-slate-900 text-slate-300">Select Option</option>
                   {f.options.map(opt => (
-                    <option key={opt} value={opt}>{opt}</option>
+                    <option key={opt} value={opt} className="bg-slate-900 text-white">{opt}</option>
                   ))}
                 </select>
               </div>
@@ -493,13 +527,13 @@ function ResourceEditor({ resource, item, onDone }) {
           if (f.type === 'list') {
             return (
               <div key={f.key} className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">{f.label}</label>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">{f.label}</label>
                 <input
                   type="text"
-                  className="inp"
+                  className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
                   value={(val || []).join(', ')}
                   onChange={e => setForm(setVal(form, f.key, e.target.value.split(',').map(s => s.trim()).filter(Boolean)))}
-                  placeholder="Comma separated items..."
+                  placeholder="Comma separated items (e.g. Atal Tunnel, River Rafting, Hot Springs)..."
                 />
               </div>
             );
@@ -508,16 +542,16 @@ function ResourceEditor({ resource, item, onDone }) {
           if (f.type === 'lines') {
             return (
               <div key={f.key} className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">{f.label}</label>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">{f.label}</label>
                 <textarea
-                  className="inp font-mono text-xs"
+                  className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 font-mono text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
                   rows="4"
                   defaultValue={(val || []).map(i => `${i.title} | ${i.details}`).join('\n')}
                   onChange={e => setForm(setVal(form, f.key, e.target.value.split('\n').filter(Boolean).map(line => {
                     const [t, ...d] = line.split('|');
                     return { title: (t || '').trim(), details: d.join('|').trim() };
                   })))}
-                  placeholder="Day 1: Arrival | Transfer to Shimla..."
+                  placeholder="Day 1: Arrival | Chauffeur transfer to Shimla..."
                 />
               </div>
             );
@@ -526,9 +560,9 @@ function ResourceEditor({ resource, item, onDone }) {
           if (f.type === 'textarea') {
             return (
               <div key={f.key} className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">{f.label}</label>
+                <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">{f.label}</label>
                 <textarea
-                  className="inp"
+                  className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
                   rows="4"
                   value={val || ''}
                   onChange={e => setForm(setVal(form, f.key, e.target.value))}
@@ -539,11 +573,11 @@ function ResourceEditor({ resource, item, onDone }) {
 
           return (
             <div key={f.key}>
-              <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">{f.label}</label>
+              <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">{f.label}</label>
               <input
                 type={f.type || 'text'}
                 required={f.required}
-                className="inp"
+                className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
                 value={val ?? ''}
                 placeholder={f.placeholder}
                 onChange={e => setForm(setVal(form, f.key, f.type === 'number' ? (e.target.value === '' ? undefined : Number(e.target.value)) : e.target.value))}
@@ -553,13 +587,25 @@ function ResourceEditor({ resource, item, onDone }) {
         })}
       </div>
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && (
+        <div className="p-3 bg-red-500/25 border border-red-400/50 rounded-xl text-xs text-red-200">
+          {error}
+        </div>
+      )}
 
-      <div className="flex gap-3 pt-4 border-t border-white/5">
-        <button type="submit" disabled={loading || uploading} className="btn-primary">
-          {loading ? 'Saving…' : 'Save & Publish'}
+      <div className="flex flex-wrap gap-3 pt-4 border-t border-white/10">
+        <button
+          type="submit"
+          disabled={loading || uploading}
+          className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition cursor-pointer"
+        >
+          {loading ? 'Saving…' : 'Save & Publish Live'}
         </button>
-        <button type="button" onClick={onDone} className="btn-secondary">
+        <button
+          type="button"
+          onClick={onDone}
+          className="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold text-slate-200 transition cursor-pointer"
+        >
           Cancel
         </button>
       </div>
@@ -567,7 +613,7 @@ function ResourceEditor({ resource, item, onDone }) {
   );
 }
 
-// 3. Resource List & Table View
+// 3. Resource List & Glassmorphic Table View
 function ResourceList({ resource }) {
   const [data, setData] = useState(null);
   const [q, setQ] = useState('');
@@ -589,7 +635,6 @@ function ResourceList({ resource }) {
   };
 
   const getFallbackData = () => {
-    // Check if custom stored items exist first
     if (!isInbox) {
       try {
         const stored = localStorage.getItem(`rjt_custom_${resource}`);
@@ -733,22 +778,26 @@ function ResourceList({ resource }) {
 
   return (
     <div className="space-y-4">
-      {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row justify-between gap-3 items-center">
-        <div className="relative w-full sm:w-80">
+      {/* Glass Action Bar */}
+      <div className="flex flex-col sm:flex-row justify-between gap-3 items-stretch sm:items-center">
+        <div className="relative flex-1 max-w-md">
           <input
             type="text"
-            className="inp pl-9 text-xs"
-            placeholder={`Search ${resource}…`}
-            onKeyDown={e => e.key === 'Enter' && setQ(e.target.value)}
+            className="w-full bg-white/[0.08] backdrop-blur-xl border border-white/15 rounded-2xl py-2.5 pl-10 pr-4 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition"
+            placeholder={`Search ${resource} by keyword…`}
+            value={q}
+            onChange={e => setQ(e.target.value)}
           />
-          <Search className="w-4 h-4 text-sand-muted absolute left-3 top-2.5" />
+          <Search className="w-4 h-4 text-teal-300 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
         {RESOURCE_FIELDS[resource] && (
-          <button onClick={() => setEditingItem('new')} className="btn-primary text-xs !py-2 self-end sm:self-auto">
+          <button
+            onClick={() => setEditingItem('new')}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition hover:scale-[1.02] cursor-pointer whitespace-nowrap"
+          >
             <Plus size={16} />
-            <span>Add {resource.slice(0, -1)}</span>
+            <span>Add New {resource.slice(0, -1)}</span>
           </button>
         )}
       </div>
@@ -756,37 +805,41 @@ function ResourceList({ resource }) {
       {loading ? (
         <Loading />
       ) : !data || data.items.length === 0 ? (
-        <div className="travel-card p-12 text-center">
-          <p className="text-sand-muted text-xs">No records found for {resource}.</p>
+        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 rounded-3xl p-12 text-center text-white">
+          <Sparkles className="w-8 h-8 text-teal-300 mx-auto mb-2 opacity-60" />
+          <p className="text-slate-300 text-sm">No records found matching your filter in {resource}.</p>
         </div>
       ) : (
-        <div className="travel-card bg-glass overflow-hidden">
+        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 rounded-3xl overflow-hidden shadow-2xl relative">
+          {/* Top Specular Edge */}
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-ink-elevated/80 border-b border-white/5 uppercase text-sand-muted font-mono text-[10px]">
+              <thead className="bg-white/[0.08] border-b border-white/10 uppercase text-teal-300 font-mono text-[10px] tracking-wider">
                 <tr>
-                  <th className="p-3.5">Record / Title</th>
-                  <th className="p-3.5">Details</th>
-                  <th className="p-3.5">Status / Metrics</th>
-                  <th className="p-3.5 text-right">Quick Contact & Actions</th>
+                  <th className="p-4">Record / Title</th>
+                  <th className="p-4">Details & Overview</th>
+                  <th className="p-4">Status / Metrics</th>
+                  <th className="p-4 text-right">Quick Contact & Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {data.items.map((item) => (
-                  <tr key={item._id} className="hover:bg-white/[0.02]">
-                    <td className="p-3.5 font-medium text-sand">
+                  <tr key={item._id} className="hover:bg-white/[0.05] transition">
+                    <td className="p-4 font-medium text-white">
                       {isInbox ? (
                         <div>
-                          <span className="font-mono font-bold text-gold text-xs block">
+                          <span className="font-mono font-bold text-teal-300 text-xs block">
                             {item.bookingId || item.type?.toUpperCase()}
                           </span>
-                          <span className="font-bold text-sand text-sm block">{item.name}</span>
+                          <span className="font-bold text-white text-sm block mt-0.5">{item.name}</span>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sand-muted font-mono text-[11px]">{item.phone}</span>
+                            <span className="text-slate-300 font-mono text-[11px]">{item.phone}</span>
                             {item.phone && (
                               <a
                                 href={`tel:${item.phone}`}
-                                className="text-teal-300 hover:text-teal-200"
+                                className="text-teal-300 hover:text-white"
                                 title="Call"
                               >
                                 <Phone size={12} />
@@ -800,69 +853,75 @@ function ResourceList({ resource }) {
                             <img
                               src={img(item.featuredImage || item.images?.[0] || item.image)}
                               alt=""
-                              className="w-10 h-10 object-cover rounded-lg border border-white/10"
+                              className="w-12 h-12 object-cover rounded-xl border border-white/20 shadow-md flex-shrink-0"
                             />
                           )}
                           <div>
-                            <span className="font-bold text-sand block">{item.name || item.title}</span>
-                            <span className="text-[11px] text-sand-muted">{item.category || item.state || ''}</span>
+                            <span className="font-bold text-white text-sm block">{item.name || item.title}</span>
+                            <span className="text-[11px] text-teal-200/80">{item.category || item.state || ''}</span>
                           </div>
                         </div>
                       )}
                     </td>
 
-                    <td className="p-3.5 text-sand-muted max-w-xs truncate">
+                    <td className="p-4 text-slate-300 max-w-xs truncate">
                       {isInbox ? (
                         <div>
-                          <span className="text-sand font-medium block">{item.destination || item.package || item.subject || ''}</span>
-                          <span className="text-sand-muted text-[11px] block">{item.vehicle || item.message}</span>
+                          <span className="text-white font-medium block">{item.destination || item.package || item.subject || ''}</span>
+                          <span className="text-slate-400 text-[11px] block truncate">{item.vehicle || item.message}</span>
                         </div>
                       ) : (
-                        <span>{item.shortDescription || item.overview || item.excerpt || `₹${item.price || item.pricePerDay || item.startingPrice || '-'}`}</span>
+                        <span className="line-clamp-2">{item.shortDescription || item.overview || item.excerpt || `₹${item.price || item.pricePerDay || item.startingPrice || '-'}`}</span>
                       )}
                     </td>
 
-                    <td className="p-3.5">
+                    <td className="p-4">
                       {resource === 'bookings' ? (
                         <select
-                          className="inp inp-select text-[11px] !py-1 !px-2 w-32"
+                          className="bg-slate-900/90 border border-white/20 text-teal-200 text-xs rounded-xl py-1.5 px-2.5 focus:outline-none focus:border-teal-400"
                           value={item.status || 'Confirmed'}
                           onChange={e => handleStatusChange(item, e.target.value)}
                         >
                           {BOOKING_STATUSES.map(st => (
-                            <option key={st} value={st}>{st}</option>
+                            <option key={st} value={st} className="bg-slate-900 text-white">{st}</option>
                           ))}
                         </select>
                       ) : resource === 'inquiries' ? (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30 uppercase">
-                          {item.status || 'New'}
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-teal-500/20 text-teal-200 border border-teal-400/30 uppercase backdrop-blur-md">
+                          <Activity size={10} className="text-teal-300" />
+                          <span>{item.status || 'New'}</span>
                         </span>
                       ) : (
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${item.published !== false ? 'bg-turquoise/20 text-turquoise' : 'bg-red-500/20 text-red-400'}`}>
-                          {item.published !== false ? 'LIVE' : 'DRAFT'}
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase backdrop-blur-md ${
+                          item.published !== false 
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' 
+                            : 'bg-red-500/20 text-red-300 border border-red-400/40'
+                        }`}>
+                          <CheckCircle2 size={10} />
+                          <span>{item.published !== false ? 'LIVE' : 'DRAFT'}</span>
                         </span>
                       )}
                     </td>
 
-                    <td className="p-3.5 text-right space-x-2 whitespace-nowrap">
+                    <td className="p-4 text-right space-x-2 whitespace-nowrap">
                       {isInbox && item.phone && (
                         <>
                           <a
                             href={`https://wa.me/${item.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(item.name || 'Customer')},%20this%20is%20Ranjit%20Tour%20%26%20Travels%20regarding%20your%20trip%20inquiry.`}
                             target="_blank"
                             rel="noreferrer"
-                            className="btn-secondary !py-1 !px-2.5 text-[11px] text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1.5"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-400/30 text-emerald-300 text-xs font-bold transition"
                             title="Open WhatsApp Chat"
                           >
-                            <MessageCircle size={13} className="text-emerald-400" />
+                            <MessageCircle size={13} />
                             <span>WhatsApp</span>
                           </a>
                           <a
                             href={`tel:${item.phone}`}
-                            className="btn-secondary !py-1 !px-2.5 text-[11px] text-teal-300 hover:text-teal-200 inline-flex items-center gap-1.5"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/30 text-teal-200 text-xs font-bold transition"
                             title="Call Customer"
                           >
-                            <Phone size={13} className="text-teal-300" />
+                            <Phone size={13} />
                             <span>Call</span>
                           </a>
                         </>
@@ -870,18 +929,18 @@ function ResourceList({ resource }) {
                       {RESOURCE_FIELDS[resource] && (
                         <button
                           onClick={() => setEditingItem(item)}
-                          className="btn-secondary !py-1 !px-2 text-[11px]"
+                          className="inline-flex items-center justify-center p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 hover:text-white transition cursor-pointer"
                           title="Edit"
                         >
-                          <Edit2 size={12} />
+                          <Edit2 size={13} />
                         </button>
                       )}
                       <button
                         onClick={() => handleDelete(item)}
-                        className="btn-secondary !py-1 !px-2 text-[11px] text-red-400 hover:text-red-300"
+                        className="inline-flex items-center justify-center p-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-400/30 text-red-300 hover:text-red-200 transition cursor-pointer"
                         title="Delete"
                       >
-                        <Trash2 size={12} />
+                        <Trash2 size={13} />
                       </button>
                     </td>
                   </tr>
@@ -891,12 +950,16 @@ function ResourceList({ resource }) {
           </div>
 
           {data.pages > 1 && (
-            <div className="p-3 bg-ink-elevated/40 border-t border-white/5 flex justify-end gap-1">
+            <div className="p-4 bg-white/5 border-t border-white/10 flex justify-end gap-1.5">
               {Array.from({ length: data.pages }, (_, i) => (
                 <button
                   key={i}
                   onClick={() => setPage(i + 1)}
-                  className={`w-7 h-7 rounded text-xs ${i + 1 === page ? 'bg-gold text-ink font-bold' : 'bg-ink-elevated text-sand'}`}
+                  className={`w-8 h-8 rounded-xl text-xs font-bold transition ${
+                    i + 1 === page 
+                      ? 'bg-teal-500 text-white shadow-md' 
+                      : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                  }`}
                 >
                   {i + 1}
                 </button>
@@ -909,7 +972,7 @@ function ResourceList({ resource }) {
   );
 }
 
-// 4. Analytics Dashboard View
+// 4. Analytics Dashboard View (Luminous Glassmorphism Cards)
 function AdminDashboard() {
   const [stats, setStats] = useState({
     totalBookings: 0,
@@ -937,48 +1000,71 @@ function AdminDashboard() {
   if (loading) return <Loading />;
 
   const metricCards = [
-    { label: 'Total Bookings', value: stats.totalBookings || 0, color: 'text-gold' },
-    { label: 'Pending Requests', value: stats.pendingBookings || 0, color: 'text-turquoise' },
-    { label: 'Confirmed Trips', value: stats.confirmedBookings || 0, color: 'text-gold-light' },
-    { label: 'Completed Tours', value: stats.completedTrips || 0, color: 'text-sand' },
-    { label: 'Total Inquiries', value: stats.totalInquiries || 0, color: 'text-turquoise' },
-    { label: 'Destinations', value: stats.totalDestinations || 8, color: 'text-sand' },
-    { label: 'Tour Packages', value: stats.totalPackages || 8, color: 'text-gold' },
-    { label: 'Fleet Vehicles', value: stats.totalVehicles || 8, color: 'text-sand' }
+    { label: 'Total Bookings', value: stats.totalBookings || 0, icon: Calendar, gradient: 'from-teal-500/20 to-emerald-500/20', border: 'border-teal-400/30', textGrad: 'from-teal-300 to-emerald-200' },
+    { label: 'Pending Requests', value: stats.pendingBookings || 0, icon: Clock, gradient: 'from-amber-500/20 to-orange-500/20', border: 'border-amber-400/30', textGrad: 'from-amber-300 to-yellow-200' },
+    { label: 'Confirmed Trips', value: stats.confirmedBookings || 0, icon: CheckCircle2, gradient: 'from-emerald-500/20 to-teal-500/20', border: 'border-emerald-400/30', textGrad: 'from-emerald-300 to-teal-200' },
+    { label: 'Completed Tours', value: stats.completedTrips || 0, icon: Sparkles, gradient: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-400/30', textGrad: 'from-cyan-300 to-blue-200' },
+    { label: 'Total Inquiries', value: stats.totalInquiries || 0, icon: HelpCircle, gradient: 'from-purple-500/20 to-pink-500/20', border: 'border-purple-400/30', textGrad: 'from-purple-300 to-pink-200' },
+    { label: 'Destinations', value: stats.totalDestinations || 8, icon: MapPin, gradient: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-400/30', textGrad: 'from-teal-200 to-cyan-100' },
+    { label: 'Tour Packages', value: stats.totalPackages || 8, icon: Package, gradient: 'from-emerald-500/20 to-green-500/20', border: 'border-emerald-400/30', textGrad: 'from-emerald-200 to-green-100' },
+    { label: 'Fleet Vehicles', value: stats.totalVehicles || 8, icon: Car, gradient: 'from-amber-500/20 to-teal-500/20', border: 'border-amber-400/30', textGrad: 'from-amber-200 to-teal-100' }
   ];
 
   return (
     <div className="space-y-8">
-      {/* Metric Counters */}
+      {/* Metric Counters Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {metricCards.map((mc, idx) => (
-          <div key={idx} className="travel-card p-5 bg-glass">
-            <span className="text-[11px] font-mono uppercase text-sand-muted tracking-wider block mb-1">
-              {mc.label}
-            </span>
-            <span className={`font-display text-3xl font-extrabold ${mc.color}`}>
-              {mc.value || 0}
-            </span>
-          </div>
-        ))}
+        {metricCards.map((mc, idx) => {
+          const Icon = mc.icon;
+          return (
+            <div
+              key={idx}
+              className={`bg-white/[0.06] backdrop-blur-2xl border ${mc.border} hover:bg-white/[0.09] transition-all duration-300 rounded-3xl p-5 shadow-2xl relative overflow-hidden group`}
+            >
+              {/* Specular Edge */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+              
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[10px] font-mono uppercase text-slate-300 tracking-wider font-bold">
+                  {mc.label}
+                </span>
+                <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${mc.gradient} border ${mc.border} flex items-center justify-center text-white shadow-sm`}>
+                  <Icon size={16} />
+                </div>
+              </div>
+
+              <span className={`font-display text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r ${mc.textGrad}`}>
+                {mc.value || 0}
+              </span>
+            </div>
+          );
+        })}
       </div>
 
       {/* Recent Bookings & Inquiries */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Bookings */}
-        <div className="travel-card p-6 bg-glass">
-          <h3 className="font-display font-bold text-base text-sand mb-4 flex items-center justify-between">
-            <span>Recent Booking Requests</span>
-            <Calendar size={16} className="text-gold" />
-          </h3>
+        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-white">
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+
+          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+            <div>
+              <span className="text-[10px] font-mono text-teal-300 font-bold uppercase tracking-wider block">Live Feed</span>
+              <h3 className="font-display font-bold text-lg text-white">Recent Booking Requests</h3>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-300 flex items-center justify-center border border-teal-400/30">
+              <Calendar size={16} />
+            </div>
+          </div>
+
           <div className="space-y-3">
             {(stats.recentBookings || []).map(b => (
-              <div key={b._id} className="p-3 bg-ink-elevated rounded-lg flex items-center justify-between text-xs">
+              <div key={b._id} className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-between text-xs transition backdrop-blur-md">
                 <div>
-                  <span className="font-mono font-bold text-gold">{b.bookingId}</span>
-                  <span className="block text-sand font-medium">{b.name} ({b.destination})</span>
+                  <span className="font-mono font-bold text-teal-300">{b.bookingId}</span>
+                  <span className="block text-white font-bold mt-0.5">{b.name} ({b.destination})</span>
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gold/20 text-gold">
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-200 border border-teal-400/30">
                   {b.status}
                 </span>
               </div>
@@ -987,19 +1073,27 @@ function AdminDashboard() {
         </div>
 
         {/* Recent Inquiries */}
-        <div className="travel-card p-6 bg-glass">
-          <h3 className="font-display font-bold text-base text-sand mb-4 flex items-center justify-between">
-            <span>Recent Inquiries</span>
-            <HelpCircle size={16} className="text-turquoise" />
-          </h3>
+        <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-white">
+          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+
+          <div className="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+            <div>
+              <span className="text-[10px] font-mono text-cyan-300 font-bold uppercase tracking-wider block">CRM Stream</span>
+              <h3 className="font-display font-bold text-lg text-white">Recent Guest Inquiries</h3>
+            </div>
+            <div className="w-8 h-8 rounded-xl bg-cyan-500/20 text-cyan-300 flex items-center justify-center border border-cyan-400/30">
+              <HelpCircle size={16} />
+            </div>
+          </div>
+
           <div className="space-y-3">
             {(stats.recentInquiries || []).map(inq => (
-              <div key={inq._id} className="p-3 bg-ink-elevated rounded-lg text-xs space-y-1">
+              <div key={inq._id} className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-xs space-y-1 transition backdrop-blur-md">
                 <div className="flex items-center justify-between">
-                  <b className="text-sand">{inq.name}</b>
-                  <span className="text-[10px] text-turquoise uppercase font-mono">{inq.type}</span>
+                  <b className="text-white font-bold">{inq.name}</b>
+                  <span className="text-[10px] text-teal-300 uppercase font-mono">{inq.type}</span>
                 </div>
-                <p className="text-sand-muted line-clamp-1">{inq.message}</p>
+                <p className="text-slate-300 line-clamp-1">{inq.message}</p>
               </div>
             ))}
           </div>
@@ -1024,7 +1118,7 @@ function WebsiteSettingsEditor() {
     setSaving(true);
     try {
       await api.put('/settings', settings);
-      setNotice('Settings saved successfully!');
+      setNotice('Settings successfully saved and live across website!');
     } catch (err) {
       setNotice(msg(err));
     } finally {
@@ -1035,89 +1129,98 @@ function WebsiteSettingsEditor() {
   if (!settings) return <Loading />;
 
   return (
-    <form onSubmit={handleSave} className="travel-card p-6 sm:p-8 bg-glass space-y-6">
-      <div className="flex items-center justify-between border-b border-white/5 pb-4">
-        <h3 className="font-display font-bold text-xl text-sand">Global Website & NAP Settings</h3>
-        <button type="submit" disabled={saving} className="btn-primary text-xs">
+    <form onSubmit={handleSave} className="bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden text-white">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div>
+          <span className="text-[10px] font-mono text-teal-300 font-bold uppercase tracking-wider block">Global Config</span>
+          <h3 className="font-display font-bold text-xl sm:text-2xl text-white">Website & NAP Settings</h3>
+        </div>
+        <button
+          type="submit"
+          disabled={saving}
+          className="px-6 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition cursor-pointer"
+        >
           {saving ? 'Saving…' : 'Save Changes'}
         </button>
       </div>
 
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">BUSINESS NAME</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">BUSINESS NAME</label>
           <input
             type="text"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.businessName || ''}
             onChange={e => setSettings({ ...settings, businessName: e.target.value })}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">HERO TAGLINE</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">HERO TAGLINE</label>
           <input
             type="text"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.tagline || ''}
             onChange={e => setSettings({ ...settings, tagline: e.target.value })}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">PRIMARY PHONE</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">PRIMARY PHONE</label>
           <input
             type="text"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.phone || ''}
             onChange={e => setSettings({ ...settings, phone: e.target.value })}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">WHATSAPP NUMBER</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">WHATSAPP NUMBER</label>
           <input
             type="text"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.whatsapp || ''}
             onChange={e => setSettings({ ...settings, whatsapp: e.target.value })}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">EMAIL ADDRESS</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">EMAIL ADDRESS</label>
           <input
             type="email"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.email || ''}
             onChange={e => setSettings({ ...settings, email: e.target.value })}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">BUSINESS HOURS</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">BUSINESS HOURS</label>
           <input
             type="text"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.businessHours || ''}
             onChange={e => setSettings({ ...settings, businessHours: e.target.value })}
           />
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">PHYSICAL OFFICE ADDRESS (NAP)</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">PHYSICAL OFFICE ADDRESS (NAP)</label>
           <input
             type="text"
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             value={settings.address || ''}
             onChange={e => setSettings({ ...settings, address: e.target.value })}
           />
         </div>
 
         <div className="sm:col-span-2">
-          <label className="block text-xs font-semibold text-sand-muted mb-1 uppercase">HERO INTRO TEXT</label>
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">HERO INTRO TEXT</label>
           <textarea
-            className="inp"
+            className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3 text-xs sm:text-sm text-white focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
             rows="3"
             value={settings.heroText || ''}
             onChange={e => setSettings({ ...settings, heroText: e.target.value })}
@@ -1125,12 +1228,16 @@ function WebsiteSettingsEditor() {
         </div>
       </div>
 
-      {notice && <p className="text-xs text-gold">{notice}</p>}
+      {notice && (
+        <div className="p-3.5 bg-emerald-500/20 border border-emerald-400/40 rounded-xl text-xs text-emerald-200 font-medium backdrop-blur-md">
+          {notice}
+        </div>
+      )}
     </form>
   );
 }
 
-// 5. Change Password Component
+// 6. Change Password Component
 function ChangePasswordSection({ user }) {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -1179,15 +1286,15 @@ function ChangePasswordSection({ user }) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Account Info Card */}
-      <div className="travel-card p-6 bg-glass border-white/10">
+      <div className="bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl relative overflow-hidden text-white">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-gold/15 text-gold flex items-center justify-center border border-gold/30 font-bold font-display text-lg">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500/30 to-emerald-500/30 border border-teal-400/50 flex items-center justify-center font-bold font-display text-xl text-teal-300 shadow-lg">
             {user?.name?.charAt(0) || 'A'}
           </div>
           <div>
-            <h3 className="font-display font-bold text-lg text-sand">{user?.name}</h3>
-            <span className="text-xs text-sand-muted">{user?.email}</span>
-            <span className="inline-block ml-2 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gold/20 text-gold uppercase">
+            <h3 className="font-display font-bold text-lg text-white">{user?.name}</h3>
+            <span className="text-xs text-slate-300">{user?.email}</span>
+            <span className="inline-block ml-2 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-teal-500/20 text-teal-300 border border-teal-400/30 uppercase">
               {user?.role}
             </span>
           </div>
@@ -1195,26 +1302,26 @@ function ChangePasswordSection({ user }) {
       </div>
 
       {/* Change Password Form Card */}
-      <form onSubmit={handleChangePassword} className="travel-card p-6 sm:p-8 bg-glass space-y-5">
+      <form onSubmit={handleChangePassword} className="bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 relative overflow-hidden text-white">
         <div className="border-b border-white/10 pb-4">
-          <h3 className="font-display font-bold text-lg text-sand flex items-center gap-2">
-            <Lock size={18} className="text-gold" />
+          <h3 className="font-display font-bold text-lg text-white flex items-center gap-2">
+            <Lock size={18} className="text-teal-300" />
             <span>Update Admin Password</span>
           </h3>
-          <p className="text-xs text-sand-muted mt-1">
+          <p className="text-xs text-slate-300 mt-1">
             Once changed, your new password will be required for all future logins. The previous password will no longer work.
           </p>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-sand-muted mb-1.5 uppercase tracking-wider">
+          <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
             Current Password *
           </label>
           <div className="relative flex items-center">
             <input
               type={showCurrent ? 'text' : 'password'}
               required
-              className="inp pr-10"
+              className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 pl-3.5 pr-10 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
               placeholder="Enter current active password"
               value={currentPassword}
               onChange={e => setCurrentPassword(e.target.value)}
@@ -1222,7 +1329,7 @@ function ChangePasswordSection({ user }) {
             <button
               type="button"
               onClick={() => setShowCurrent(!showCurrent)}
-              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sand-muted hover:text-sand"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
             >
               {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
@@ -1231,14 +1338,14 @@ function ChangePasswordSection({ user }) {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-sand-muted mb-1.5 uppercase tracking-wider">
+            <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
               New Password *
             </label>
             <div className="relative flex items-center">
               <input
                 type={showNew ? 'text' : 'password'}
                 required
-                className="inp pr-10"
+                className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 pl-3.5 pr-10 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
                 placeholder="Min 6 characters"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
@@ -1246,7 +1353,7 @@ function ChangePasswordSection({ user }) {
               <button
                 type="button"
                 onClick={() => setShowNew(!showNew)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sand-muted hover:text-sand"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
               >
                 {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
@@ -1254,13 +1361,13 @@ function ChangePasswordSection({ user }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-sand-muted mb-1.5 uppercase tracking-wider">
+            <label className="block text-[11px] font-bold text-slate-300 mb-1.5 uppercase tracking-wider">
               Confirm New Password *
             </label>
             <input
               type="password"
               required
-              className="inp"
+              className="w-full bg-white/10 border border-white/15 rounded-xl py-2.5 px-3.5 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-400/30 transition backdrop-blur-md"
               placeholder="Re-enter new password"
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
@@ -1269,7 +1376,7 @@ function ChangePasswordSection({ user }) {
         </div>
 
         {status.msg && (
-          <div className={`p-3.5 rounded-xl text-xs font-medium ${status.success ? 'bg-emerald-500/20 border border-emerald-400/40 text-emerald-200' : 'bg-red-500/20 border border-red-400/40 text-red-200'}`}>
+          <div className={`p-3.5 rounded-xl text-xs font-medium backdrop-blur-md ${status.success ? 'bg-emerald-500/25 border border-emerald-400/50 text-emerald-200' : 'bg-red-500/25 border border-red-400/50 text-red-200'}`}>
             {status.msg}
           </div>
         )}
@@ -1277,7 +1384,7 @@ function ChangePasswordSection({ user }) {
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary w-full sm:w-auto font-bold !py-2.5 !px-6"
+          className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition cursor-pointer"
         >
           {loading ? 'Saving New Password…' : 'Save & Update Password'}
         </button>
@@ -1286,7 +1393,7 @@ function ChangePasswordSection({ user }) {
   );
 }
 
-// 6. Main Admin Layout
+// 7. Main Admin Layout with Full-Immersion Glassmorphic Environment
 export default function Admin() {
   const [user, setUser] = useState(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -1344,32 +1451,56 @@ export default function Admin() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-ink text-sand">
-      {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-ink-card border-r border-white/5 p-4 justify-between flex-shrink-0">
+    <div className="min-h-screen flex bg-slate-950 text-slate-100 relative overflow-hidden font-sans selection:bg-teal-500 selection:text-white">
+      {/* Background Mountain Wallpaper with Deep Atmospheric Contrast */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=2000&q=80"
+          alt="Himalayan Mountains"
+          className="w-full h-full object-cover object-center filter brightness-[0.2] contrast-[1.15] scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-950/95 via-slate-950/85 to-slate-900/90" />
+      </div>
+
+      {/* Ambient Glowing Glass Orbs */}
+      <div className="fixed top-10 left-1/4 w-[500px] h-[500px] bg-teal-500/10 blur-[160px] rounded-full pointer-events-none" />
+      <div className="fixed bottom-10 right-1/4 w-[500px] h-[500px] bg-emerald-500/10 blur-[160px] rounded-full pointer-events-none" />
+      <div className="fixed top-1/2 right-10 w-[400px] h-[400px] bg-cyan-500/10 blur-[140px] rounded-full pointer-events-none" />
+
+      {/* Sidebar Desktop (Frosted Glass) */}
+      <aside className="hidden lg:flex flex-col w-64 bg-slate-950/60 backdrop-blur-2xl border-r border-white/10 p-4 justify-between flex-shrink-0 relative z-10 shadow-2xl">
+        {/* Specular Edge Highlight */}
+        <div className="absolute top-0 right-0 bottom-0 w-px bg-gradient-to-b from-white/20 via-white/5 to-transparent pointer-events-none" />
+
         <div className="space-y-6">
-          <div className="flex items-center gap-3 px-2 py-1">
-            <div className="w-8 h-8 rounded-lg bg-gold/10 text-gold flex items-center justify-center border border-gold/30">
-              <Shield size={18} />
-            </div>
-            <div>
-              <span className="font-display font-bold text-sm text-sand block leading-none">RANJIT TOURS</span>
-              <span className="text-[10px] font-mono text-gold uppercase">{user.role}</span>
+          <div className="px-2 py-1">
+            <Logo light={true} />
+            <div className="mt-2 flex items-center justify-between">
+              <span className="text-[10px] font-mono text-teal-300 uppercase tracking-widest font-bold px-2 py-0.5 rounded-full bg-teal-500/20 border border-teal-400/30">
+                {user.role}
+              </span>
+              <span className="text-[10px] text-slate-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Sync
+              </span>
             </div>
           </div>
 
           <nav className="space-y-1">
             {navigationItems.map(item => {
               const Icon = item.icon;
+              const isActive = activeTab === item.key;
               return (
                 <button
                   key={item.key}
                   onClick={() => setActiveTab(item.key)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition ${
-                    activeTab === item.key ? 'bg-gold text-ink font-bold shadow-lg shadow-gold/10' : 'text-sand-muted hover:bg-white/5 hover:text-sand'
+                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-teal-500/30 to-emerald-500/20 border border-teal-400/50 text-white font-bold shadow-lg shadow-teal-950/50 backdrop-blur-md' 
+                      : 'text-slate-300 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <Icon size={16} />
+                  <Icon size={16} className={isActive ? 'text-teal-300' : 'text-slate-400'} />
                   <span>{item.label}</span>
                 </button>
               );
@@ -1382,7 +1513,7 @@ export default function Admin() {
             localStorage.removeItem('rjt_token');
             setUser(null);
           }}
-          className="flex items-center gap-2 px-3 py-2 text-xs text-red-400 hover:text-red-300 transition"
+          className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs text-red-300 hover:text-red-200 hover:bg-red-500/15 border border-transparent hover:border-red-400/30 transition cursor-pointer"
         >
           <LogOut size={16} />
           <span>Sign Out</span>
@@ -1390,35 +1521,43 @@ export default function Admin() {
       </aside>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {/* Top Navbar */}
-        <header className="h-16 bg-ink-card border-b border-white/5 px-4 sm:px-6 flex items-center justify-between">
+        <header className="h-16 bg-slate-950/50 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-sand hover:bg-white/5 rounded-lg min-h-[40px] min-w-[40px] flex items-center justify-center"
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-xl min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               aria-label="Toggle admin menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <h2 className="font-display font-bold text-base sm:text-lg text-sand capitalize truncate">
-              {activeTab === 'security' ? 'Security & Password' : activeTab.replace('-', ' ')}
+            <h2 className="font-display font-bold text-base sm:text-lg text-white capitalize truncate flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-teal-400" />
+              <span>{activeTab === 'security' ? 'Security & Password' : activeTab.replace('-', ' ')}</span>
             </h2>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 text-xs">
-            <span className="text-sand-muted hidden sm:inline">Logged in as: <b className="text-sand">{user.name}</b></span>
-            <a href="/" target="_blank" rel="noreferrer" className="btn-secondary !py-1.5 !px-3 text-xs whitespace-nowrap">
-              View Website
+            <span className="text-slate-400 hidden sm:inline">Logged in as: <b className="text-white">{user.name}</b></span>
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-bold transition backdrop-blur-md whitespace-nowrap"
+            >
+              <Globe size={13} className="text-teal-300" />
+              <span>View Website</span>
             </a>
           </div>
         </header>
 
-        {/* Mobile Navigation Drawer */}
+        {/* Mobile Navigation Drawer (Glassmorphic) */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-ink-card border-b border-white/10 p-4 space-y-1.5 animate-in slide-in-from-top-2 duration-150">
+          <div className="lg:hidden bg-slate-950/90 backdrop-blur-2xl border-b border-white/10 p-4 space-y-1.5 animate-in slide-in-from-top-2 duration-150">
             {navigationItems.map(item => {
               const Icon = item.icon;
+              const isActive = activeTab === item.key;
               return (
                 <button
                   key={item.key}
@@ -1427,22 +1566,24 @@ export default function Admin() {
                     setMobileMenuOpen(false);
                   }}
                   className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-3 min-h-[44px] transition ${
-                    activeTab === item.key ? 'bg-gold text-ink font-bold shadow-md' : 'text-sand-muted hover:bg-white/5 hover:text-sand'
+                    isActive 
+                      ? 'bg-gradient-to-r from-teal-500/30 to-emerald-500/20 border border-teal-400/50 text-white font-bold shadow-md' 
+                      : 'text-slate-300 hover:bg-white/10 hover:text-white'
                   }`}
                 >
-                  <Icon size={16} />
+                  <Icon size={16} className={isActive ? 'text-teal-300' : 'text-slate-400'} />
                   <span>{item.label}</span>
                 </button>
               );
             })}
 
-            <div className="pt-2 border-t border-white/5 mt-2">
+            <div className="pt-2 border-t border-white/10 mt-2">
               <button
                 onClick={() => {
                   localStorage.removeItem('rjt_token');
                   setUser(null);
                 }}
-                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-red-400 hover:bg-red-500/10 min-h-[44px]"
+                className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs text-red-300 hover:bg-red-500/20 min-h-[44px]"
               >
                 <LogOut size={16} />
                 <span>Sign Out</span>

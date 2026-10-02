@@ -287,19 +287,7 @@ function LayoutShell({ children }) {
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Col 1: Brand Info */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold">
-                <Compass className="w-6 h-6 animate-spin-slow" />
-              </div>
-              <div>
-                <span className="block font-display font-bold text-lg text-white leading-none">
-                  RANJIT <span className="text-teal-400">TOURS</span>
-                </span>
-                <span className="block text-[9px] tracking-[0.25em] text-teal-300 uppercase font-semibold mt-1">
-                  Royal Route Experience
-                </span>
-              </div>
-            </div>
+            <Logo light={true} />
             <p className="text-xs text-slate-400 leading-relaxed">
               {s.footerAbout || 'Ranjit Tour & Travels is your premier north India travel concierge, operating customized tour packages, luxury sedans, Innova Crystas, and tempo travellers across Himachal, Punjab, Kashmir, Ladakh & Rajasthan.'}
             </p>

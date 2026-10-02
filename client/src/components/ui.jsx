@@ -84,21 +84,29 @@ export function Seo({ title, description, image, jsonLd, keywords = [] }) {
   );
 }
 
-export function Logo({ compact = false }) {
+export function Logo({ compact = false, light = false }) {
   return (
-    <div className="flex items-center gap-2">
-      <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-700 p-0.5 shadow-md shadow-teal-700/20 flex items-center justify-center flex-shrink-0">
-        <div className="w-full h-full bg-white rounded-[9px] flex items-center justify-center">
-          <Compass className="w-4 h-4 text-teal-700 animate-spin-slow" />
-        </div>
-        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+    <div className="flex items-center gap-2.5">
+      <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-teal-500/30 via-emerald-500/20 to-teal-700/40 p-0.5 backdrop-blur-md border border-teal-400/40 shadow-lg shadow-teal-900/20 flex items-center justify-center flex-shrink-0 group overflow-hidden">
+        {/* Specular glass reflection sheen */}
+        <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none rounded-t-[10px]" />
+        
+        <img
+          src="/favicon.svg"
+          alt="Ranjit Tour & Travels Glassmorphism Logo"
+          className="w-6 h-6 sm:w-7 sm:h-7 object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse z-20" />
       </div>
       {!compact && (
         <div className="flex flex-col min-w-0">
-          <span className="font-display font-extrabold text-sm sm:text-base md:text-lg tracking-tight text-slate-900 leading-none whitespace-nowrap">
-            RANJIT <span className="text-teal-700">TOURS</span>
+          <span className={`font-display font-extrabold text-sm sm:text-base md:text-lg tracking-tight leading-none whitespace-nowrap ${light ? 'text-white' : 'text-slate-900'}`}>
+            RANJIT <span className={light ? 'text-teal-300' : 'text-teal-700'}>TOURS</span>
           </span>
-          <span className="text-[8px] sm:text-[9px] tracking-[0.15em] sm:tracking-[0.2em] text-slate-500 uppercase font-bold mt-0.5 whitespace-nowrap">
+          <span className={`text-[8px] sm:text-[9px] tracking-[0.15em] sm:tracking-[0.2em] uppercase font-bold mt-0.5 whitespace-nowrap ${light ? 'text-teal-200/80' : 'text-slate-500'}`}>
             Himachal & North India
           </span>
         </div>
