@@ -578,7 +578,42 @@ function ResourceList({ resource }) {
 
   const isInbox = resource === 'bookings' || resource === 'inquiries';
 
+  const saveCustomItems = (items) => {
+    if (!isInbox) {
+      try {
+        localStorage.setItem(`rjt_custom_${resource}`, JSON.stringify(items));
+      } catch (e) {
+        console.warn('Storage sync warn:', e);
+      }
+    }
+  };
+
   const getFallbackData = () => {
+    // Check if custom stored items exist first
+    if (!isInbox) {
+      try {
+        const stored = localStorage.getItem(`rjt_custom_${resource}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            let items = parsed;
+            if (q) {
+              const qLow = q.toLowerCase();
+              items = items.filter(it => 
+                (it.name && it.name.toLowerCase().includes(qLow)) ||
+                (it.title && it.title.toLowerCase().includes(qLow)) ||
+                (it.shortDescription && it.shortDescription.toLowerCase().includes(qLow)) ||
+                (it.state && it.state.toLowerCase().includes(qLow))
+              );
+            }
+            return { items, total: items.length, page: 1, pages: 1 };
+          }
+        }
+      } catch (e) {
+        console.warn('Custom storage read error:', e);
+      }
+    }
+
     const fallbackMap = {
       packages: DEFAULT_PACKAGES,
       destinations: DEFAULT_DESTINATIONS,
@@ -608,12 +643,17 @@ function ResourceList({ resource }) {
       .then(res => {
         if (res.data?.items && res.data.items.length > 0) {
           setData(res.data);
+          if (!isInbox) saveCustomItems(res.data.items);
         } else {
-          setData(getFallbackData());
+          const fb = getFallbackData();
+          setData(fb);
+          if (!isInbox && fb.items.length > 0) saveCustomItems(fb.items);
         }
       })
       .catch(() => {
-        setData(getFallbackData());
+        const fb = getFallbackData();
+        setData(fb);
+        if (!isInbox && fb.items.length > 0) saveCustomItems(fb.items);
       })
       .finally(() => setLoading(false));
   };
@@ -629,7 +669,12 @@ function ResourceList({ resource }) {
       } catch (err) {
         console.warn('Backend delete deferred:', err.message);
       } finally {
-        setData(prev => prev ? { ...prev, items: prev.items.filter(i => i._id !== item._id) } : null);
+        setData(prev => {
+          if (!prev) return null;
+          const updatedItems = prev.items.filter(i => i._id !== item._id);
+          saveCustomItems(updatedItems);
+          return { ...prev, items: updatedItems, total: Math.max(0, (prev.total || 1) - 1) };
+        });
       }
     }
   };
@@ -655,23 +700,29 @@ function ResourceList({ resource }) {
         onDone={(savedForm) => {
           if (savedForm) {
             setData(prev => {
-              if (!prev) return { items: [savedForm], total: 1, page: 1, pages: 1 };
+              const currentItems = prev?.items || getFallbackData().items;
+              const itemToSave = { ...savedForm };
+              if (!itemToSave.slug) {
+                const label = itemToSave.name || itemToSave.title || 'item';
+                itemToSave.slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+              }
+              let updatedItems;
               if (editingItem && editingItem !== 'new' && editingItem._id) {
-                return {
-                  ...prev,
-                  items: prev.items.map(it => it._id === editingItem._id ? { ...it, ...savedForm } : it)
-                };
+                updatedItems = currentItems.map(it => it._id === editingItem._id ? { ...it, ...itemToSave } : it);
               } else {
                 const newItem = {
-                  ...savedForm,
-                  _id: savedForm._id || `dest_${Date.now()}`
+                  ...itemToSave,
+                  _id: itemToSave._id || `${resource.slice(0, 3)}_${Date.now()}`
                 };
-                return {
-                  ...prev,
-                  items: [newItem, ...prev.items],
-                  total: (prev.total || 0) + 1
-                };
+                updatedItems = [newItem, ...currentItems];
               }
+              saveCustomItems(updatedItems);
+              return {
+                items: updatedItems,
+                total: updatedItems.length,
+                page: 1,
+                pages: 1
+              };
             });
           }
           setEditingItem(null);

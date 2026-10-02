@@ -284,7 +284,7 @@ function LayoutShell({ children }) {
       {/* Sticky Mobile Booking Bottom Bar */}
       <div className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2 z-40 flex gap-2 shadow-lg items-center">
         <a
-          href={`tel:${(s.phone || '+919876543210').replace(/\s+/g, '')}`}
+          href={`tel:${(s.phone || '+919816596713').replace(/\s+/g, '')}`}
           className="btn-secondary !py-2.5 !px-3 text-xs flex items-center justify-center gap-1 font-bold flex-shrink-0"
         >
           <Phone size={15} className="text-teal-700" />

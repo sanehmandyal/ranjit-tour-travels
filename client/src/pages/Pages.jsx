@@ -13,6 +13,24 @@ import {
   Loading, ErrorBox, useSettings, waLink 
 } from '../components/ui.jsx';
 
+// Helper to read customized items from browser storage if modified by Admin
+export const getStoredCustomItems = (resourceKey, defaultList) => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(`rjt_custom_${resourceKey}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(`Could not load custom ${resourceKey} storage:`, e);
+  }
+  return defaultList;
+};
+
 // Fallback Tour Packages Data (8 Professional Packages)
 export const DEFAULT_PACKAGES = [
   {
@@ -688,11 +706,11 @@ export const DEFAULT_TESTIMONIALS = [
 export function Home() {
   const s = useSettings();
   const navigate = useNavigate();
-  const [destinations, setDestinations] = useState(DEFAULT_DESTINATIONS);
-  const [packages, setPackages] = useState(DEFAULT_PACKAGES);
-  const [vehicles, setVehicles] = useState(DEFAULT_VEHICLES);
-  const [services, setServices] = useState([]);
-  const [blogs, setBlogs] = useState([]);
+  const [destinations, setDestinations] = useState(() => getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
+  const [packages, setPackages] = useState(() => getStoredCustomItems('packages', DEFAULT_PACKAGES));
+  const [vehicles, setVehicles] = useState(() => getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
+  const [services, setServices] = useState(() => getStoredCustomItems('services', []));
+  const [blogs, setBlogs] = useState(() => getStoredCustomItems('blogs', []));
   const [testimonials, setTestimonials] = useState(DEFAULT_TESTIMONIALS);
   const [loading, setLoading] = useState(true);
 
@@ -715,20 +733,49 @@ export function Home() {
       api.get('/testimonials?limit=3')
     ])
       .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
-        if (dRes.data.items && dRes.data.items.length > 0) {
+        const customDests = getStoredCustomItems('destinations', null);
+        if (customDests && customDests.length > 0) {
+          setDestinations(customDests);
+        } else if (dRes.data.items && dRes.data.items.length > 0) {
           setDestinations(dRes.data.items);
         }
-        if (pRes.data.items && pRes.data.items.length > 0) {
+
+        const customPkgs = getStoredCustomItems('packages', null);
+        if (customPkgs && customPkgs.length > 0) {
+          setPackages(customPkgs);
+        } else if (pRes.data.items && pRes.data.items.length > 0) {
           setPackages(pRes.data.items);
         }
-        if (vRes.data.items && vRes.data.items.length > 0) {
+
+        const customVehs = getStoredCustomItems('vehicles', null);
+        if (customVehs && customVehs.length > 0) {
+          setVehicles(customVehs);
+        } else if (vRes.data.items && vRes.data.items.length > 0) {
           setVehicles(vRes.data.items);
         }
-        setServices(sRes.data.items || []);
-        setBlogs(bRes.data.items || []);
-        setTestimonials(tRes.data.items || []);
+
+        const customSrvs = getStoredCustomItems('services', null);
+        if (customSrvs && customSrvs.length > 0) {
+          setServices(customSrvs);
+        } else if (sRes.data.items && sRes.data.items.length > 0) {
+          setServices(sRes.data.items);
+        }
+
+        const customBlgs = getStoredCustomItems('blogs', null);
+        if (customBlgs && customBlgs.length > 0) {
+          setBlogs(customBlgs);
+        } else if (bRes.data.items && bRes.data.items.length > 0) {
+          setBlogs(bRes.data.items);
+        }
+
+        setTestimonials(tRes.data.items || DEFAULT_TESTIMONIALS);
       })
-      .catch(err => console.error('Home load error:', err))
+      .catch(err => {
+        console.warn('Home live load notice:', err.message);
+        setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
+        setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
+        setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -1621,24 +1668,24 @@ export function Home() {
 
       {/* 24/7 CONTACT & INSTANT DISPATCH BANNER */}
       <section className="py-12 px-4 max-w-7xl mx-auto">
-        <div className="travel-card p-8 sm:p-10 bg-gradient-to-r from-teal-800 via-teal-900 to-slate-900 text-white rounded-2xl flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xl relative overflow-hidden">
+        <div className="travel-card-dispatch p-8 sm:p-10 text-white rounded-3xl flex flex-col lg:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
           <div className="absolute right-0 top-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="space-y-2 text-center lg:text-left relative z-10">
             <span className="text-xs font-mono text-teal-300 font-bold uppercase tracking-widest">Round-The-Clock Dispatch</span>
             <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">Need a Cab or Custom Tour Quote Instantly?</h3>
             <p className="text-xs sm:text-sm text-slate-200 max-w-2xl">
-              Operating 24/7 across Chandigarh, Mohali, Panchkula, Delhi NCR, Shimla, Manali, Dharamshala, Amritsar & Spiti Valley.
+              Operating 24/7 across Amb Andaura Railway Station, Chandigarh, Mohali, Panchkula, Delhi NCR, Shimla, Manali, Dharamshala, Amritsar & Spiti Valley.
             </p>
-            <div className="pt-2 text-xs text-teal-200 flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <span>📍 {s.address}</span>
-              <span>📞 <b>{s.phone}</b></span>
+            <div className="pt-2 text-xs text-teal-200 flex flex-wrap items-center justify-center lg:justify-start gap-4 font-medium">
+              <span>📍 {s.address || 'Near Amb Andaura Railway Station, Amb, Distt. Una, HP 177203'}</span>
+              <span>📞 <b>{s.phone || '+91 98165 96713'}</b></span>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3 justify-center relative z-10">
             <a
-              href={`tel:${(s.phone || '+919876543210').replace(/\s+/g, '')}`}
+              href={`tel:${(s.phone || '+919816596713').replace(/\s+/g, '')}`}
               className="btn-primary !bg-white !text-slate-900 hover:!bg-slate-100 font-bold shadow-md"
             >
               <Phone size={16} className="text-teal-700" />
@@ -1669,33 +1716,43 @@ export function Listing({ kind }) {
   const configMap = {
     destinations: {
       endpoint: '/destinations',
+      resourceKey: 'destinations',
       title: 'Destinations in North India',
       subtitle: 'Explore authentic mountain ridges, valley lakes, and heritage towns.',
-      searchPlaceholder: 'Search destinations by name or state (e.g. Manali, Punjab)...'
+      searchPlaceholder: 'Search destinations by name or state (e.g. Manali, Punjab)...',
+      fallback: DEFAULT_DESTINATIONS
     },
     'tour-packages': {
       endpoint: '/packages',
+      resourceKey: 'packages',
       title: 'Royal Tour Packages',
       subtitle: 'Complete all-inclusive road trip packages with private chauffeur & luxury stays.',
-      searchPlaceholder: 'Search packages by destination or theme (e.g. Spiti, Family, Honeymoon)...'
+      searchPlaceholder: 'Search packages by destination or theme (e.g. Spiti, Family, Honeymoon)...',
+      fallback: DEFAULT_PACKAGES
     },
     cars: {
       endpoint: '/vehicles',
+      resourceKey: 'vehicles',
       title: 'Vehicle Fleet & Taxi Rentals',
       subtitle: 'Sanitized Sedans, SUVs, Innova Crystas, and Tempo Travellers.',
-      searchPlaceholder: 'Search fleet by category or model (e.g. Innova, SUV, 17 Seater)...'
+      searchPlaceholder: 'Search fleet by category or model (e.g. Innova, SUV, 17 Seater)...',
+      fallback: DEFAULT_VEHICLES
     },
     services: {
       endpoint: '/services',
+      resourceKey: 'services',
       title: 'Our Travel Services',
       subtitle: 'Outstation cabs, one-way transfers, airport pickups, and corporate fleets.',
-      searchPlaceholder: 'Search services...'
+      searchPlaceholder: 'Search services...',
+      fallback: []
     },
     blog: {
       endpoint: '/blogs',
+      resourceKey: 'blogs',
       title: 'Travel Blogs & Road Guides',
       subtitle: 'Expert itineraries, mountain road updates, and local travel advice.',
-      searchPlaceholder: 'Search travel guides and tips...'
+      searchPlaceholder: 'Search travel guides and tips...',
+      fallback: []
     }
   };
 
@@ -1704,42 +1761,31 @@ export function Listing({ kind }) {
   useEffect(() => {
     setLoading(true);
     setError('');
+    const customList = getStoredCustomItems(currentCfg.resourceKey, currentCfg.fallback || []);
+
     api.get(currentCfg.endpoint, {
       params: { page, q, category, state, limit: 12 }
     })
       .then(res => {
-        if (kind === 'tour-packages' && (!res.data || !res.data.items || res.data.items.length === 0)) {
-          let items = DEFAULT_PACKAGES;
-          if (q) items = items.filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.overview.toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: 1 });
-        } else if (kind === 'destinations' && (!res.data || !res.data.items || res.data.items.length === 0)) {
-          let items = DEFAULT_DESTINATIONS;
-          if (q) items = items.filter(d => d.name.toLowerCase().includes(q.toLowerCase()) || d.shortDescription.toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: 1 });
-        } else if (kind === 'cars' && (!res.data || !res.data.items || res.data.items.length === 0)) {
-          let items = DEFAULT_VEHICLES;
-          if (q) items = items.filter(v => v.name.toLowerCase().includes(q.toLowerCase()) || v.category.toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: 1 });
+        if (res.data?.items && res.data.items.length > 0) {
+          const stored = localStorage.getItem(`rjt_custom_${currentCfg.resourceKey}`);
+          if (stored) {
+            let items = customList;
+            if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
+            setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
+          } else {
+            setData(res.data);
+          }
         } else {
-          setData(res.data);
+          let items = customList;
+          if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
+          setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
         }
       })
-      .catch(err => {
-        if (kind === 'tour-packages') {
-          let items = DEFAULT_PACKAGES;
-          if (q) items = items.filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.overview.toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: 1 });
-        } else if (kind === 'destinations') {
-          let items = DEFAULT_DESTINATIONS;
-          if (q) items = items.filter(d => d.name.toLowerCase().includes(q.toLowerCase()) || d.shortDescription.toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: 1 });
-        } else if (kind === 'cars') {
-          let items = DEFAULT_VEHICLES;
-          if (q) items = items.filter(v => v.name.toLowerCase().includes(q.toLowerCase()) || v.category.toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: 1 });
-        } else {
-          setError(msg(err));
-        }
+      .catch(() => {
+        let items = customList;
+        if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
+        setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
       })
       .finally(() => setLoading(false));
   }, [kind, page, q, category, state]);
@@ -2051,29 +2097,23 @@ export function Detail({ kind }) {
   useEffect(() => {
     setLoading(true);
     setError('');
+    const resourceKey = kind === 'tour-packages' ? 'packages' : (kind === 'cars' ? 'vehicles' : (kind === 'blog' ? 'blogs' : kind));
+    const fallbackList = kind === 'tour-packages' ? DEFAULT_PACKAGES : (kind === 'destinations' ? DEFAULT_DESTINATIONS : (kind === 'cars' ? DEFAULT_VEHICLES : []));
+    const customList = getStoredCustomItems(resourceKey, fallbackList);
+    const localMatch = customList.find(item => item.slug === slug || item._id === slug);
+
     api.get(endpointMap[kind] || `/packages/${slug}`)
-      .then(res => setData(res.data))
+      .then(res => {
+        if (localMatch) {
+          setData({ ...res.data, ...localMatch });
+        } else {
+          setData(res.data);
+        }
+      })
       .catch(err => {
-        if (kind === 'tour-packages') {
-          const fallback = DEFAULT_PACKAGES.find(p => p.slug === slug);
-          if (fallback) {
-            setData(fallback);
-            return;
-          }
-        }
-        if (kind === 'destinations') {
-          const fallback = DEFAULT_DESTINATIONS.find(d => d.slug === slug);
-          if (fallback) {
-            setData(fallback);
-            return;
-          }
-        }
-        if (kind === 'cars') {
-          const fallback = DEFAULT_VEHICLES.find(v => v.slug === slug);
-          if (fallback) {
-            setData(fallback);
-            return;
-          }
+        if (localMatch) {
+          setData(localMatch);
+          return;
         }
         setError(err.response?.status === 404 ? 'The requested travel route or page does not exist.' : msg(err));
       })
