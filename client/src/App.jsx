@@ -26,7 +26,7 @@ const NAV_LINKS = [
 ];
 
 // Global Live Autocomplete Search Component
-function GlobalSearch() {
+function GlobalSearch({ isMobile = false, onSelect }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -53,14 +53,15 @@ function GlobalSearch() {
     navigate(url);
     setQuery('');
     setIsOpen(false);
+    if (onSelect) onSelect();
   };
 
   return (
-    <div className="relative hidden md:block w-44 lg:w-56">
+    <div className={`relative ${isMobile ? 'w-full' : 'hidden md:block w-44 lg:w-56'}`}>
       <div className="relative flex items-center">
         <input
           type="text"
-          className="w-full bg-slate-100/90 border border-slate-200/90 rounded-full py-1.5 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition"
+          className="w-full bg-slate-100/90 border border-slate-200/90 rounded-full py-2 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition"
           placeholder="Search destinations, cabs…"
           aria-label="Global Search"
           value={query}
@@ -71,17 +72,17 @@ function GlobalSearch() {
       </div>
 
       {isOpen && results.length > 0 && (
-        <div className="absolute top-full right-0 mt-2 w-72 lg:w-80 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 z-50 divide-y divide-slate-100">
+        <div className={`absolute top-full ${isMobile ? 'left-0 right-0' : 'right-0 w-72 lg:w-80'} mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl p-2 z-50 divide-y divide-slate-100 max-h-72 overflow-y-auto`}>
           {results.map((res, i) => (
             <button
               key={i}
               onClick={() => handleSelect(res.url)}
-              className="w-full text-left p-2.5 rounded-lg hover:bg-teal-50 flex items-center gap-3 transition"
+              className="w-full text-left p-2.5 rounded-lg hover:bg-teal-50 flex items-center gap-3 transition min-h-[44px]"
             >
               {res.image && (
                 <img src={img(res.image)} alt="" className="w-8 h-8 rounded object-cover flex-shrink-0" />
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <span className="text-[10px] font-mono text-teal-700 uppercase font-semibold block">{res.type}</span>
                 <span className="text-xs font-bold text-slate-900 block truncate">{res.label}</span>
                 <span className="text-[11px] text-slate-500 truncate block">{res.sub}</span>
@@ -105,20 +106,32 @@ function LayoutShell({ children }) {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-topo-pattern text-slate-900 selection:bg-teal-600 selection:text-white">
-      {/* Top Announcement Bar */}
+    <div className="min-h-screen flex flex-col justify-between bg-topo-pattern text-slate-900 selection:bg-teal-600 selection:text-white w-full overflow-x-hidden">
+      {/* Top Announcement Bar (Visible on tablets & desktop) */}
       <div className="bg-slate-900/95 backdrop-blur-md text-teal-100 py-1.5 px-4 text-[11px] hidden sm:block border-b border-slate-800/80">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-4 text-slate-300">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-2">
+          <div className="flex items-center gap-3 text-slate-300">
             <span className="flex items-center gap-1.5">
               <span className="text-rose-400">📍</span>
-              <span>Railway Station, Amb Andaura, Una (HP) - 177203</span>
+              <span className="truncate">Near Amb Andaura Railway Station, Una (HP)</span>
             </span>
             <span className="text-slate-600">·</span>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>24/7 Helpline & WhatsApp: <a href="tel:+919816596713" className="text-white font-bold hover:text-teal-300 transition">+91 98165 96713</a></span>
+              <span>24/7 Helpline: <a href="tel:+919816596713" className="text-white font-bold hover:text-teal-300 transition">+91 98165 96713</a></span>
             </span>
           </div>
           <div className="flex items-center gap-3 text-teal-300">
@@ -132,9 +145,9 @@ function LayoutShell({ children }) {
       </div>
 
       {/* Main Header / Glass Navbar */}
-      <header className="sticky top-0 z-40 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 shadow-xs transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
-          <Link to="/" className="flex-shrink-0">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-xs transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
+          <Link to="/" className="flex-shrink-0" onClick={() => setMobileOpen(false)}>
             <Logo />
           </Link>
 
@@ -154,53 +167,98 @@ function LayoutShell({ children }) {
           </nav>
 
           {/* Right Action Bar */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <GlobalSearch />
 
             <Link to="/booking" className="btn-primary hidden sm:inline-flex !py-2 !px-4 text-xs font-bold whitespace-nowrap shadow-sm">
               Plan My Trip
             </Link>
 
-            {/* Mobile Hamburger Toggle */}
+            {/* Mobile Hamburger Toggle Button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2 text-slate-800"
+              className="lg:hidden p-2.5 text-slate-800 hover:bg-slate-100 rounded-xl transition min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+              {mobileOpen ? <X size={24} className="text-teal-700" /> : <Menu size={24} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Slide-down Drawer */}
+        {/* Mobile Full-Screen Slide-in Drawer */}
         {mobileOpen && (
-          <div className="xl:hidden bg-white/92 backdrop-blur-2xl border-t border-slate-200 p-6 space-y-4 shadow-2xl">
-            <nav className="flex flex-col space-y-3 text-sm font-semibold uppercase tracking-wider">
-              {NAV_LINKS.map((link) => (
+          <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 bg-slate-900/40 backdrop-blur-sm z-50 flex flex-col justify-between overflow-y-auto">
+            <div className="bg-white p-5 border-b border-slate-200 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
+              {/* Mobile Search */}
+              <div className="pb-2">
+                <GlobalSearch isMobile={true} onSelect={() => setMobileOpen(false)} />
+              </div>
+
+              {/* Navigation Links */}
+              <nav className="flex flex-col divide-y divide-slate-100 text-sm font-bold uppercase tracking-wider">
+                {NAV_LINKS.map((link) => (
+                  <NavLink
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) =>
+                      `py-3 px-3 rounded-lg flex items-center justify-between transition min-h-[44px] ${isActive ? 'bg-teal-50 text-teal-800 font-extrabold' : 'text-slate-800 hover:bg-slate-50'}`
+                    }
+                  >
+                    <span>{link.label}</span>
+                    <ArrowRight size={14} className="text-teal-600 opacity-60" />
+                  </NavLink>
+                ))}
+              </nav>
+
+              {/* Action Buttons in Mobile Drawer */}
+              <div className="pt-3 border-t border-slate-100 space-y-2.5">
                 <Link
-                  key={link.path}
-                  to={link.path}
+                  to="/booking"
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 hover:bg-teal-50 hover:text-teal-800 rounded-lg text-slate-800 transition"
+                  className="btn-primary w-full text-center !py-3 text-xs font-bold shadow-md justify-center"
                 >
-                  {link.label}
+                  <span>Instant Cab & Tour Booking</span>
+                  <ArrowRight size={16} />
                 </Link>
-              ))}
-              <Link
-                to="/booking"
-                onClick={() => setMobileOpen(false)}
-                className="btn-primary text-center mt-2"
-              >
-                Plan My Trip
-              </Link>
-            </nav>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href="tel:+919816596713"
+                    className="btn-secondary text-xs !py-2.5 justify-center font-bold"
+                  >
+                    <Phone size={14} className="text-teal-700" />
+                    <span>Call Admin</span>
+                  </a>
+                  <a
+                    href={waLink(s, 'Hello Ranjit Tour & Travels, I want to inquire about cabs / packages.')}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn-turquoise text-xs !py-2.5 justify-center font-bold"
+                  >
+                    <MessageCircle size={15} />
+                    <span>WhatsApp</span>
+                  </a>
+                </div>
+
+                <div className="pt-2 text-center">
+                  <Link
+                    to="/admin/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="text-[11px] text-slate-500 hover:text-teal-700 font-medium"
+                  >
+                    🔐 Admin Portal Login
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </header>
 
-      {/* Main Page Content */}
-      <div className="flex-1">
+      {/* Main Page Content with safe padding for mobile bottom bar */}
+      <div className="flex-1 w-full pb-20 sm:pb-0 overflow-x-hidden">
         {children}
       </div>
 
@@ -281,11 +339,11 @@ function LayoutShell({ children }) {
         </div>
       </footer>
 
-      {/* Sticky Mobile Booking Bottom Bar */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-2 z-40 flex gap-2 shadow-lg items-center">
+      {/* Sticky Mobile Booking Bottom Bar (Optimized for iPhone notch & modern Androids) */}
+      <div className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 px-3 pt-2.5 pb-[calc(0.6rem+env(safe-area-inset-bottom,0px))] z-40 flex gap-2 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] items-center">
         <a
           href={`tel:${(s.phone || '+919816596713').replace(/\s+/g, '')}`}
-          className="btn-secondary !py-2.5 !px-3 text-xs flex items-center justify-center gap-1 font-bold flex-shrink-0"
+          className="btn-secondary !py-2.5 !px-3 text-xs flex items-center justify-center gap-1.5 font-bold flex-shrink-0 min-h-[44px]"
         >
           <Phone size={15} className="text-teal-700" />
           <span>Call</span>
@@ -294,12 +352,12 @@ function LayoutShell({ children }) {
           href={waLink(s, 'Hello Ranjit Tour & Travels, I want to inquire about a tour package / taxi.')}
           target="_blank"
           rel="noreferrer"
-          className="btn-turquoise !py-2.5 !px-3 text-xs flex items-center justify-center gap-1.5 font-bold flex-1"
+          className="btn-turquoise !py-2.5 !px-3 text-xs flex items-center justify-center gap-1.5 font-bold flex-1 min-h-[44px]"
         >
           <MessageCircle size={16} />
           <span>WhatsApp Us</span>
         </a>
-        <Link to="/booking" className="btn-primary !py-2.5 !px-3 text-xs font-bold text-center flex-1">
+        <Link to="/booking" className="btn-primary !py-2.5 !px-3 text-xs font-bold text-center flex-1 min-h-[44px] justify-center">
           Book Cab
         </Link>
       </div>
