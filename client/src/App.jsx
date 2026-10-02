@@ -145,7 +145,7 @@ function LayoutShell({ children }) {
       </div>
 
       {/* Main Header / Glass Navbar */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 shadow-xs transition-all duration-300">
+      <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-200/80 shadow-xs transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
           <Link to="/" className="flex-shrink-0" onClick={() => setMobileOpen(false)}>
             <Logo />
@@ -177,23 +177,43 @@ function LayoutShell({ children }) {
             {/* Mobile Hamburger Toggle Button */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="lg:hidden p-2.5 text-slate-800 hover:bg-slate-100 rounded-xl transition min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className="lg:hidden p-2.5 text-slate-800 hover:bg-slate-100 rounded-xl transition min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer"
               aria-label="Toggle navigation menu"
               aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X size={24} className="text-teal-700" /> : <Menu size={24} />}
+              {mobileOpen ? <X size={26} className="text-teal-700" /> : <Menu size={26} className="text-slate-800" />}
             </button>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Full-Screen Slide-in Drawer */}
-        {mobileOpen && (
-          <div className="lg:hidden fixed inset-x-0 top-16 bottom-0 bg-slate-900/40 backdrop-blur-sm z-50 flex flex-col justify-between overflow-y-auto">
-            <div className="bg-white p-5 border-b border-slate-200 shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto animate-in slide-in-from-top-2 duration-200">
+      {/* Mobile Drawer (Rendered outside header to guarantee proper full-screen overlay without clipping) */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex flex-col">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-slate-950/60 transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+
+          {/* Drawer Content */}
+          <div className="relative z-10 bg-white w-full max-h-[90vh] flex flex-col shadow-2xl border-b border-slate-200">
+            {/* Drawer Header */}
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+              <Logo />
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-2 text-slate-500 hover:text-slate-900 rounded-lg hover:bg-slate-100 min-w-[40px] min-h-[40px] flex items-center justify-center cursor-pointer"
+                aria-label="Close menu"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Drawer Body */}
+            <div className="p-4 overflow-y-auto space-y-4">
               {/* Mobile Search */}
-              <div className="pb-2">
-                <GlobalSearch isMobile={true} onSelect={() => setMobileOpen(false)} />
-              </div>
+              <GlobalSearch isMobile={true} onSelect={() => setMobileOpen(false)} />
 
               {/* Navigation Links */}
               <nav className="flex flex-col divide-y divide-slate-100 text-sm font-bold uppercase tracking-wider">
@@ -207,19 +227,19 @@ function LayoutShell({ children }) {
                     }
                   >
                     <span>{link.label}</span>
-                    <ArrowRight size={14} className="text-teal-600 opacity-60" />
+                    <ArrowRight size={15} className="text-teal-600 opacity-60" />
                   </NavLink>
                 ))}
               </nav>
 
-              {/* Action Buttons in Mobile Drawer */}
+              {/* Action Buttons */}
               <div className="pt-3 border-t border-slate-100 space-y-2.5">
                 <Link
                   to="/booking"
                   onClick={() => setMobileOpen(false)}
                   className="btn-primary w-full text-center !py-3 text-xs font-bold shadow-md justify-center"
                 >
-                  <span>Instant Cab & Tour Booking</span>
+                  <span>Book Cab / Tour Package</span>
                   <ArrowRight size={16} />
                 </Link>
 
@@ -254,8 +274,8 @@ function LayoutShell({ children }) {
               </div>
             </div>
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       {/* Main Page Content with safe padding for mobile bottom bar */}
       <div className="flex-1 w-full pb-20 sm:pb-0 overflow-x-hidden">
