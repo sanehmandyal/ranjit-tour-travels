@@ -1703,6 +1703,7 @@ export function Home() {
 // 2. LISTINGS (Destinations, Packages, Cars, Services, Blog)
 // ==========================================
 export function Listing({ kind }) {
+  const s = useSettings();
   const [searchParams, setSearchParams] = useSearchParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -247,8 +247,9 @@ export function JourneyRoute({ stops = [] }) {
   );
 }
 
-export const waLink = (settings, text = '') => {
-  const num = (settings.whatsapp || '+919816596713').replace(/\D/g, '');
+export const waLink = (settings = {}, text = '') => {
+  const whatsappNumber = typeof settings === 'string' ? settings : (settings?.whatsapp || settings?.phone || '+919816596713');
+  const num = (whatsappNumber || '+919816596713').replace(/\D/g, '') || '919816596713';
   return `https://wa.me/${num}?text=${encodeURIComponent(text)}`;
 };
 
