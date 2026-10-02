@@ -86,20 +86,20 @@ export function Seo({ title, description, image, jsonLd, keywords = [] }) {
 
 export function Logo({ compact = false }) {
   return (
-    <div className="flex items-center gap-2.5">
-      <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-700 p-0.5 shadow-md shadow-teal-700/20 flex items-center justify-center flex-shrink-0">
+    <div className="flex items-center gap-2">
+      <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-700 p-0.5 shadow-md shadow-teal-700/20 flex items-center justify-center flex-shrink-0">
         <div className="w-full h-full bg-white rounded-[9px] flex items-center justify-center">
-          <Compass className="w-4.5 h-4.5 text-teal-700 animate-spin-slow" />
+          <Compass className="w-4 h-4 text-teal-700 animate-spin-slow" />
         </div>
-        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+        <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
       </div>
       {!compact && (
-        <div className="flex flex-col">
-          <span className="font-display font-extrabold text-base sm:text-lg tracking-tight text-slate-900 leading-none">
+        <div className="flex flex-col min-w-0">
+          <span className="font-display font-extrabold text-sm sm:text-base md:text-lg tracking-tight text-slate-900 leading-none whitespace-nowrap">
             RANJIT <span className="text-teal-700">TOURS</span>
           </span>
-          <span className="text-[9px] tracking-[0.2em] text-slate-500 uppercase font-bold mt-0.5">
-            North India & Himachal
+          <span className="text-[8px] sm:text-[9px] tracking-[0.15em] sm:tracking-[0.2em] text-slate-500 uppercase font-bold mt-0.5 whitespace-nowrap">
+            Himachal & North India
           </span>
         </div>
       )}

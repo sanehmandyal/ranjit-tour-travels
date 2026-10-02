@@ -832,28 +832,28 @@ export function Home() {
               <span>North India's Trusted Himachal & Temple Tour Specialist</span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.12] drop-shadow-lg">
+            <h1 className="font-display text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] drop-shadow-lg">
               Discover Himachal <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-emerald-300 to-teal-100">
                 & Royal North India
               </span>
             </h1>
 
-            <p className="text-slate-100 text-base sm:text-lg max-w-xl leading-relaxed font-normal drop-shadow-md">
+            <p className="text-slate-100 text-sm sm:text-lg max-w-xl leading-relaxed font-normal drop-shadow-md">
               {s.heroText || 'Customized tour packages, outstation cabs & hill-expert chauffeurs for Manali, Shimla, Dharamshala, Spiti Valley, Leh Ladakh, Amritsar Golden Temple & Himachal Devi Darshan.'}
             </p>
 
-            <div className="flex flex-wrap items-center gap-3.5 pt-2">
-              <Link to="/tour-packages" className="btn-primary !bg-teal-600 hover:!bg-teal-500 !text-white shadow-lg shadow-teal-950/40">
+            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3.5 pt-2">
+              <Link to="/tour-packages" className="btn-primary !bg-teal-600 hover:!bg-teal-500 !text-white shadow-lg shadow-teal-950/40 justify-center">
                 <span>Explore Packages</span>
                 <ArrowRight size={17} />
               </Link>
-              <Link to="/cars" className="btn-secondary !bg-white/15 hover:!bg-white/25 !text-white !border-white/30 backdrop-blur-md">
+              <Link to="/cars" className="btn-secondary !bg-white/15 hover:!bg-white/25 !text-white !border-white/30 backdrop-blur-md justify-center">
                 <span>View Taxi Fleet</span>
               </Link>
               <a
                 href={`tel:${(s.phone || '+919876543210').replace(/\s+/g, '')}`}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition shadow-sm backdrop-blur-md"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white text-xs font-bold transition shadow-sm backdrop-blur-md"
               >
                 <Phone size={14} className="text-teal-300" />
                 <span>Call {s.phone || '+91 98765 43210'}</span>
@@ -861,7 +861,7 @@ export function Home() {
             </div>
 
             {/* Feature Highlights Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-white/15">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-6 border-t border-white/15">
               <div className="flex items-center gap-2 text-xs text-slate-200 font-semibold">
                 <div className="w-6 h-6 rounded-md bg-teal-500/25 flex items-center justify-center flex-shrink-0 text-teal-300">
                   <Shield size={14} />
@@ -896,13 +896,13 @@ export function Home() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <div className="travel-card bg-white/95 backdrop-blur-xl border border-white/80 p-6 sm:p-7 shadow-2xl relative rounded-2xl">
-              <div className="flex items-center justify-between mb-5 border-b border-slate-100 pb-3">
+            <div className="travel-card bg-white/95 backdrop-blur-xl border border-white/80 p-4 sm:p-7 shadow-2xl relative rounded-2xl">
+              <div className="flex items-center justify-between mb-4 sm:mb-5 border-b border-slate-100 pb-3">
                 <div>
-                  <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider font-mono">Fast Cab & Tour Inquiry</span>
-                  <h3 className="font-display text-xl font-extrabold text-slate-900 mt-0.5">Plan My Journey</h3>
+                  <span className="text-[10px] sm:text-[11px] font-bold text-teal-700 uppercase tracking-wider font-mono">Fast Cab & Tour Inquiry</span>
+                  <h3 className="font-display text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">Plan My Journey</h3>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center text-teal-700 border border-teal-100 shadow-xs">
+                <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center text-teal-700 border border-teal-100 shadow-xs flex-shrink-0">
                   <Navigation size={18} />
                 </div>
               </div>
@@ -1004,7 +1004,7 @@ export function Home() {
       {/* STATS & TRUST BAR */}
       {s.stats && s.stats.length > 0 && (
         <section className="border-y border-slate-200 bg-white py-8 relative overflow-hidden shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
             {s.stats.map((st, i) => (
               <motion.div 
                 key={i}
@@ -1014,10 +1014,10 @@ export function Home() {
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
-                <p className="font-display text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-emerald-600">
+                <p className="font-display text-2xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-700 to-emerald-600">
                   {st.value}
                 </p>
-                <p className="text-xs text-slate-700 font-bold tracking-wide uppercase">
+                <p className="text-[11px] sm:text-xs text-slate-700 font-bold tracking-wide uppercase">
                   {st.label}
                 </p>
               </motion.div>
@@ -1668,12 +1668,12 @@ export function Home() {
 
       {/* 24/7 CONTACT & INSTANT DISPATCH BANNER */}
       <section className="py-12 px-4 max-w-7xl mx-auto">
-        <div className="travel-card-dispatch p-8 sm:p-10 text-white rounded-3xl flex flex-col lg:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
+        <div className="travel-card-dispatch p-5 sm:p-10 text-white rounded-2xl sm:rounded-3xl flex flex-col lg:flex-row items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
           <div className="absolute right-0 top-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="space-y-2 text-center lg:text-left relative z-10">
             <span className="text-xs font-mono text-teal-300 font-bold uppercase tracking-widest">Round-The-Clock Dispatch</span>
-            <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">Need a Cab or Custom Tour Quote Instantly?</h3>
+            <h3 className="font-display text-xl sm:text-3xl font-bold text-white">Need a Cab or Custom Tour Quote Instantly?</h3>
             <p className="text-xs sm:text-sm text-slate-200 max-w-2xl">
               Operating 24/7 across Amb Andaura Railway Station, Chandigarh, Mohali, Panchkula, Delhi NCR, Shimla, Manali, Dharamshala, Amritsar & Spiti Valley.
             </p>
@@ -1683,15 +1683,15 @@ export function Home() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3 justify-center relative z-10">
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 justify-center w-full sm:w-auto relative z-10">
             <a
               href={`tel:${(s.phone || '+919816596713').replace(/\s+/g, '')}`}
-              className="btn-primary !bg-white !text-slate-900 hover:!bg-slate-100 font-bold shadow-md"
+              className="btn-primary !bg-white !text-slate-900 hover:!bg-slate-100 font-bold shadow-md justify-center"
             >
               <Phone size={16} className="text-teal-700" />
               <span>Call Helpline</span>
             </a>
-            <WhatsAppButton text="Hello Ranjit Tour & Travels, I want to book a taxi / tour package immediately." label="WhatsApp Dispatch" className="!bg-emerald-500 hover:!bg-emerald-600 font-bold shadow-md" />
+            <WhatsAppButton text="Hello Ranjit Tour & Travels, I want to book a taxi / tour package immediately." label="WhatsApp Dispatch" className="!bg-emerald-500 hover:!bg-emerald-600 font-bold shadow-md justify-center" />
           </div>
         </div>
       </section>
@@ -2895,7 +2895,7 @@ _Please send customized itinerary with price quotation._`;
       ) : (
         <div className="travel-card p-6 sm:p-10 bg-white border-slate-200 shadow-md">
           {/* Step tracker */}
-          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100 text-xs font-mono">
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-100 text-[10px] sm:text-xs font-mono gap-1.5 overflow-x-auto whitespace-nowrap">
             <span className={step >= 1 ? 'text-teal-700 font-bold' : 'text-slate-400'}>01. DESTINATION</span>
             <span className={step >= 2 ? 'text-teal-700 font-bold' : 'text-slate-400'}>02. FLEET & STAYS</span>
             <span className={step >= 3 ? 'text-teal-700 font-bold' : 'text-slate-400'}>03. CONTACT & CONFIRM</span>
