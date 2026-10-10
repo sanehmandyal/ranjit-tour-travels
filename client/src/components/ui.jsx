@@ -84,23 +84,31 @@ export function Seo({ title, description, image, jsonLd, keywords = [] }) {
   );
 }
 
-export function Logo({ compact = false, light = false }) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-teal-500/30 via-emerald-500/20 to-teal-700/40 p-0.5 backdrop-blur-md border border-teal-400/40 shadow-lg shadow-teal-900/20 flex items-center justify-center flex-shrink-0 group overflow-hidden">
-        {/* Specular glass reflection sheen */}
-        <div className="absolute top-0 inset-x-0 h-1/2 bg-gradient-to-b from-white/30 to-transparent pointer-events-none rounded-t-[10px]" />
-        
+export function Logo({ compact = false, light = false, showFullImage = false }) {
+  if (showFullImage) {
+    return (
+      <div className="flex items-center">
         <img
-          src="/favicon.svg"
-          alt="Ranjit Tour & Travels Glassmorphism Logo"
-          className="w-6 h-6 sm:w-7 sm:h-7 object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
+          src="/images/logo.png"
+          alt="Ranjit Tour & Travels"
+          className="h-12 sm:h-14 w-auto object-contain drop-shadow-md rounded-xl"
         />
-        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white animate-pulse z-20" />
       </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2.5 sm:gap-3 group">
+      {/* Circular Emblem of the Official Logo */}
+      <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white p-0.5 shadow-md shadow-teal-900/15 border border-teal-500/30 flex items-center justify-center flex-shrink-0 overflow-hidden transition-transform duration-300 group-hover:scale-105">
+        <img
+          src="/images/logo.png"
+          alt="Ranjit Tour & Travels"
+          className="w-full h-full object-cover object-center rounded-full"
+        />
+        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+      </div>
+
       {!compact && (
         <div className="flex flex-col min-w-0">
           <span className={`font-display font-extrabold text-sm sm:text-base md:text-lg tracking-tight leading-none whitespace-nowrap ${light ? 'text-white' : 'text-slate-900'}`}>

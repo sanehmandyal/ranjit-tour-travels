@@ -207,13 +207,13 @@ function AdminLogin({ onLoginSuccess }) {
 
           {/* Header Brand Badge */}
           <div className="text-center mb-8">
-            <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500/30 to-emerald-600/30 p-1 backdrop-blur-xl border border-teal-400/50 shadow-xl shadow-teal-500/30 flex items-center justify-center mx-auto mb-4 group">
+            <div className="relative w-20 h-20 rounded-full bg-white p-1 shadow-xl shadow-teal-500/30 border-2 border-teal-400/60 flex items-center justify-center mx-auto mb-4 group overflow-hidden">
               <img
-                src="/favicon.svg"
+                src="/images/logo.png"
                 alt="Ranjit Tour & Travels"
-                className="w-12 h-12 object-contain drop-shadow-md"
+                className="w-full h-full object-cover object-center rounded-full drop-shadow-md"
               />
-              <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse" />
+              <div className="absolute top-0 right-0 w-4 h-4 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse" />
             </div>
 
             <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
