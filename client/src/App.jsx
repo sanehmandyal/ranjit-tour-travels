@@ -13,6 +13,7 @@ import {
 import { api, img } from './api.js';
 
 const Admin = lazy(() => import('./admin/Admin.jsx'));
+const HumanBodyViewer = lazy(() => import('./components/HumanBodyViewer.jsx'));
 
 const NAV_LINKS = [
   { path: '/', label: 'Home' },
@@ -405,6 +406,11 @@ export default function App() {
                 <Route path="/custom-tour" element={<CustomTour />} />
                 <Route path="/taxi-booking" element={<Booking />} />
                 <Route path="/airport-transfer" element={<Booking />} />
+
+                {/* 3D Human Body Spatial & Lateral Feature Viewer */}
+                <Route path="/body" element={<HumanBodyViewer />} />
+                <Route path="/human-body-viewer" element={<HumanBodyViewer />} />
+                <Route path="/anatomy" element={<HumanBodyViewer />} />
 
                 <Route path="/gallery" element={<GalleryPage />} />
                 <Route path="/testimonials" element={<TestimonialsPage />} />
