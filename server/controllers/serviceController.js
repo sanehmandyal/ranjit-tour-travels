@@ -38,12 +38,21 @@ export const getServices = async (req, res, next) => {
 
 export const getServiceBySlug = async (req, res, next) => {
   try {
-    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug) && req.params.slug.length === 24;
+    const rawSlug = req.params.slug || '';
+    const isObjectId = mongoose.Types.ObjectId.isValid(rawSlug) && rawSlug.length === 24;
     const query = isObjectId
-      ? { $or: [{ _id: req.params.slug }, { slug: req.params.slug }] }
-      : { slug: req.params.slug };
+      ? { $or: [{ _id: rawSlug }, { slug: rawSlug }] }
+      : { slug: rawSlug };
 
-    const service = await Service.findOne(query);
+    let service = await Service.findOne(query);
+    if (!service && !isObjectId) {
+      service = await Service.findOne({
+        $or: [
+          { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+          { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+        ]
+      });
+    }
     if (!service) {
       return res.status(404).json({ success: false, message: 'Service not found.' });
     }
@@ -52,6 +61,7 @@ export const getServiceBySlug = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const createService = async (req, res, next) => {
   try {

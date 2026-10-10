@@ -40,12 +40,21 @@ export const getVehicles = async (req, res, next) => {
 
 export const getVehicleBySlug = async (req, res, next) => {
   try {
-    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug) && req.params.slug.length === 24;
+    const rawSlug = req.params.slug || '';
+    const isObjectId = mongoose.Types.ObjectId.isValid(rawSlug) && rawSlug.length === 24;
     const query = isObjectId 
-      ? { $or: [{ _id: req.params.slug }, { slug: req.params.slug }] }
-      : { slug: req.params.slug };
+      ? { $or: [{ _id: rawSlug }, { slug: rawSlug }] }
+      : { slug: rawSlug };
     
-    const vehicle = await Vehicle.findOne(query);
+    let vehicle = await Vehicle.findOne(query);
+    if (!vehicle && !isObjectId) {
+      vehicle = await Vehicle.findOne({
+        $or: [
+          { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+          { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+        ]
+      });
+    }
     if (!vehicle) {
       return res.status(404).json({ success: false, message: 'Vehicle not found.' });
     }
@@ -54,6 +63,7 @@ export const getVehicleBySlug = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const createVehicle = async (req, res, next) => {
   try {

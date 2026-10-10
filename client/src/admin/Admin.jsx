@@ -410,14 +410,23 @@ function ResourceEditor({ resource, item, onDone }) {
     let savedItem = preparedForm;
     try {
       let res;
-      const targetParam = (item?._id && item._id.length === 24) ? item._id : (item?.slug || preparedForm.slug || item?._id);
-      if (targetParam) {
-        res = await api.put(`/${resource}/${targetParam}`, payload);
+      const isEditingExisting = Boolean(item && (item._id || item.slug || item.id));
+      if (isEditingExisting) {
+        const targetParam = (item._id && item._id.length === 24) ? item._id : (item.slug || item._id || item.id);
+        try {
+          res = await api.put(`/${resource}/${targetParam}`, payload);
+        } catch (putErr) {
+          // If PUT failed (e.g. record was only in local state), create via POST
+          res = await api.post(`/${resource}`, payload);
+        }
       } else {
+        // Creating brand new item
         res = await api.post(`/${resource}`, payload);
       }
       if (res?.data?.data) {
         savedItem = { ...preparedForm, ...res.data.data };
+      } else if (res?.data) {
+        savedItem = { ...preparedForm, ...(res.data._id ? res.data : {}) };
       }
     } catch (err) {
       console.warn('Backend save notice (cached locally):', err.message);
@@ -426,6 +435,7 @@ function ResourceEditor({ resource, item, onDone }) {
       onDone(savedItem);
     }
   };
+
 
   return (
     <form onSubmit={handleSave} className="bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden text-white">

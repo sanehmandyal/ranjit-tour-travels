@@ -45,12 +45,21 @@ export const getPackages = async (req, res, next) => {
 
 export const getPackageBySlug = async (req, res, next) => {
   try {
-    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug) && req.params.slug.length === 24;
+    const rawSlug = req.params.slug || '';
+    const isObjectId = mongoose.Types.ObjectId.isValid(rawSlug) && rawSlug.length === 24;
     const query = isObjectId
-      ? { $or: [{ _id: req.params.slug }, { slug: req.params.slug }] }
-      : { slug: req.params.slug };
+      ? { $or: [{ _id: rawSlug }, { slug: rawSlug }] }
+      : { slug: rawSlug };
 
-    const pkg = await TourPackage.findOne(query).populate('destination');
+    let pkg = await TourPackage.findOne(query).populate('destination');
+    if (!pkg && !isObjectId) {
+      pkg = await TourPackage.findOne({
+        $or: [
+          { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+          { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+        ]
+      }).populate('destination');
+    }
     if (!pkg) {
       return res.status(404).json({ success: false, message: 'Package not found.' });
     }
@@ -59,6 +68,7 @@ export const getPackageBySlug = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const createPackage = async (req, res, next) => {
   try {

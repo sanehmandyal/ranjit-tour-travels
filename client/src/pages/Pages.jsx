@@ -2517,34 +2517,51 @@ export function Detail({ kind }) {
 
   const endpointMap = {
     destinations: `/destinations/${slug}`,
+    destination: `/destinations/${slug}`,
     'tour-packages': `/packages/${slug}`,
+    packages: `/packages/${slug}`,
+    package: `/packages/${slug}`,
     cars: `/vehicles/${slug}`,
+    car: `/vehicles/${slug}`,
+    vehicles: `/vehicles/${slug}`,
+    vehicle: `/vehicles/${slug}`,
     services: `/services/${slug}`,
-    blog: `/blogs/${slug}`
+    service: `/services/${slug}`,
+    blog: `/blogs/${slug}`,
+    blogs: `/blogs/${slug}`
   };
 
   useEffect(() => {
     setLoading(true);
     setError('');
-    const resourceKey = kind === 'tour-packages' ? 'packages' : (kind === 'cars' ? 'vehicles' : (kind === 'blog' ? 'blogs' : kind));
+    const resourceKey = (kind === 'tour-packages' || kind === 'packages' || kind === 'package') ? 'packages' 
+      : (kind === 'cars' || kind === 'car' || kind === 'vehicles' || kind === 'vehicle') ? 'vehicles' 
+      : (kind === 'services' || kind === 'service') ? 'services'
+      : (kind === 'destinations' || kind === 'destination') ? 'destinations'
+      : (kind === 'blog' || kind === 'blogs') ? 'blogs' 
+      : kind;
+
     const fallbackList = 
-      kind === 'tour-packages' ? DEFAULT_PACKAGES : 
-      kind === 'destinations' ? DEFAULT_DESTINATIONS : 
-      kind === 'cars' ? DEFAULT_VEHICLES : 
-      kind === 'services' ? DEFAULT_SERVICES : 
+      resourceKey === 'packages' ? DEFAULT_PACKAGES : 
+      resourceKey === 'destinations' ? DEFAULT_DESTINATIONS : 
+      resourceKey === 'vehicles' ? DEFAULT_VEHICLES : 
+      resourceKey === 'services' ? DEFAULT_SERVICES : 
       DEFAULT_BLOGS;
+
     const customList = getStoredCustomItems(resourceKey, fallbackList);
+    const targetSlug = (slug || '').toLowerCase();
+
     const localMatch = customList.find(item => {
-      const iSlug = item.slug || toSlug(item.name || item.title);
+      const iSlug = (item.slug || toSlug(item.name || item.title) || '').toLowerCase();
       const iName = (item.name || item.title || '').trim().toLowerCase();
-      const targetSlug = slug.toLowerCase();
       return (
         item.slug === slug || 
         item._id === slug || 
+        item.id === slug ||
         iSlug === targetSlug ||
         iName === targetSlug ||
-        targetSlug.includes(iSlug) ||
-        iSlug.includes(targetSlug)
+        toSlug(iName) === targetSlug ||
+        (iSlug && targetSlug && (targetSlug.includes(iSlug) || iSlug.includes(targetSlug)))
       );
     });
 
@@ -2561,6 +2578,8 @@ export function Detail({ kind }) {
           setData(itemData);
         } else if (localMatch) {
           setData(localMatch);
+        } else {
+          setError('The requested travel service or page does not exist.');
         }
       })
       .catch(err => {
@@ -2572,6 +2591,7 @@ export function Detail({ kind }) {
       })
       .finally(() => setLoading(false));
   }, [kind, slug]);
+
 
   if (loading) return <Loading />;
   if (error || !data) return <ErrorBox message={error} onRetry={() => window.location.reload()} />;

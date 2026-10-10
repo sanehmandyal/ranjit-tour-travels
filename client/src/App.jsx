@@ -393,15 +393,24 @@ export default function App() {
                 {/* Listings & Details */}
                 <Route path="/destinations" element={<Listing kind="destinations" />} />
                 <Route path="/destinations/:slug" element={<Detail kind="destinations" />} />
+                <Route path="/destination/:slug" element={<Detail kind="destinations" />} />
 
                 <Route path="/tour-packages" element={<Listing kind="tour-packages" />} />
                 <Route path="/tour-packages/:slug" element={<Detail kind="tour-packages" />} />
+                <Route path="/packages" element={<Listing kind="tour-packages" />} />
+                <Route path="/packages/:slug" element={<Detail kind="tour-packages" />} />
+                <Route path="/package/:slug" element={<Detail kind="tour-packages" />} />
 
                 <Route path="/cars" element={<Listing kind="cars" />} />
                 <Route path="/cars/:slug" element={<Detail kind="cars" />} />
+                <Route path="/car/:slug" element={<Detail kind="cars" />} />
+                <Route path="/vehicles" element={<Listing kind="cars" />} />
+                <Route path="/vehicles/:slug" element={<Detail kind="cars" />} />
+                <Route path="/vehicle/:slug" element={<Detail kind="cars" />} />
 
                 <Route path="/services" element={<Listing kind="services" />} />
                 <Route path="/services/:slug" element={<Detail kind="services" />} />
+                <Route path="/service/:slug" element={<Detail kind="services" />} />
 
                 <Route path="/custom-tour" element={<CustomTour />} />
                 <Route path="/taxi-booking" element={<Booking />} />
@@ -417,9 +426,12 @@ export default function App() {
 
                 <Route path="/blog" element={<Listing kind="blog" />} />
                 <Route path="/blog/:slug" element={<Detail kind="blog" />} />
+                <Route path="/blogs" element={<Listing kind="blog" />} />
+                <Route path="/blogs/:slug" element={<Detail kind="blog" />} />
 
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/booking" element={<Booking />} />
+
 
                 {/* Local SEO Landing Pages */}
                 <Route path="/locations/:city" element={<LocationPage />} />

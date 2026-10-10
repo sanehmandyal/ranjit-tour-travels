@@ -42,12 +42,21 @@ export const getDestinations = async (req, res, next) => {
 
 export const getDestinationBySlug = async (req, res, next) => {
   try {
-    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug) && req.params.slug.length === 24;
+    const rawSlug = req.params.slug || '';
+    const isObjectId = mongoose.Types.ObjectId.isValid(rawSlug) && rawSlug.length === 24;
     const query = isObjectId
-      ? { $or: [{ _id: req.params.slug }, { slug: req.params.slug }] }
-      : { slug: req.params.slug };
+      ? { $or: [{ _id: rawSlug }, { slug: rawSlug }] }
+      : { slug: rawSlug };
 
-    const destination = await Destination.findOne(query);
+    let destination = await Destination.findOne(query);
+    if (!destination && !isObjectId) {
+      destination = await Destination.findOne({
+        $or: [
+          { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+          { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+        ]
+      });
+    }
     if (!destination) {
       return res.status(404).json({ success: false, message: 'Destination not found.' });
     }
@@ -56,6 +65,7 @@ export const getDestinationBySlug = async (req, res, next) => {
     next(err);
   }
 };
+
 
 export const createDestination = async (req, res, next) => {
   try {
