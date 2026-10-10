@@ -42,51 +42,47 @@ const app = express();
 // Connect Database
 connectDB();
 
-// Security & Middlewares
+// 1. Universal CORS & Preflight Handler (Always First)
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range, Client-Version');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Authorization');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+  next();
+});
+
+// 2. Cors package for Express route compatibility
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
+}));
+app.options('*', cors({ origin: true, credentials: true }));
+
+// 3. Security & Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'https://ranjittourandtravels.in',
-  'https://www.ranjittourandtravels.in',
-  'http://ranjittourandtravels.in',
-  'http://www.ranjittourandtravels.in',
-  'https://ranjit-tour-travels.vercel.app',
-  'https://ranjittourandtravels.com',
-  'https://www.ranjittourandtravels.com',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:3000'
-].filter(Boolean);
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.endsWith('.vercel.app') ||
-      origin.endsWith('.onrender.com') ||
-      origin.includes('ranjittour') ||
-      process.env.NODE_ENV !== 'production'
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error('Blocked by CORS policy'));
-    }
-  },
-  credentials: true
-}));
-
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 app.use(morgan('dev'));
 
-// Rate Limiting
+// Rate Limiting (Skip preflight OPTIONS and health checks)
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
+  max: 600,
+  skip: (req) => req.method === 'OPTIONS' || req.path === '/' || req.path === '/healthz' || req.path === '/api/health',
   message: { success: false, message: 'Too many requests from this IP, please try again in 15 minutes.' }
 });
 app.use('/api', generalLimiter);
