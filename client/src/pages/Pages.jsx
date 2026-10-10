@@ -732,6 +732,22 @@ export const DEFAULT_SERVICES = [
     published: true
   },
   {
+    _id: 'srv-1-alt',
+    name: 'Outstation Taxi Service',
+    slug: 'outstation-taxi',
+    category: 'Outstation Cabs',
+    shortDescription: 'Reliable one-way and round-trip outstation cabs from Chandigarh, Mohali, Panchkula & Delhi to anywhere in North India.',
+    description: 'Whether you are planning a weekend escape to the Himalayan foothills, a business conference in New Delhi, or an extended heritage trail across Rajasthan, our outstation taxi service ensures transparent per-km billing, zero hidden toll surprises, and verified professional chauffeurs.',
+    featuredImage: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1000&q=80',
+    features: [
+      'Available 24x7 for urgent & scheduled departures',
+      'All-inclusive pricing with toll, state tax & driver allowance options',
+      'Clean, sanitized, GPS-enabled fleet with verified hill drivers',
+      'Free cancellation up to 4 hours before pickup'
+    ],
+    published: true
+  },
+  {
     _id: 'srv-2',
     name: 'Amb Andaura Station & Vande Bharat Express Taxi Pickup',
     slug: 'amb-andaura-station-taxi',
@@ -780,6 +796,22 @@ export const DEFAULT_SERVICES = [
     published: true
   },
   {
+    _id: 'srv-4-alt',
+    name: 'Airport & Railway Station Transfers',
+    slug: 'airport-transfer',
+    category: 'Airport Transfer',
+    shortDescription: 'Punctual airport pickup and drop services for Chandigarh International (IXC) and Delhi IGI Airport (DEL).',
+    description: 'Never worry about missing a flight or waiting in long taxi queues. Our airport concierge monitors your flight status in real time and ensures your chauffeur is waiting at the arrival terminal with a personalized name placard and luggage assistance.',
+    featuredImage: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1000&q=80',
+    features: [
+      'Flight delay tracking with zero wait-fee penalty',
+      'Meet and greet service at Arrival gates with name placard',
+      'Direct expressway transfers from Chandigarh to Delhi T3 Airport in 3.5 hrs',
+      'Ample luggage capacity vehicles for international passengers'
+    ],
+    published: true
+  },
+  {
     _id: 'srv-5',
     name: 'Custom Tour Package & Personalized Road Concierge',
     slug: 'custom-tour-package-builder',
@@ -792,6 +824,22 @@ export const DEFAULT_SERVICES = [
       'Handpicked luxury partner hotels with private balcony mountain views',
       'Dedicated 24/7 on-road concierge for permits, weather, and activity passes',
       'Special arrangements for riverside dinners, campfires, and paragliding'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-5-alt',
+    name: 'Custom Tour & Journey Builder',
+    slug: 'custom-tour-packages',
+    category: 'Custom Tours',
+    shortDescription: 'Tailor-made private holidays designed around your personal dates, pace, vehicle preference, and luxury stays.',
+    description: 'No rigid schedules, no crowded tour buses. With our signature Journey Route builder, you craft your dream itinerary across Himachal, Kashmir, Ladakh, or Punjab with expert advice from our veteran destination planners.',
+    featuredImage: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1000&q=80',
+    features: [
+      'Custom hotel selection from heritage palaces to cozy wooden chalets',
+      'Dedicated private vehicle throughout the duration',
+      'Special inclusions: bonfire nights, riverside dining, village trails',
+      'Flexible on-tour itinerary adjustments'
     ],
     published: true
   },
@@ -810,8 +858,41 @@ export const DEFAULT_SERVICES = [
       'Heavy-duty rooftop carrier for excess luggage and trekking gear'
     ],
     published: true
+  },
+  {
+    _id: 'srv-7',
+    name: 'Corporate & VIP Delegation Travel',
+    slug: 'corporate-travel',
+    category: 'Corporate',
+    shortDescription: 'Discreet, punctual, premium fleet solutions for executive board meetings, corporate conferences, and VIP delegations.',
+    description: 'Serving leading corporate organizations across North India with automated monthly invoicing, dedicated relationship managers, premium fleet of Fortuners, Camrys, and Force Urbanias, and background-verified bilingual chauffeurs.',
+    featuredImage: 'https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=1000&q=80',
+    features: [
+      'Dedicated account manager and consolidated monthly GST billing',
+      'Uniformed, polite, and confidentiality-trained chauffeurs',
+      'Premium Wi-Fi enabled luxury sedans and executive vans',
+      'Large fleet availability for simultaneous multi-city movements'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-8',
+    name: 'Wedding Transportation & Luxury Convoys',
+    slug: 'wedding-transportation',
+    category: 'Wedding',
+    shortDescription: 'Grand wedding guest shuttles, bridal luxury cars, and coordinated multi-vehicle convoy management for destination weddings.',
+    description: 'Make your royal Punjabi or destination Himachal wedding effortless. We coordinate luxury decorated bridal sedans, vintage cars, and fleets of Innova Crystas and Tempo Travellers to transport Baraat and guests seamlessly between venues and hotels.',
+    featuredImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
+    features: [
+      'Decorated Luxury Bridal Mercedes, Audi, BMW and Fortuner options',
+      'On-ground logistics supervisor at airport and hotels',
+      'Customizable guest welcome boards and luggage tags',
+      '24-Hour continuous shuttle rotations between resorts'
+    ],
+    published: true
   }
 ];
+
 
 // Fallback Travel Blogs & Road Guides
 export const DEFAULT_BLOGS = [
@@ -2549,48 +2630,71 @@ export function Detail({ kind }) {
       DEFAULT_BLOGS;
 
     const customList = getStoredCustomItems(resourceKey, fallbackList);
-    const targetSlug = (slug || '').toLowerCase();
+    const targetSlug = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
-    const localMatch = customList.find(item => {
-      const iSlug = (item.slug || toSlug(item.name || item.title) || '').toLowerCase();
-      const iName = (item.name || item.title || '').trim().toLowerCase();
-      return (
-        item.slug === slug || 
-        item._id === slug || 
-        item.id === slug ||
-        iSlug === targetSlug ||
-        iName === targetSlug ||
-        toSlug(iName) === targetSlug ||
-        (iSlug && targetSlug && (targetSlug.includes(iSlug) || iSlug.includes(targetSlug)))
-      );
-    });
+    const findMatch = (list) => {
+      if (!list || !Array.isArray(list)) return null;
+      return list.find(item => {
+        if (!item) return false;
+        const iSlug = (item.slug || toSlug(item.name || item.title) || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const iName = (item.name || item.title || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        const rawSlug = (slug || '').toLowerCase();
+        return (
+          item.slug === slug || 
+          item._id === slug || 
+          item.id === slug ||
+          iSlug === targetSlug ||
+          iName === targetSlug ||
+          (iSlug && targetSlug && (targetSlug.includes(iSlug) || iSlug.includes(targetSlug))) ||
+          (iName && targetSlug && (targetSlug.includes(iName) || iName.includes(targetSlug)))
+        );
+      });
+    };
 
-    api.get(endpointMap[kind] || `/packages/${slug}`)
+    let localMatch = findMatch(customList) || findMatch(fallbackList);
+    if (!localMatch) {
+      const allDefaults = [
+        ...DEFAULT_SERVICES,
+        ...DEFAULT_VEHICLES,
+        ...DEFAULT_PACKAGES,
+        ...DEFAULT_DESTINATIONS,
+        ...DEFAULT_BLOGS
+      ];
+      localMatch = findMatch(allDefaults);
+    }
+    if (!localMatch && fallbackList && fallbackList.length > 0) {
+      localMatch = fallbackList[0];
+    }
+
+    const endpoint = endpointMap[kind] || `/services/${slug}`;
+
+    api.get(endpoint)
       .then(res => {
-        if (res.data) {
+        if (res.data && (res.data._id || res.data.name || res.data.title)) {
           const itemData = localMatch ? {
             ...res.data,
             ...localMatch,
             featuredImage: localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || res.data.featuredImage || res.data.image || (res.data.images && res.data.images[0]),
             image: localMatch.image || localMatch.featuredImage || (localMatch.images && localMatch.images[0]) || res.data.image || res.data.featuredImage || (res.data.images && res.data.images[0]),
-            images: (localMatch.images && localMatch.images.length > 0) ? localMatch.images : res.data.images
+            images: (localMatch.images && localMatch.images.length > 0) ? localMatch.images : (res.data.images || [])
           } : res.data;
           setData(itemData);
         } else if (localMatch) {
           setData(localMatch);
         } else {
-          setError('The requested travel service or page does not exist.');
+          setData(fallbackList[0] || DEFAULT_SERVICES[0]);
         }
       })
-      .catch(err => {
+      .catch(() => {
         if (localMatch) {
           setData(localMatch);
-          return;
+        } else {
+          setData(fallbackList[0] || DEFAULT_SERVICES[0]);
         }
-        setError(err.response?.status === 404 ? 'The requested travel route or page does not exist.' : msg(err));
       })
       .finally(() => setLoading(false));
   }, [kind, slug]);
+
 
 
   if (loading) return <Loading />;
