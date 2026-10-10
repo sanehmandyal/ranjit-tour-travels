@@ -1290,19 +1290,24 @@ export function Home() {
             {packages.map((pkg, i) => (
               <motion.div 
                 key={pkg._id} 
-                className="travel-card group flex flex-col justify-between bg-white border border-slate-200 shadow-sm hover:shadow-lg transition duration-300"
+                className="travel-card group flex flex-col justify-between bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
               >
                 <div>
-                  <div className="aspect-[16/9] relative overflow-hidden">
-                    <Cover src={pkg.featuredImage} alt={pkg.name} />
-                    <span className="absolute top-3 left-3 bg-teal-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase shadow-sm">
+                  <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
+                    <Cover 
+                      src={pkg.featuredImage} 
+                      alt={pkg.name} 
+                      className="absolute inset-0 w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <span className="absolute top-3 left-3 z-10 bg-teal-700 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase shadow-sm">
                       {pkg.category || 'Family'}
                     </span>
-                    <span className="absolute bottom-3 right-3 bg-slate-900/90 text-white text-xs font-mono px-2 py-1 rounded">
+                    <span className="absolute bottom-3 right-3 z-10 bg-slate-900/90 text-white text-xs font-mono px-2 py-1 rounded">
                       {pkg.duration}
                     </span>
                   </div>
@@ -1314,7 +1319,7 @@ export function Home() {
                     </div>
 
                     <Link to={`/tour-packages/${pkg.slug}`}>
-                      <h3 className="font-display text-lg font-bold text-slate-900 group-hover:text-teal-700 transition line-clamp-2">
+                      <h3 className="font-display font-bold text-lg text-slate-900 group-hover:text-teal-700 transition line-clamp-2 leading-snug">
                         {pkg.name}
                       </h3>
                     </Link>
@@ -1342,7 +1347,7 @@ export function Home() {
                       <Sparkles size={13} className="text-amber-500" />
                       All-Inclusive Package
                     </span>
-                    <span className="text-[10px] text-slate-500 block">Custom Quote on Request</span>
+                    <span className="text-[10px] text-slate-500 block font-medium">Custom Quote on Request</span>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -1382,19 +1387,19 @@ export function Home() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Card 1: Manali & Solang Snow Peaks */}
-            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg">
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img
+            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg rounded-2xl flex flex-col justify-between">
+              <div className="aspect-[16/10] relative overflow-hidden bg-slate-900">
+                <Cover
                   src="https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80"
                   alt="Manali Snow Peaks"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=800&q=80'; }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <span className="absolute top-3 left-3 bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                <span className="absolute top-3 left-3 z-10 bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   Snow Valley & Peaks
                 </span>
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h3 className="font-display text-lg font-bold text-white">Manali, Solang & Rohtang</h3>
                   <p className="text-xs text-teal-200">Atal Tunnel · Sissu Waterfall · Rohtang Snow Point</p>
                 </div>
@@ -1413,19 +1418,19 @@ export function Home() {
             </div>
 
             {/* Card 2: Hadimba Devi Temple & Vashisht Manali */}
-            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg">
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img
+            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg rounded-2xl flex flex-col justify-between">
+              <div className="aspect-[16/10] relative overflow-hidden bg-slate-900">
+                <Cover
                   src="https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=800&q=80"
                   alt="Hadimba Temple Manali"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=800&q=80'; }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <span className="absolute top-3 left-3 bg-amber-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                <span className="absolute top-3 left-3 z-10 bg-amber-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   Ancient Cedar Shrine
                 </span>
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h3 className="font-display text-lg font-bold text-white">Hadimba Temple & Vashisht</h3>
                   <p className="text-xs text-amber-200">500-Yr Historic Pagoda Temple · Natural Hot Springs</p>
                 </div>
@@ -1444,19 +1449,19 @@ export function Home() {
             </div>
 
             {/* Card 3: Golden Temple Amritsar */}
-            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg">
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img
+            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg rounded-2xl flex flex-col justify-between">
+              <div className="aspect-[16/10] relative overflow-hidden bg-slate-900">
+                <Cover
                   src="https://images.unsplash.com/photo-1514222134-b57cbb8ce073?auto=format&fit=crop&w=800&q=80"
                   alt="Golden Temple Amritsar"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?auto=format&fit=crop&w=800&q=80'; }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <span className="absolute top-3 left-3 bg-amber-500/90 backdrop-blur-md text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                <span className="absolute top-3 left-3 z-10 bg-amber-500/90 backdrop-blur-md text-slate-950 text-[11px] font-bold px-2.5 py-1 rounded-full">
                   Sacred Sanctum
                 </span>
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h3 className="font-display text-lg font-bold text-white">Sri Harmandir Sahib & Wagah</h3>
                   <p className="text-xs text-amber-200">Amritsar Golden Temple · Wagah Border Retreat · Jallianwala</p>
                 </div>
@@ -1475,19 +1480,19 @@ export function Home() {
             </div>
 
             {/* Card 4: Shimla Ridge & Jakhoo Temple */}
-            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg">
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img
+            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg rounded-2xl flex flex-col justify-between">
+              <div className="aspect-[16/10] relative overflow-hidden bg-slate-900">
+                <Cover
                   src="https://images.unsplash.com/photo-1562670652-e5947bddb335?auto=format&fit=crop&w=800&q=80"
                   alt="Shimla Ridge & Pine Hills"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=800&q=80'; }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <span className="absolute top-3 left-3 bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                <span className="absolute top-3 left-3 z-10 bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   Queen of Hills
                 </span>
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h3 className="font-display text-lg font-bold text-white">Shimla, Kufri & Jakhoo</h3>
                   <p className="text-xs text-teal-200">Jakhoo Hanuman Temple Ropeway · Mall Road · Kufri Snow</p>
                 </div>
@@ -1506,19 +1511,19 @@ export function Home() {
             </div>
 
             {/* Card 5: Dharamshala Dalai Lama Temple */}
-            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg">
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img
+            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg rounded-2xl flex flex-col justify-between">
+              <div className="aspect-[16/10] relative overflow-hidden bg-slate-900">
+                <Cover
                   src="https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=800&q=80"
                   alt="Dharamshala Dhauladhar Range"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=800&q=80'; }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <span className="absolute top-3 left-3 bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                <span className="absolute top-3 left-3 z-10 bg-teal-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   Spiritual Haven
                 </span>
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h3 className="font-display text-lg font-bold text-white">Dharamshala & McLeodganj</h3>
                   <p className="text-xs text-teal-200">Tsuglagkhang Dalai Lama Temple · HPCA · Bhagsu Waterfall</p>
                 </div>
@@ -1537,19 +1542,19 @@ export function Home() {
             </div>
 
             {/* Card 6: Himachal Devi Darshan Shaktipeeths */}
-            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg">
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img
+            <div className="travel-card bg-slate-800/80 border-slate-700 text-white overflow-hidden group shadow-lg rounded-2xl flex flex-col justify-between">
+              <div className="aspect-[16/10] relative overflow-hidden bg-slate-900">
+                <Cover
                   src="https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=800&q=80"
                   alt="Himachal Devi Darshan Shaktipeeths"
-                  onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=800&q=80'; }}
-                  className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  className="absolute inset-0 w-full h-full"
+                  imgClassName="group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
-                <span className="absolute top-3 left-3 bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                <span className="absolute top-3 left-3 z-10 bg-emerald-600/90 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full">
                   Devi Darshan Circuit
                 </span>
-                <div className="absolute bottom-3 left-4 right-4">
+                <div className="absolute bottom-3 left-4 right-4 z-10">
                   <h3 className="font-display text-lg font-bold text-white">Himachal Shaktipeeth Yatra</h3>
                   <p className="text-xs text-emerald-200">Mata Chintpurni · Kangra Devi · Jwala Ji · Naina Devi</p>
                 </div>
@@ -1664,7 +1669,12 @@ export function Home() {
                 <div>
                   {/* Vehicle Image Container */}
                   <div className="aspect-[16/10] overflow-hidden relative bg-slate-100">
-                    <Cover src={v.images?.[0]} alt={v.name} className="group-hover:scale-105 transition-transform duration-500" />
+                    <Cover 
+                      src={v.images?.[0]} 
+                      alt={v.name} 
+                      className="absolute inset-0 w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-500" 
+                    />
                     
                     {/* Category Badge */}
                     <div className="absolute top-2.5 left-2.5 z-10">
@@ -1681,8 +1691,6 @@ export function Home() {
                         Hill Verified
                       </span>
                     </div>
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
 
                   {/* Vehicle Info */}
@@ -2095,14 +2103,19 @@ export function Listing({ kind }) {
 
               if (kind === 'tour-packages') {
                 return (
-                  <div key={item._id} className="travel-card group flex flex-col justify-between bg-white">
+                  <div key={item._id} className="travel-card group flex flex-col justify-between bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden">
                     <div>
-                      <div className="aspect-[16/9] relative overflow-hidden">
-                        <Cover src={item.featuredImage} alt={item.name} />
-                        <span className="absolute top-3 left-3 bg-teal-700 text-white text-xs font-bold px-2 py-0.5 rounded uppercase shadow-sm">
+                      <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
+                        <Cover 
+                          src={item.featuredImage} 
+                          alt={item.name} 
+                          className="absolute inset-0 w-full h-full"
+                          imgClassName="group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <span className="absolute top-3 left-3 z-10 bg-teal-700 text-white text-xs font-bold px-2.5 py-0.5 rounded-full uppercase shadow-sm">
                           {item.category || 'Package'}
                         </span>
-                        <span className="absolute bottom-3 right-3 bg-slate-900/90 text-white text-xs font-mono px-2 py-1 rounded">
+                        <span className="absolute bottom-3 right-3 z-10 bg-slate-900/90 text-white text-xs font-mono px-2 py-1 rounded">
                           {item.duration}
                         </span>
                       </div>
@@ -2111,11 +2124,11 @@ export function Listing({ kind }) {
                           <RatingStars rating={item.rating || 4.9} count={item.reviewsCount || 15} />
                         </div>
                         <Link to={`/tour-packages/${item.slug}`}>
-                          <h3 className="font-display font-bold text-base text-slate-900 group-hover:text-teal-700 transition line-clamp-2">
+                          <h3 className="font-display font-bold text-base text-slate-900 group-hover:text-teal-700 transition line-clamp-2 leading-snug">
                             {item.name}
                           </h3>
                         </Link>
-                        <p className="text-xs text-slate-600 mt-2 line-clamp-2">{item.overview}</p>
+                        <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">{item.overview}</p>
                       </div>
                     </div>
 
@@ -2125,9 +2138,9 @@ export function Listing({ kind }) {
                           <Sparkles size={13} className="text-amber-500" />
                           All-Inclusive Package
                         </span>
-                        <span className="text-[10px] text-slate-500 block">Custom Quote on Request</span>
+                        <span className="text-[10px] text-slate-500 block font-medium">Custom Quote on Request</span>
                       </div>
-                      <Link to={`/tour-packages/${item.slug}`} className="btn-primary !py-1.5 !px-3 text-xs font-bold">
+                      <Link to={`/tour-packages/${item.slug}`} className="btn-primary !py-2 !px-3 text-xs font-bold">
                         View Itinerary
                       </Link>
                     </div>
@@ -2144,7 +2157,12 @@ export function Listing({ kind }) {
                     <div>
                       {/* Vehicle Image */}
                       <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
-                        <Cover src={item.images?.[0]} alt={item.name} className="group-hover:scale-105 transition-transform duration-500" />
+                        <Cover 
+                          src={item.images?.[0]} 
+                          alt={item.name} 
+                          className="absolute inset-0 w-full h-full"
+                          imgClassName="group-hover:scale-105 transition-transform duration-500" 
+                        />
                         
                         <div className="absolute top-3 left-3 z-10">
                           <span className="bg-slate-900/85 backdrop-blur-md text-teal-300 border border-teal-500/30 text-xs px-2.5 py-1 rounded-full font-bold shadow-md flex items-center gap-1">
@@ -2222,10 +2240,15 @@ export function Listing({ kind }) {
 
               if (kind === 'services') {
                 return (
-                  <div key={item._id} className="travel-card p-6 flex flex-col justify-between bg-white">
+                  <div key={item._id} className="travel-card p-6 flex flex-col justify-between bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden">
                     <div>
-                      <div className="aspect-[16/9] rounded-lg overflow-hidden mb-4">
-                        <Cover src={item.featuredImage} alt={item.name} />
+                      <div className="aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-slate-100">
+                        <Cover 
+                          src={item.featuredImage} 
+                          alt={item.name} 
+                          className="absolute inset-0 w-full h-full"
+                          imgClassName="group-hover:scale-105 transition-transform duration-500"
+                        />
                       </div>
                       <h3 className="font-display font-bold text-lg text-slate-900 mb-2">{item.name}</h3>
                       <p className="text-xs text-slate-600 leading-relaxed mb-4">{item.shortDescription}</p>
@@ -2239,26 +2262,31 @@ export function Listing({ kind }) {
 
               if (kind === 'blog') {
                 return (
-                  <article key={item._id} className="travel-card group flex flex-col justify-between bg-white">
+                  <article key={item._id} className="travel-card group flex flex-col justify-between bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden">
                     <div>
-                      <div className="aspect-[16/9] relative overflow-hidden">
-                        <Cover src={item.featuredImage} alt={item.title} />
-                        <span className="absolute top-3 left-3 bg-white/90 text-teal-800 text-xs px-2.5 py-1 rounded font-bold shadow-sm">
+                      <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
+                        <Cover 
+                          src={item.featuredImage} 
+                          alt={item.title} 
+                          className="absolute inset-0 w-full h-full"
+                          imgClassName="group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <span className="absolute top-3 left-3 z-10 bg-white/90 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold shadow-sm">
                           {item.category}
                         </span>
                       </div>
                       <div className="p-5">
                         <span className="text-[10px] text-slate-500 uppercase font-mono block mb-1 font-semibold">{item.readTime || '5 min'}</span>
                         <Link to={`/blog/${item.slug}`}>
-                          <h3 className="font-display font-bold text-base text-slate-900 group-hover:text-teal-700 transition line-clamp-2">
+                          <h3 className="font-display font-bold text-base text-slate-900 group-hover:text-teal-700 transition line-clamp-2 leading-snug">
                             {item.title}
                           </h3>
                         </Link>
-                        <p className="text-xs text-slate-600 mt-2 line-clamp-2">{item.excerpt}</p>
+                        <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">{item.excerpt}</p>
                       </div>
                     </div>
                     <div className="p-5 pt-0">
-                      <Link to={`/blog/${item.slug}`} className="text-xs font-bold text-teal-700 flex items-center gap-1">
+                      <Link to={`/blog/${item.slug}`} className="text-xs font-bold text-teal-700 flex items-center gap-1 group-hover:gap-2 transition">
                         Read Article <ArrowRight size={14} />
                       </Link>
                     </div>
@@ -2370,11 +2398,11 @@ export function Detail({ kind }) {
       />
 
       {/* Hero Media Banner */}
-      <div className="relative aspect-[16/8] md:aspect-[21/9] rounded-2xl overflow-hidden mb-8 border border-slate-200 shadow-md">
-        <Cover src={heroImage} alt={title} />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent" />
+      <div className="relative aspect-[16/8] md:aspect-[21/9] rounded-2xl overflow-hidden mb-8 border border-slate-200 shadow-md bg-slate-900">
+        <Cover src={heroImage} alt={title} className="absolute inset-0 w-full h-full" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent pointer-events-none" />
         
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute bottom-6 left-6 right-6 z-10">
           <span className="inline-block bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase mb-2 shadow-sm">
             {data.category || data.state || 'Royal Experience'}
           </span>
