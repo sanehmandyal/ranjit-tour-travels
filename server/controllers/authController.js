@@ -41,6 +41,7 @@ export const login = async (req, res, next) => {
     const isMasterPasswordInput = 
       password === masterAdminPass ||
       password === 'admin@123' ||
+      password === 'ranjit#Amb@2026!Secure' ||
       password === 'Ranjit#Amb@2026!Secure';
 
     let user = null;
@@ -162,7 +163,7 @@ export const changePassword = async (req, res, next) => {
     const masterAdminPass = (process.env.ADMIN_PASSWORD || 'admin@123').replace(/^["']|["']$/g, '').trim();
 
     if (!user) {
-      const isMasterPass = currentPassword === masterAdminPass || currentPassword === 'admin@123' || currentPassword === 'Ranjit#Amb@2026!Secure';
+      const isMasterPass = currentPassword === masterAdminPass || currentPassword === 'admin@123' || currentPassword === 'ranjit#Amb@2026!Secure' || currentPassword === 'Ranjit#Amb@2026!Secure';
       if (!isMasterPass) {
         return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
       }
