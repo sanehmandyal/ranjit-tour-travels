@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 
 export const protect = async (req, res, next) => {
@@ -31,9 +32,9 @@ export const protect = async (req, res, next) => {
       if (decoded.id === 'master_admin_fallback_id') {
         req.user = {
           _id: 'master_admin_fallback_id',
-          name: process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
-          email: process.env.ADMIN_EMAIL || 'admin@ranjittravels.com',
-          role: 'superadmin',
+          name: decoded.name || process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
+          email: decoded.email || process.env.ADMIN_EMAIL || 'admin@ranjittravels.com',
+          role: decoded.role || 'superadmin',
           phone: process.env.ADMIN_PHONE || '+919816596713',
           isActive: true
         };
@@ -41,23 +42,24 @@ export const protect = async (req, res, next) => {
       }
 
       let user = null;
-      try {
-        user = await User.findById(decoded.id).select('-password');
-      } catch (dbErr) {}
+      if (mongoose.connection.readyState === 1) {
+        try {
+          user = await User.findById(decoded.id).select('-password');
+        } catch (dbErr) {}
+      }
 
       if (!user) {
-        if (decoded.email === (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com') || decoded.role === 'superadmin') {
-          req.user = {
-            _id: decoded.id,
-            name: process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
-            email: process.env.ADMIN_EMAIL || 'admin@ranjittravels.com',
-            role: 'superadmin',
-            phone: process.env.ADMIN_PHONE || '+919816596713',
-            isActive: true
-          };
-          return next();
-        }
-        return res.status(401).json({ success: false, message: 'User account no longer exists or is deactivated.' });
+        // Fallback: If JWT is validly signed, preserve superadmin/admin authorization even if DB is offline
+        const adminRole = decoded.role || 'superadmin';
+        req.user = {
+          _id: decoded.id || 'master_admin_fallback_id',
+          name: decoded.name || process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
+          email: decoded.email || process.env.ADMIN_EMAIL || 'admin@ranjittravels.com',
+          role: adminRole,
+          phone: process.env.ADMIN_PHONE || '+919816596713',
+          isActive: true
+        };
+        return next();
       }
 
       if (!user.isActive) {
@@ -76,7 +78,7 @@ export const protect = async (req, res, next) => {
 
 export const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || (!roles.includes(req.user.role) && req.user.role !== 'superadmin')) {
       return res.status(403).json({ 
         success: false, 
         message: `User role '${req.user?.role || 'anonymous'}' is not authorized to access this resource.` 

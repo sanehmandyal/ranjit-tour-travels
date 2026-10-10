@@ -29,9 +29,12 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response?.status === 401 && window.location.pathname.startsWith('/admin') && !window.location.pathname.includes('login')) {
-      localStorage.removeItem('rjt_token');
-      window.location.href = '/admin/login';
+    // Only clear invalid token on explicit auth verification failures
+    if (error.response?.status === 401 && error.config?.url?.includes('/auth/me')) {
+      const token = localStorage.getItem('rjt_token');
+      if (token && !token.startsWith('rjt_session_')) {
+        localStorage.removeItem('rjt_token');
+      }
     }
     return Promise.reject(error);
   }

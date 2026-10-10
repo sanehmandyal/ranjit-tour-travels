@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Gallery from '../models/Gallery.js';
 import { localStore } from '../utils/localStore.js';
 
@@ -13,15 +14,16 @@ export const getGallery = async (req, res, next) => {
 
     let items = [];
     let total = 0;
-    try {
-      total = await Gallery.countDocuments(filter).maxTimeMS(2500);
-      items = await Gallery.find(filter)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] getGallery:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        total = await Gallery.countDocuments(filter);
+        items = await Gallery.find(filter)
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] getGallery:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -30,7 +32,7 @@ export const getGallery = async (req, res, next) => {
       total = items.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -39,7 +41,7 @@ export const getGallery = async (req, res, next) => {
     });
   } catch (err) {
     const local = localStore.getCollection('gallery');
-    res.json({
+    return res.json({
       success: true,
       items: local,
       total: local.length,
@@ -52,46 +54,52 @@ export const getGallery = async (req, res, next) => {
 export const createGalleryItem = async (req, res, next) => {
   try {
     let item = null;
-    try {
-      item = await Gallery.create(req.body);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createGalleryItem:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        item = await Gallery.create(req.body);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createGalleryItem:', dbErr.message);
+      }
     }
-    const saved = localStore.upsertItem('gallery', item ? item.toObject() : req.body);
-    res.status(201).json({ success: true, data: item || saved });
+    const saved = localStore.upsertItem('gallery', item?.toObject ? item.toObject() : req.body);
+    return res.status(201).json({ success: true, data: item || saved });
   } catch (err) {
     const saved = localStore.upsertItem('gallery', req.body);
-    res.status(201).json({ success: true, data: saved });
+    return res.status(201).json({ success: true, data: saved });
   }
 };
 
 export const updateGalleryItem = async (req, res, next) => {
   try {
     let item = null;
-    try {
-      item = await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true }).maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updateGalleryItem:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        item = await Gallery.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updateGalleryItem:', dbErr.message);
+      }
     }
     const saved = localStore.upsertItem('gallery', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: item || saved });
+    return res.json({ success: true, data: item || saved });
   } catch (err) {
     const saved = localStore.upsertItem('gallery', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: saved });
+    return res.json({ success: true, data: saved });
   }
 };
 
 export const deleteGalleryItem = async (req, res, next) => {
   try {
-    try {
-      await Gallery.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deleteGalleryItem:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        await Gallery.findByIdAndDelete(req.params.id);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deleteGalleryItem:', dbErr.message);
+      }
     }
     localStore.deleteItem('gallery', req.params.id);
-    res.json({ success: true, message: 'Gallery item deleted.' });
+    return res.json({ success: true, message: 'Gallery item deleted.' });
   } catch (err) {
     localStore.deleteItem('gallery', req.params.id);
-    res.json({ success: true, message: 'Gallery item deleted.' });
+    return res.json({ success: true, message: 'Gallery item deleted.' });
   }
 };

@@ -20,15 +20,15 @@ const STORE_PATH = path.join(DATA_DIR, 'store.json');
 
 const getInitialData = () => {
   return {
-    destinations: defaultDestinations.map((d, i) => ({ ...d, _id: `dest_${i + 1}`, id: `dest_${i + 1}` })),
+    destinations: (defaultDestinations || []).map((d, i) => ({ ...d, _id: `dest_${i + 1}`, id: `dest_${i + 1}` })),
     packages: (defaultPackages || []).map((p, i) => ({ ...p, _id: `pkg_${i + 1}`, id: `pkg_${i + 1}` })),
-    vehicles: defaultVehicles.map((v, i) => ({ ...v, _id: `veh_${i + 1}`, id: `veh_${i + 1}` })),
-    services: defaultServices.map((s, i) => ({ ...s, _id: `srv_${i + 1}`, id: `srv_${i + 1}` })),
-    blogs: defaultBlogs.map((b, i) => ({ ...b, _id: `blog_${i + 1}`, id: `blog_${i + 1}` })),
-    testimonials: defaultTestimonials.map((t, i) => ({ ...t, _id: `test_${i + 1}`, id: `test_${i + 1}` })),
-    gallery: defaultGallery.map((g, i) => ({ ...g, _id: `gal_${i + 1}`, id: `gal_${i + 1}` })),
-    coupons: defaultCoupons.map((c, i) => ({ ...c, _id: `cpn_${i + 1}`, id: `cpn_${i + 1}` })),
-    settings: { ...defaultWebsiteSettings, _id: 'settings_master', id: 'settings_master' },
+    vehicles: (defaultVehicles || []).map((v, i) => ({ ...v, _id: `veh_${i + 1}`, id: `veh_${i + 1}` })),
+    services: (defaultServices || []).map((s, i) => ({ ...s, _id: `srv_${i + 1}`, id: `srv_${i + 1}` })),
+    blogs: (defaultBlogs || []).map((b, i) => ({ ...b, _id: `blog_${i + 1}`, id: `blog_${i + 1}` })),
+    testimonials: (defaultTestimonials || []).map((t, i) => ({ ...t, _id: `test_${i + 1}`, id: `test_${i + 1}` })),
+    gallery: (defaultGallery || []).map((g, i) => ({ ...g, _id: `gal_${i + 1}`, id: `gal_${i + 1}` })),
+    coupons: (defaultCoupons || []).map((c, i) => ({ ...c, _id: `cpn_${i + 1}`, id: `cpn_${i + 1}` })),
+    settings: { ...(defaultWebsiteSettings || {}), _id: 'settings_master', id: 'settings_master' },
     adminPassword: 'Ranjit@123',
     bookings: [],
     inquiries: []
@@ -41,17 +41,16 @@ const loadStore = () => {
   if (inMemoryStore) return inMemoryStore;
   try {
     if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+      try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
     }
     if (fs.existsSync(STORE_PATH)) {
       const raw = fs.readFileSync(STORE_PATH, 'utf-8');
       inMemoryStore = JSON.parse(raw);
     } else {
       inMemoryStore = getInitialData();
-      fs.writeFileSync(STORE_PATH, JSON.stringify(inMemoryStore, null, 2), 'utf-8');
+      try { fs.writeFileSync(STORE_PATH, JSON.stringify(inMemoryStore, null, 2), 'utf-8'); } catch (e) {}
     }
   } catch (err) {
-    console.warn('[LocalStore Load Warning]:', err.message);
     inMemoryStore = getInitialData();
   }
   return inMemoryStore;
@@ -60,12 +59,10 @@ const loadStore = () => {
 const saveStore = () => {
   try {
     if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+      try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
     }
     fs.writeFileSync(STORE_PATH, JSON.stringify(inMemoryStore || getInitialData(), null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('[LocalStore Save Warning]:', err.message);
-  }
+  } catch (err) {}
 };
 
 const cleanStr = (s) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -89,6 +86,7 @@ export const localStore = {
   },
 
   upsertItem: (collectionName, data) => {
+    if (!data || typeof data !== 'object') return data;
     const store = loadStore();
     if (!store[collectionName]) store[collectionName] = [];
     const items = store[collectionName];

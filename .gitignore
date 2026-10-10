@@ -21,6 +21,8 @@ client/.env
 dist/
 build/
 
-# Uploads
+# Uploads & Data
 server/uploads/*
 !server/uploads/.gitkeep
+server/data/
+

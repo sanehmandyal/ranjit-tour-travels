@@ -13,24 +13,25 @@ export const getServices = async (req, res, next) => {
     let items = [];
     let total = 0;
 
-    try {
-      const filter = { ...publishedOnly };
-      if (q) {
-        filter.$or = [
-          { name: { $regex: q, $options: 'i' } },
-          { shortDescription: { $regex: q, $options: 'i' } },
-          { description: { $regex: q, $options: 'i' } }
-        ];
-      }
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const filter = { ...publishedOnly };
+        if (q) {
+          filter.$or = [
+            { name: { $regex: q, $options: 'i' } },
+            { category: { $regex: q, $options: 'i' } },
+            { description: { $regex: q, $options: 'i' } }
+          ];
+        }
 
-      total = await Service.countDocuments(filter).maxTimeMS(2500);
-      items = await Service.find(filter)
-        .sort({ createdAt: 1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Services from localStore:', dbErr.message);
+        total = await Service.countDocuments(filter);
+        items = await Service.find(filter)
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Services from localStore:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -39,14 +40,14 @@ export const getServices = async (req, res, next) => {
         const qLow = q.toLowerCase();
         storeItems = storeItems.filter(s => 
           (s.name && s.name.toLowerCase().includes(qLow)) ||
-          (s.shortDescription && s.shortDescription.toLowerCase().includes(qLow))
+          (s.category && s.category.toLowerCase().includes(qLow))
         );
       }
       items = storeItems.slice((page - 1) * limit, page * limit);
       total = storeItems.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -55,7 +56,7 @@ export const getServices = async (req, res, next) => {
     });
   } catch (err) {
     const storeItems = localStore.getCollection('services');
-    res.json({
+    return res.json({
       success: true,
       items: storeItems,
       total: storeItems.length,
@@ -69,23 +70,25 @@ export const getServiceBySlug = async (req, res, next) => {
   try {
     const rawSlug = req.params.slug || '';
     const isObjectId = mongoose.Types.ObjectId.isValid(rawSlug) && rawSlug.length === 24;
-    const query = isObjectId
+    const query = isObjectId 
       ? { $or: [{ _id: rawSlug }, { slug: rawSlug }] }
       : { slug: rawSlug };
-
+    
     let service = null;
-    try {
-      service = await Service.findOne(query).maxTimeMS(2500);
-      if (!service && !isObjectId) {
-        service = await Service.findOne({
-          $or: [
-            { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-            { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
-          ]
-        }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        service = await Service.findOne(query);
+        if (!service && !isObjectId) {
+          service = await Service.findOne({
+            $or: [
+              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+            ]
+          });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Service by slug:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Service by slug:', dbErr.message);
     }
 
     if (!service) {
@@ -100,7 +103,7 @@ export const getServiceBySlug = async (req, res, next) => {
     if (!service) {
       return res.status(404).json({ success: false, message: 'Service not found.' });
     }
-    res.json(service);
+    return res.json(service);
   } catch (err) {
     const service = localStore.getItem('services', req.params.slug) || localStore.getCollection('services')[0];
     if (service) return res.json(service);
@@ -108,52 +111,51 @@ export const getServiceBySlug = async (req, res, next) => {
   }
 };
 
-
 export const createService = async (req, res, next) => {
   try {
     const data = { ...req.body };
     delete data._id;
     delete data.id;
-    if (data.published === undefined) data.published = true;
     if (!data.slug && data.name) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
 
-    // Sync all image fields
     const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
     if (photo) {
       data.featuredImage = photo;
-      data.image = photo;
       if (!data.images || data.images.length === 0) {
         data.images = [photo];
       }
     }
 
     let saved = null;
-    try {
-      const matchCriteria = [];
-      if (data.slug) matchCriteria.push({ slug: data.slug });
-      if (data.name) matchCriteria.push({ name: data.name });
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const matchCriteria = [];
+        if (data.slug) matchCriteria.push({ slug: data.slug });
+        if (data.name) matchCriteria.push({ name: data.name });
 
-      let exists = null;
-      if (matchCriteria.length > 0) {
-        exists = await Service.findOne({ $or: matchCriteria }).maxTimeMS(2500);
-      }
+        let exists = null;
+        if (matchCriteria.length > 0) {
+          exists = await Service.findOne({ $or: matchCriteria });
+        }
 
-      if (exists) {
-        saved = await Service.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      } else {
-        saved = await Service.create(data);
+        if (exists) {
+          saved = await Service.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
+        } else {
+          saved = await Service.create(data);
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createService:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createService:', dbErr.message);
     }
 
-    const finalItem = localStore.upsertItem('services', saved ? saved.toObject() : data);
-    res.status(201).json({ success: true, data: saved || finalItem });
+    const finalItem = localStore.upsertItem('services', saved?.toObject ? saved.toObject() : data);
+    return res.status(201).json({ success: true, data: saved?.toObject ? saved.toObject() : finalItem });
   } catch (err) {
+    console.error('[createService Error]:', err);
     const finalItem = localStore.upsertItem('services', req.body);
-    res.status(201).json({ success: true, data: finalItem });
+    return res.status(201).json({ success: true, data: finalItem });
   }
 };
 
@@ -162,16 +164,13 @@ export const updateService = async (req, res, next) => {
     const data = { ...req.body };
     delete data._id;
     delete data.id;
-    if (data.published === undefined) data.published = true;
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
 
-    // Sync all image fields
     const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
     if (photo) {
       data.featuredImage = photo;
-      data.image = photo;
       if (!data.images || data.images.length === 0) {
         data.images = [photo];
       }
@@ -180,56 +179,61 @@ export const updateService = async (req, res, next) => {
     let service = null;
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
 
-    try {
-      if (isObjectId) {
-        service = await Service.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      }
-
-      if (!service) {
-        const matchCriteria = [];
-        if (data.slug) matchCriteria.push({ slug: data.slug });
-        if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
-        if (data.name) matchCriteria.push({ name: data.name });
-
-        if (matchCriteria.length > 0) {
-          service = await Service.findOneAndUpdate(
-            { $or: matchCriteria },
-            { $set: data },
-            { new: true, upsert: true, runValidators: false }
-          ).maxTimeMS(2500);
-        } else {
-          service = await Service.create(data);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          service = await Service.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
         }
+
+        if (!service) {
+          const matchCriteria = [];
+          if (data.slug) matchCriteria.push({ slug: data.slug });
+          if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
+          if (data.name) matchCriteria.push({ name: data.name });
+
+          if (matchCriteria.length > 0) {
+            service = await Service.findOneAndUpdate(
+              { $or: matchCriteria },
+              { $set: data },
+              { new: true, upsert: true, runValidators: false }
+            );
+          } else {
+            service = await Service.create(data);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updateService:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updateService:', dbErr.message);
     }
 
     const payloadWithId = { ...data, _id: req.params.id };
-    const finalItem = localStore.upsertItem('services', service ? service.toObject() : payloadWithId);
-    res.json({ success: true, data: service || finalItem });
+    const finalItem = localStore.upsertItem('services', service?.toObject ? service.toObject() : payloadWithId);
+    return res.json({ success: true, data: service?.toObject ? service.toObject() : finalItem });
   } catch (err) {
+    console.error('[updateService Error]:', err);
     const finalItem = localStore.upsertItem('services', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: finalItem });
+    return res.json({ success: true, data: finalItem });
   }
 };
 
 export const deleteService = async (req, res, next) => {
   try {
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
-    try {
-      if (isObjectId) {
-        await Service.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-      } else {
-        await Service.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          await Service.findByIdAndDelete(req.params.id);
+        } else {
+          await Service.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deleteService:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deleteService:', dbErr.message);
     }
     localStore.deleteItem('services', req.params.id);
-    res.json({ success: true, message: 'Service deleted successfully.' });
+    return res.json({ success: true, message: 'Service deleted successfully.' });
   } catch (err) {
     localStore.deleteItem('services', req.params.id);
-    res.json({ success: true, message: 'Service deleted successfully.' });
+    return res.json({ success: true, message: 'Service deleted successfully.' });
   }
 };

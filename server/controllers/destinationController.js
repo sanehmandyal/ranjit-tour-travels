@@ -15,26 +15,27 @@ export const getDestinations = async (req, res, next) => {
     let items = [];
     let total = 0;
 
-    try {
-      const filter = { ...publishedOnly };
-      if (q) {
-        filter.$or = [
-          { name: { $regex: q, $options: 'i' } },
-          { state: { $regex: q, $options: 'i' } },
-          { description: { $regex: q, $options: 'i' } }
-        ];
-      }
-      if (state) filter.state = state;
-      if (category) filter.category = category;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const filter = { ...publishedOnly };
+        if (q) {
+          filter.$or = [
+            { name: { $regex: q, $options: 'i' } },
+            { state: { $regex: q, $options: 'i' } },
+            { description: { $regex: q, $options: 'i' } }
+          ];
+        }
+        if (state) filter.state = state;
+        if (category) filter.category = category;
 
-      total = await Destination.countDocuments(filter).maxTimeMS(2500);
-      items = await Destination.find(filter)
-        .sort({ isPopular: -1, createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Destinations from localStore:', dbErr.message);
+        total = await Destination.countDocuments(filter);
+        items = await Destination.find(filter)
+          .sort({ isPopular: -1, createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Destinations from localStore:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -57,7 +58,7 @@ export const getDestinations = async (req, res, next) => {
       total = storeItems.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -66,7 +67,7 @@ export const getDestinations = async (req, res, next) => {
     });
   } catch (err) {
     const storeItems = localStore.getCollection('destinations');
-    res.json({
+    return res.json({
       success: true,
       items: storeItems,
       total: storeItems.length,
@@ -85,18 +86,20 @@ export const getDestinationBySlug = async (req, res, next) => {
       : { slug: rawSlug };
 
     let destination = null;
-    try {
-      destination = await Destination.findOne(query).maxTimeMS(2500);
-      if (!destination && !isObjectId) {
-        destination = await Destination.findOne({
-          $or: [
-            { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-            { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
-          ]
-        }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        destination = await Destination.findOne(query);
+        if (!destination && !isObjectId) {
+          destination = await Destination.findOne({
+            $or: [
+              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+            ]
+          });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Destination by slug:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Destination by slug:', dbErr.message);
     }
 
     if (!destination) {
@@ -111,14 +114,13 @@ export const getDestinationBySlug = async (req, res, next) => {
     if (!destination) {
       return res.status(404).json({ success: false, message: 'Destination not found.' });
     }
-    res.json(destination);
+    return res.json(destination);
   } catch (err) {
     const destination = localStore.getItem('destinations', req.params.slug) || localStore.getCollection('destinations')[0];
     if (destination) return res.json(destination);
     next(err);
   }
 };
-
 
 export const createDestination = async (req, res, next) => {
   try {
@@ -138,30 +140,33 @@ export const createDestination = async (req, res, next) => {
     }
 
     let saved = null;
-    try {
-      const matchCriteria = [];
-      if (data.slug) matchCriteria.push({ slug: data.slug });
-      if (data.name) matchCriteria.push({ name: data.name });
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const matchCriteria = [];
+        if (data.slug) matchCriteria.push({ slug: data.slug });
+        if (data.name) matchCriteria.push({ name: data.name });
 
-      let exists = null;
-      if (matchCriteria.length > 0) {
-        exists = await Destination.findOne({ $or: matchCriteria }).maxTimeMS(2500);
-      }
+        let exists = null;
+        if (matchCriteria.length > 0) {
+          exists = await Destination.findOne({ $or: matchCriteria });
+        }
 
-      if (exists) {
-        saved = await Destination.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      } else {
-        saved = await Destination.create(data);
+        if (exists) {
+          saved = await Destination.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
+        } else {
+          saved = await Destination.create(data);
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createDestination:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createDestination:', dbErr.message);
     }
 
-    const finalItem = localStore.upsertItem('destinations', saved ? saved.toObject() : data);
-    res.status(201).json({ success: true, data: saved || finalItem });
+    const finalItem = localStore.upsertItem('destinations', saved?.toObject ? saved.toObject() : data);
+    return res.status(201).json({ success: true, data: saved?.toObject ? saved.toObject() : finalItem });
   } catch (err) {
+    console.error('[createDestination Error]:', err);
     const finalItem = localStore.upsertItem('destinations', req.body);
-    res.status(201).json({ success: true, data: finalItem });
+    return res.status(201).json({ success: true, data: finalItem });
   }
 };
 
@@ -185,56 +190,61 @@ export const updateDestination = async (req, res, next) => {
     let destination = null;
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
 
-    try {
-      if (isObjectId) {
-        destination = await Destination.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      }
-
-      if (!destination) {
-        const matchCriteria = [];
-        if (data.slug) matchCriteria.push({ slug: data.slug });
-        if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
-        if (data.name) matchCriteria.push({ name: data.name });
-
-        if (matchCriteria.length > 0) {
-          destination = await Destination.findOneAndUpdate(
-            { $or: matchCriteria },
-            { $set: data },
-            { new: true, upsert: true, runValidators: false }
-          ).maxTimeMS(2500);
-        } else {
-          destination = await Destination.create(data);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          destination = await Destination.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
         }
+
+        if (!destination) {
+          const matchCriteria = [];
+          if (data.slug) matchCriteria.push({ slug: data.slug });
+          if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
+          if (data.name) matchCriteria.push({ name: data.name });
+
+          if (matchCriteria.length > 0) {
+            destination = await Destination.findOneAndUpdate(
+              { $or: matchCriteria },
+              { $set: data },
+              { new: true, upsert: true, runValidators: false }
+            );
+          } else {
+            destination = await Destination.create(data);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updateDestination:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updateDestination:', dbErr.message);
     }
 
     const payloadWithId = { ...data, _id: req.params.id };
-    const finalItem = localStore.upsertItem('destinations', destination ? destination.toObject() : payloadWithId);
-    res.json({ success: true, data: destination || finalItem });
+    const finalItem = localStore.upsertItem('destinations', destination?.toObject ? destination.toObject() : payloadWithId);
+    return res.json({ success: true, data: destination?.toObject ? destination.toObject() : finalItem });
   } catch (err) {
+    console.error('[updateDestination Error]:', err);
     const finalItem = localStore.upsertItem('destinations', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: finalItem });
+    return res.json({ success: true, data: finalItem });
   }
 };
 
 export const deleteDestination = async (req, res, next) => {
   try {
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
-    try {
-      if (isObjectId) {
-        await Destination.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-      } else {
-        await Destination.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          await Destination.findByIdAndDelete(req.params.id);
+        } else {
+          await Destination.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deleteDestination:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deleteDestination:', dbErr.message);
     }
     localStore.deleteItem('destinations', req.params.id);
-    res.json({ success: true, message: 'Destination deleted successfully.' });
+    return res.json({ success: true, message: 'Destination deleted successfully.' });
   } catch (err) {
     localStore.deleteItem('destinations', req.params.id);
-    res.json({ success: true, message: 'Destination deleted successfully.' });
+    return res.json({ success: true, message: 'Destination deleted successfully.' });
   }
 };

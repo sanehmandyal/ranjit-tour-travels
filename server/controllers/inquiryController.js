@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Inquiry from '../models/Inquiry.js';
 import { localStore } from '../utils/localStore.js';
 
@@ -21,15 +22,16 @@ export const getInquiries = async (req, res, next) => {
 
     let items = [];
     let total = 0;
-    try {
-      total = await Inquiry.countDocuments(filter).maxTimeMS(2500);
-      items = await Inquiry.find(filter)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] getInquiries:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        total = await Inquiry.countDocuments(filter);
+        items = await Inquiry.find(filter)
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] getInquiries:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -38,7 +40,7 @@ export const getInquiries = async (req, res, next) => {
       total = local.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -47,7 +49,7 @@ export const getInquiries = async (req, res, next) => {
     });
   } catch (err) {
     const local = localStore.getCollection('inquiries');
-    res.json({
+    return res.json({
       success: true,
       items: local,
       total: local.length,
@@ -65,24 +67,26 @@ export const createInquiry = async (req, res, next) => {
     }
 
     let inquiry = null;
-    try {
-      inquiry = await Inquiry.create({
-        name,
-        phone,
-        email,
-        type: type || 'contact',
-        subject,
-        destination,
-        travelers: Number(travelers) || 2,
-        travelDate,
-        budget,
-        message
-      });
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createInquiry:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        inquiry = await Inquiry.create({
+          name,
+          phone,
+          email,
+          type: type || 'contact',
+          subject,
+          destination,
+          travelers: Number(travelers) || 2,
+          travelDate,
+          budget,
+          message
+        });
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createInquiry:', dbErr.message);
+      }
     }
 
-    const saved = localStore.upsertItem('inquiries', inquiry ? inquiry.toObject() : {
+    const saved = localStore.upsertItem('inquiries', inquiry?.toObject ? inquiry.toObject() : {
       name,
       phone,
       email,
@@ -96,7 +100,7 @@ export const createInquiry = async (req, res, next) => {
       createdAt: new Date().toISOString()
     });
 
-    res.status(201).json({ 
+    return res.status(201).json({ 
       success: true, 
       message: 'Inquiry received. Our travel expert will call you shortly.', 
       data: inquiry || saved 
@@ -109,30 +113,34 @@ export const createInquiry = async (req, res, next) => {
 export const updateInquiry = async (req, res, next) => {
   try {
     let inquiry = null;
-    try {
-      inquiry = await Inquiry.findByIdAndUpdate(req.params.id, req.body, { new: true }).maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updateInquiry:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        inquiry = await Inquiry.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updateInquiry:', dbErr.message);
+      }
     }
     const saved = localStore.upsertItem('inquiries', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: inquiry || saved });
+    return res.json({ success: true, data: inquiry || saved });
   } catch (err) {
     const saved = localStore.upsertItem('inquiries', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: saved });
+    return res.json({ success: true, data: saved });
   }
 };
 
 export const deleteInquiry = async (req, res, next) => {
   try {
-    try {
-      await Inquiry.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deleteInquiry:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        await Inquiry.findByIdAndDelete(req.params.id);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deleteInquiry:', dbErr.message);
+      }
     }
     localStore.deleteItem('inquiries', req.params.id);
-    res.json({ success: true, message: 'Inquiry deleted successfully.' });
+    return res.json({ success: true, message: 'Inquiry deleted successfully.' });
   } catch (err) {
     localStore.deleteItem('inquiries', req.params.id);
-    res.json({ success: true, message: 'Inquiry deleted successfully.' });
+    return res.json({ success: true, message: 'Inquiry deleted successfully.' });
   }
 };

@@ -16,28 +16,29 @@ export const getPackages = async (req, res, next) => {
     let items = [];
     let total = 0;
 
-    try {
-      const filter = { ...publishedOnly };
-      if (q) {
-        filter.$or = [
-          { name: { $regex: q, $options: 'i' } },
-          { overview: { $regex: q, $options: 'i' } },
-          { category: { $regex: q, $options: 'i' } }
-        ];
-      }
-      if (destination) filter.destination = destination;
-      if (category) filter.category = category;
-      if (duration) filter.duration = duration;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const filter = { ...publishedOnly };
+        if (q) {
+          filter.$or = [
+            { name: { $regex: q, $options: 'i' } },
+            { overview: { $regex: q, $options: 'i' } },
+            { category: { $regex: q, $options: 'i' } }
+          ];
+        }
+        if (destination) filter.destination = destination;
+        if (category) filter.category = category;
+        if (duration) filter.duration = duration;
 
-      total = await TourPackage.countDocuments(filter).maxTimeMS(2500);
-      items = await TourPackage.find(filter)
-        .populate('destination', 'name state')
-        .sort({ isFeatured: -1, rating: -1, createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Packages from localStore:', dbErr.message);
+        total = await TourPackage.countDocuments(filter);
+        items = await TourPackage.find(filter)
+          .populate('destination', 'name state')
+          .sort({ isFeatured: -1, rating: -1, createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Packages from localStore:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -57,7 +58,7 @@ export const getPackages = async (req, res, next) => {
       total = storeItems.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -66,7 +67,7 @@ export const getPackages = async (req, res, next) => {
     });
   } catch (err) {
     const storeItems = localStore.getCollection('packages');
-    res.json({
+    return res.json({
       success: true,
       items: storeItems,
       total: storeItems.length,
@@ -85,18 +86,20 @@ export const getPackageBySlug = async (req, res, next) => {
       : { slug: rawSlug };
 
     let pkg = null;
-    try {
-      pkg = await TourPackage.findOne(query).populate('destination').maxTimeMS(2500);
-      if (!pkg && !isObjectId) {
-        pkg = await TourPackage.findOne({
-          $or: [
-            { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-            { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
-          ]
-        }).populate('destination').maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        pkg = await TourPackage.findOne(query).populate('destination');
+        if (!pkg && !isObjectId) {
+          pkg = await TourPackage.findOne({
+            $or: [
+              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+            ]
+          }).populate('destination');
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Package by slug:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Package by slug:', dbErr.message);
     }
 
     if (!pkg) {
@@ -111,14 +114,13 @@ export const getPackageBySlug = async (req, res, next) => {
     if (!pkg) {
       return res.status(404).json({ success: false, message: 'Package not found.' });
     }
-    res.json(pkg);
+    return res.json(pkg);
   } catch (err) {
     const pkg = localStore.getItem('packages', req.params.slug) || localStore.getCollection('packages')[0];
     if (pkg) return res.json(pkg);
     next(err);
   }
 };
-
 
 export const createPackage = async (req, res, next) => {
   try {
@@ -138,30 +140,33 @@ export const createPackage = async (req, res, next) => {
     }
 
     let saved = null;
-    try {
-      const matchCriteria = [];
-      if (data.slug) matchCriteria.push({ slug: data.slug });
-      if (data.name) matchCriteria.push({ name: data.name });
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const matchCriteria = [];
+        if (data.slug) matchCriteria.push({ slug: data.slug });
+        if (data.name) matchCriteria.push({ name: data.name });
 
-      let exists = null;
-      if (matchCriteria.length > 0) {
-        exists = await TourPackage.findOne({ $or: matchCriteria }).maxTimeMS(2500);
-      }
+        let exists = null;
+        if (matchCriteria.length > 0) {
+          exists = await TourPackage.findOne({ $or: matchCriteria });
+        }
 
-      if (exists) {
-        saved = await TourPackage.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      } else {
-        saved = await TourPackage.create(data);
+        if (exists) {
+          saved = await TourPackage.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
+        } else {
+          saved = await TourPackage.create(data);
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createPackage:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createPackage:', dbErr.message);
     }
 
-    const finalItem = localStore.upsertItem('packages', saved ? saved.toObject() : data);
-    res.status(201).json({ success: true, data: saved || finalItem });
+    const finalItem = localStore.upsertItem('packages', saved?.toObject ? saved.toObject() : data);
+    return res.status(201).json({ success: true, data: saved?.toObject ? saved.toObject() : finalItem });
   } catch (err) {
+    console.error('[createPackage Error]:', err);
     const finalItem = localStore.upsertItem('packages', req.body);
-    res.status(201).json({ success: true, data: finalItem });
+    return res.status(201).json({ success: true, data: finalItem });
   }
 };
 
@@ -185,56 +190,61 @@ export const updatePackage = async (req, res, next) => {
     let pkg = null;
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
 
-    try {
-      if (isObjectId) {
-        pkg = await TourPackage.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      }
-
-      if (!pkg) {
-        const matchCriteria = [];
-        if (data.slug) matchCriteria.push({ slug: data.slug });
-        if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
-        if (data.name) matchCriteria.push({ name: data.name });
-
-        if (matchCriteria.length > 0) {
-          pkg = await TourPackage.findOneAndUpdate(
-            { $or: matchCriteria },
-            { $set: data },
-            { new: true, upsert: true, runValidators: false }
-          ).maxTimeMS(2500);
-        } else {
-          pkg = await TourPackage.create(data);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          pkg = await TourPackage.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
         }
+
+        if (!pkg) {
+          const matchCriteria = [];
+          if (data.slug) matchCriteria.push({ slug: data.slug });
+          if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
+          if (data.name) matchCriteria.push({ name: data.name });
+
+          if (matchCriteria.length > 0) {
+            pkg = await TourPackage.findOneAndUpdate(
+              { $or: matchCriteria },
+              { $set: data },
+              { new: true, upsert: true, runValidators: false }
+            );
+          } else {
+            pkg = await TourPackage.create(data);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updatePackage:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updatePackage:', dbErr.message);
     }
 
     const payloadWithId = { ...data, _id: req.params.id };
-    const finalItem = localStore.upsertItem('packages', pkg ? pkg.toObject() : payloadWithId);
-    res.json({ success: true, data: pkg || finalItem });
+    const finalItem = localStore.upsertItem('packages', pkg?.toObject ? pkg.toObject() : payloadWithId);
+    return res.json({ success: true, data: pkg?.toObject ? pkg.toObject() : finalItem });
   } catch (err) {
+    console.error('[updatePackage Error]:', err);
     const finalItem = localStore.upsertItem('packages', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: finalItem });
+    return res.json({ success: true, data: finalItem });
   }
 };
 
 export const deletePackage = async (req, res, next) => {
   try {
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
-    try {
-      if (isObjectId) {
-        await TourPackage.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-      } else {
-        await TourPackage.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          await TourPackage.findByIdAndDelete(req.params.id);
+        } else {
+          await TourPackage.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deletePackage:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deletePackage:', dbErr.message);
     }
     localStore.deleteItem('packages', req.params.id);
-    res.json({ success: true, message: 'Tour package deleted successfully.' });
+    return res.json({ success: true, message: 'Tour package deleted successfully.' });
   } catch (err) {
     localStore.deleteItem('packages', req.params.id);
-    res.json({ success: true, message: 'Tour package deleted successfully.' });
+    return res.json({ success: true, message: 'Tour package deleted successfully.' });
   }
 };

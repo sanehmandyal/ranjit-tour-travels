@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Testimonial from '../models/Testimonial.js';
 import { localStore } from '../utils/localStore.js';
 
@@ -9,15 +10,16 @@ export const getTestimonials = async (req, res, next) => {
 
     let items = [];
     let total = 0;
-    try {
-      total = await Testimonial.countDocuments(publishedOnly).maxTimeMS(2500);
-      items = await Testimonial.find(publishedOnly)
-        .sort({ rating: -1, createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] getTestimonials:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        total = await Testimonial.countDocuments(publishedOnly);
+        items = await Testimonial.find(publishedOnly)
+          .sort({ rating: -1, createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] getTestimonials:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -26,7 +28,7 @@ export const getTestimonials = async (req, res, next) => {
       total = items.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -35,7 +37,7 @@ export const getTestimonials = async (req, res, next) => {
     });
   } catch (err) {
     const local = localStore.getCollection('testimonials');
-    res.json({
+    return res.json({
       success: true,
       items: local,
       total: local.length,
@@ -48,46 +50,52 @@ export const getTestimonials = async (req, res, next) => {
 export const createTestimonial = async (req, res, next) => {
   try {
     let testimonial = null;
-    try {
-      testimonial = await Testimonial.create(req.body);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createTestimonial:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        testimonial = await Testimonial.create(req.body);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createTestimonial:', dbErr.message);
+      }
     }
-    const saved = localStore.upsertItem('testimonials', testimonial ? testimonial.toObject() : req.body);
-    res.status(201).json({ success: true, data: testimonial || saved });
+    const saved = localStore.upsertItem('testimonials', testimonial?.toObject ? testimonial.toObject() : req.body);
+    return res.status(201).json({ success: true, data: testimonial || saved });
   } catch (err) {
     const saved = localStore.upsertItem('testimonials', req.body);
-    res.status(201).json({ success: true, data: saved });
+    return res.status(201).json({ success: true, data: saved });
   }
 };
 
 export const updateTestimonial = async (req, res, next) => {
   try {
     let testimonial = null;
-    try {
-      testimonial = await Testimonial.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }).maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updateTestimonial:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        testimonial = await Testimonial.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: false });
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updateTestimonial:', dbErr.message);
+      }
     }
     const saved = localStore.upsertItem('testimonials', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: testimonial || saved });
+    return res.json({ success: true, data: testimonial || saved });
   } catch (err) {
     const saved = localStore.upsertItem('testimonials', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: saved });
+    return res.json({ success: true, data: saved });
   }
 };
 
 export const deleteTestimonial = async (req, res, next) => {
   try {
-    try {
-      await Testimonial.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deleteTestimonial:', dbErr.message);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        await Testimonial.findByIdAndDelete(req.params.id);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deleteTestimonial:', dbErr.message);
+      }
     }
     localStore.deleteItem('testimonials', req.params.id);
-    res.json({ success: true, message: 'Testimonial deleted successfully.' });
+    return res.json({ success: true, message: 'Testimonial deleted successfully.' });
   } catch (err) {
     localStore.deleteItem('testimonials', req.params.id);
-    res.json({ success: true, message: 'Testimonial deleted successfully.' });
+    return res.json({ success: true, message: 'Testimonial deleted successfully.' });
   }
 };

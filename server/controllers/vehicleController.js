@@ -14,25 +14,26 @@ export const getVehicles = async (req, res, next) => {
     let items = [];
     let total = 0;
 
-    try {
-      const filter = { ...publishedOnly };
-      if (q) {
-        filter.$or = [
-          { name: { $regex: q, $options: 'i' } },
-          { category: { $regex: q, $options: 'i' } },
-          { description: { $regex: q, $options: 'i' } }
-        ];
-      }
-      if (category) filter.category = category;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const filter = { ...publishedOnly };
+        if (q) {
+          filter.$or = [
+            { name: { $regex: q, $options: 'i' } },
+            { category: { $regex: q, $options: 'i' } },
+            { description: { $regex: q, $options: 'i' } }
+          ];
+        }
+        if (category) filter.category = category;
 
-      total = await Vehicle.countDocuments(filter).maxTimeMS(2500);
-      items = await Vehicle.find(filter)
-        .sort({ seats: 1, createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit)
-        .maxTimeMS(2500);
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Vehicles serving from localStore:', dbErr.message);
+        total = await Vehicle.countDocuments(filter);
+        items = await Vehicle.find(filter)
+          .sort({ seats: 1, createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(limit);
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Vehicles serving from localStore:', dbErr.message);
+      }
     }
 
     if (!items || items.length === 0) {
@@ -51,7 +52,7 @@ export const getVehicles = async (req, res, next) => {
       total = storeItems.length;
     }
 
-    res.json({
+    return res.json({
       success: true,
       items,
       total,
@@ -60,7 +61,7 @@ export const getVehicles = async (req, res, next) => {
     });
   } catch (err) {
     const storeItems = localStore.getCollection('vehicles');
-    res.json({
+    return res.json({
       success: true,
       items: storeItems,
       total: storeItems.length,
@@ -79,18 +80,20 @@ export const getVehicleBySlug = async (req, res, next) => {
       : { slug: rawSlug };
     
     let vehicle = null;
-    try {
-      vehicle = await Vehicle.findOne(query).maxTimeMS(2500);
-      if (!vehicle && !isObjectId) {
-        vehicle = await Vehicle.findOne({
-          $or: [
-            { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-            { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
-          ]
-        }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        vehicle = await Vehicle.findOne(query);
+        if (!vehicle && !isObjectId) {
+          vehicle = await Vehicle.findOne({
+            $or: [
+              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
+              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+            ]
+          });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] Vehicle by slug:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] Vehicle by slug:', dbErr.message);
     }
 
     if (!vehicle) {
@@ -105,7 +108,7 @@ export const getVehicleBySlug = async (req, res, next) => {
     if (!vehicle) {
       return res.status(404).json({ success: false, message: 'Vehicle not found.' });
     }
-    res.json(vehicle);
+    return res.json(vehicle);
   } catch (err) {
     const vehicle = localStore.getItem('vehicles', req.params.slug) || localStore.getCollection('vehicles')[0];
     if (vehicle) return res.json(vehicle);
@@ -113,52 +116,51 @@ export const getVehicleBySlug = async (req, res, next) => {
   }
 };
 
-
 export const createVehicle = async (req, res, next) => {
   try {
     const data = { ...req.body };
     delete data._id;
     delete data.id;
-    if (data.published === undefined) data.published = true;
-    if (data.available === undefined) data.available = true;
     if (!data.slug && data.name) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
 
-    // Sync all image fields
     const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
     if (photo) {
       data.featuredImage = photo;
-      data.image = photo;
       if (!data.images || data.images.length === 0) {
         data.images = [photo];
       }
     }
 
-    const matchCriteria = [];
-    if (data.slug) matchCriteria.push({ slug: data.slug });
-    if (data.name) matchCriteria.push({ name: data.name });
-
-    let exists = null;
-    if (matchCriteria.length > 0) {
-      exists = await Vehicle.findOne({ $or: matchCriteria });
-    }
-
     let saved = null;
-    try {
-      if (exists) {
-        saved = await Vehicle.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      } else {
-        saved = await Vehicle.create(data);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        const matchCriteria = [];
+        if (data.slug) matchCriteria.push({ slug: data.slug });
+        if (data.name) matchCriteria.push({ name: data.name });
+
+        let exists = null;
+        if (matchCriteria.length > 0) {
+          exists = await Vehicle.findOne({ $or: matchCriteria });
+        }
+
+        if (exists) {
+          saved = await Vehicle.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
+        } else {
+          saved = await Vehicle.create(data);
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] createVehicle:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] createVehicle to localStore:', dbErr.message);
     }
-    const finalItem = localStore.upsertItem('vehicles', saved ? saved.toObject() : data);
-    res.status(201).json({ success: true, data: saved || finalItem });
+
+    const finalItem = localStore.upsertItem('vehicles', saved?.toObject ? saved.toObject() : data);
+    return res.status(201).json({ success: true, data: saved?.toObject ? saved.toObject() : finalItem });
   } catch (err) {
+    console.error('[createVehicle Error]:', err);
     const finalItem = localStore.upsertItem('vehicles', req.body);
-    res.status(201).json({ success: true, data: finalItem });
+    return res.status(201).json({ success: true, data: finalItem });
   }
 };
 
@@ -167,17 +169,13 @@ export const updateVehicle = async (req, res, next) => {
     const data = { ...req.body };
     delete data._id;
     delete data.id;
-    if (data.published === undefined) data.published = true;
-    if (data.available === undefined) data.available = true;
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
 
-    // Sync all image fields
     const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
     if (photo) {
       data.featuredImage = photo;
-      data.image = photo;
       if (!data.images || data.images.length === 0) {
         data.images = [photo];
       }
@@ -186,56 +184,61 @@ export const updateVehicle = async (req, res, next) => {
     let vehicle = null;
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
 
-    try {
-      if (isObjectId) {
-        vehicle = await Vehicle.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false }).maxTimeMS(2500);
-      }
-
-      if (!vehicle) {
-        const matchCriteria = [];
-        if (data.slug) matchCriteria.push({ slug: data.slug });
-        if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
-        if (data.name) matchCriteria.push({ name: data.name });
-
-        if (matchCriteria.length > 0) {
-          vehicle = await Vehicle.findOneAndUpdate(
-            { $or: matchCriteria },
-            { $set: data },
-            { new: true, upsert: true, runValidators: false }
-          ).maxTimeMS(2500);
-        } else {
-          vehicle = await Vehicle.create(data);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          vehicle = await Vehicle.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
         }
+
+        if (!vehicle) {
+          const matchCriteria = [];
+          if (data.slug) matchCriteria.push({ slug: data.slug });
+          if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
+          if (data.name) matchCriteria.push({ name: data.name });
+
+          if (matchCriteria.length > 0) {
+            vehicle = await Vehicle.findOneAndUpdate(
+              { $or: matchCriteria },
+              { $set: data },
+              { new: true, upsert: true, runValidators: false }
+            );
+          } else {
+            vehicle = await Vehicle.create(data);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] updateVehicle:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] updateVehicle to localStore:', dbErr.message);
     }
 
     const payloadWithId = { ...data, _id: req.params.id };
-    const finalItem = localStore.upsertItem('vehicles', vehicle ? vehicle.toObject() : payloadWithId);
-    res.json({ success: true, data: vehicle || finalItem });
+    const finalItem = localStore.upsertItem('vehicles', vehicle?.toObject ? vehicle.toObject() : payloadWithId);
+    return res.json({ success: true, data: vehicle?.toObject ? vehicle.toObject() : finalItem });
   } catch (err) {
+    console.error('[updateVehicle Error]:', err);
     const finalItem = localStore.upsertItem('vehicles', { ...req.body, _id: req.params.id });
-    res.json({ success: true, data: finalItem });
+    return res.json({ success: true, data: finalItem });
   }
 };
 
 export const deleteVehicle = async (req, res, next) => {
   try {
     const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
-    try {
-      if (isObjectId) {
-        await Vehicle.findByIdAndDelete(req.params.id).maxTimeMS(2500);
-      } else {
-        await Vehicle.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] }).maxTimeMS(2500);
+    if (mongoose.connection.readyState === 1) {
+      try {
+        if (isObjectId) {
+          await Vehicle.findByIdAndDelete(req.params.id);
+        } else {
+          await Vehicle.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] });
+        }
+      } catch (dbErr) {
+        console.warn('[DB Fallback] deleteVehicle:', dbErr.message);
       }
-    } catch (dbErr) {
-      console.warn('[DB Fallback] deleteVehicle:', dbErr.message);
     }
     localStore.deleteItem('vehicles', req.params.id);
-    res.json({ success: true, message: 'Vehicle deleted successfully.' });
+    return res.json({ success: true, message: 'Vehicle deleted successfully.' });
   } catch (err) {
     localStore.deleteItem('vehicles', req.params.id);
-    res.json({ success: true, message: 'Vehicle deleted successfully.' });
+    return res.json({ success: true, message: 'Vehicle deleted successfully.' });
   }
 };
