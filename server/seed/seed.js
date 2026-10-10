@@ -1254,58 +1254,8 @@ Our private airport taxi picks you up directly from your home or hotel in Chandi
     });
     console.log('[Seed] Seeded Website Settings.');
 
-    // 11. Initial Sample Bookings for Dashboard demonstration
-    await Booking.create([
-      {
-        bookingId: 'RJT-2026-0001',
-        name: 'Arjun Kapoor',
-        phone: '+91 98111 22334',
-        email: 'arjun.kapoor@example.com',
-        destination: 'Manali & Solang Valley',
-        package: 'Royal Himachal 7 Days Grand Tour (Shimla, Kullu, Manali)',
-        vehicle: 'Toyota Innova Crysta (Luxury 7-Seater)',
-        travelDate: '2026-10-15',
-        returnDate: '2026-10-21',
-        travelers: 4,
-        pickup: 'Chandigarh Airport (IXC)',
-        drop: 'Chandigarh Airport (IXC)',
-        tripType: 'Tour Package',
-        budget: '₹80,000',
-        status: 'Confirmed',
-        specialRequirements: 'Need baby seat and non-smoking driver.',
-        message: 'Family vacation with parents and kids.'
-      },
-      {
-        bookingId: 'RJT-2026-0002',
-        name: 'Sunita Sharma',
-        phone: '+91 98222 33445',
-        email: 'sunita.sharma@example.com',
-        destination: 'Spiti Valley & Chandra Taal',
-        package: 'Spiti Valley 8 Days Complete Expedition',
-        vehicle: 'Toyota Fortuner 4x4 (Royal SUV)',
-        travelDate: '2026-10-25',
-        returnDate: '2026-11-02',
-        travelers: 2,
-        pickup: 'Chandigarh Sector 35',
-        drop: 'Chandigarh Sector 35',
-        tripType: 'Tour Package',
-        status: 'In Progress',
-        message: 'Photographer couple, need extra time for sunset shoots at Chandra Taal.'
-      }
-    ]);
 
-    await Inquiry.create([
-      {
-        name: 'Rohit Verma',
-        phone: '+91 98333 44556',
-        email: 'rohit.v@example.com',
-        type: 'contact',
-        subject: 'Corporate Offsite in Kasauli for 30 Executives',
-        message: 'Looking for 2 Force Urbanias and resort booking assistance in Kasauli for next weekend.',
-        status: 'New'
-      }
-    ]);
-    console.log('[Seed] Seeded initial Bookings & Inquiries.');
+    console.log('[Seed] Bookings & Inquiries left completely clean and blank for real customer submissions.');
 
     console.log('\n=============================================');
     console.log(' SEEDING COMPLETED SUCCESSFULLY!');

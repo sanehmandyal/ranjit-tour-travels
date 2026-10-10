@@ -31,16 +31,9 @@ const DEFAULT_BLOGS = [
   { _id: 'blg-2', title: 'Chandigarh to Delhi Airport (IGI T3) Taxi: Why Private Chauffeur Beats Trains and Flights', category: 'Travel Advice', excerpt: 'Why doorstep luxury cab transfers save hours for international departures.', published: true }
 ];
 
-const DEFAULT_BOOKINGS = [
-  { _id: 'bk-1', bookingId: 'RJT-2026-0001', name: 'Rajesh Sharma', phone: '+91 98111 22334', email: 'rajesh.sharma@example.com', destination: 'Manali & Solang Valley', package: 'Royal Himachal 7 Days Grand Tour', vehicle: 'Toyota Innova Crysta (Luxury 7-Seater)', status: 'Confirmed', message: 'Family vacation arriving at Chandigarh.' },
-  { _id: 'bk-2', bookingId: 'RJT-2026-0002', name: 'Dr. Sunita Malhotra', phone: '+91 98222 33445', email: 'sunita.m@example.com', destination: 'Mata Chintpurni & 9 Devi Circuit', package: 'Himachal 9 Devi Darshan Yatra', vehicle: 'Force Tempo Traveller (12-Seater Luxury)', status: 'Confirmed', message: 'Vande Bharat pickup from Amb Andaura Station.' },
-  { _id: 'bk-3', bookingId: 'RJT-2026-0003', name: 'Gurpreet Singh Sandhu', phone: '+91 98333 44556', email: 'gurpreet.sandhu@example.com', destination: 'Spiti Valley & Chandra Taal', package: 'Spiti Valley 8 Days Expedition', vehicle: 'Mahindra Scorpio 4x4', status: 'In Progress', message: 'Photographer group with 4 travelers.' }
-];
+const DEFAULT_BOOKINGS = [];
 
-const DEFAULT_INQUIRIES = [
-  { _id: 'inq-1', name: 'Rohit Verma', phone: '+91 98165 96713', email: 'rohit.v@example.com', type: 'contact', subject: 'Corporate Offsite in Kasauli for 30 Executives', message: 'Looking for 2 Force Urbanias and resort booking assistance.', status: 'New' },
-  { _id: 'inq-2', name: 'Vikas & Neha Gupta', phone: '+91 98765 43210', email: 'vikas.gupta@example.com', type: 'booking_quote', subject: 'Amb Andaura Station Pickup to Mata Chintpurni', message: 'Need sedan cab for 2 adults arriving on Vande Bharat morning train.', status: 'New' }
-];
+const DEFAULT_INQUIRIES = [];
 
 // Fields Schema for CRUD Editors
 const RESOURCE_FIELDS = {
@@ -807,7 +800,13 @@ function ResourceList({ resource }) {
       ) : !data || data.items.length === 0 ? (
         <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 rounded-3xl p-12 text-center text-white">
           <Sparkles className="w-8 h-8 text-teal-300 mx-auto mb-2 opacity-60" />
-          <p className="text-slate-300 text-sm">No records found matching your filter in {resource}.</p>
+          <p className="text-slate-300 text-sm">
+            {resource === 'bookings'
+              ? 'No bookings received yet. Real incoming customer bookings will appear here.'
+              : resource === 'inquiries'
+              ? 'No inquiries received yet. Real incoming guest queries will appear here.'
+              : `No records found matching your filter in ${resource}.`}
+          </p>
         </div>
       ) : (
         <div className="bg-white/[0.06] backdrop-blur-2xl border border-white/15 rounded-3xl overflow-hidden shadow-2xl relative">
@@ -1058,17 +1057,25 @@ function AdminDashboard() {
           </div>
 
           <div className="space-y-3">
-            {(stats.recentBookings || []).map(b => (
-              <div key={b._id} className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-between text-xs transition backdrop-blur-md">
-                <div>
-                  <span className="font-mono font-bold text-teal-300">{b.bookingId}</span>
-                  <span className="block text-white font-bold mt-0.5">{b.name} ({b.destination})</span>
-                </div>
-                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-200 border border-teal-400/30">
-                  {b.status}
-                </span>
+            {(!stats.recentBookings || stats.recentBookings.length === 0) ? (
+              <div className="p-8 text-center bg-white/5 border border-white/10 rounded-2xl">
+                <Calendar className="w-6 h-6 text-teal-300/50 mx-auto mb-2" />
+                <p className="text-slate-300 text-xs font-semibold">No booking requests yet</p>
+                <p className="text-slate-400 text-[11px] mt-0.5">Real customer bookings submitted via website will appear here.</p>
               </div>
-            ))}
+            ) : (
+              stats.recentBookings.map(b => (
+                <div key={b._id} className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl flex items-center justify-between text-xs transition backdrop-blur-md">
+                  <div>
+                    <span className="font-mono font-bold text-teal-300">{b.bookingId}</span>
+                    <span className="block text-white font-bold mt-0.5">{b.name} ({b.destination})</span>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-teal-500/20 text-teal-200 border border-teal-400/30">
+                    {b.status}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -1087,15 +1094,23 @@ function AdminDashboard() {
           </div>
 
           <div className="space-y-3">
-            {(stats.recentInquiries || []).map(inq => (
-              <div key={inq._id} className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-xs space-y-1 transition backdrop-blur-md">
-                <div className="flex items-center justify-between">
-                  <b className="text-white font-bold">{inq.name}</b>
-                  <span className="text-[10px] text-teal-300 uppercase font-mono">{inq.type}</span>
-                </div>
-                <p className="text-slate-300 line-clamp-1">{inq.message}</p>
+            {(!stats.recentInquiries || stats.recentInquiries.length === 0) ? (
+              <div className="p-8 text-center bg-white/5 border border-white/10 rounded-2xl">
+                <HelpCircle className="w-6 h-6 text-cyan-300/50 mx-auto mb-2" />
+                <p className="text-slate-300 text-xs font-semibold">No guest inquiries yet</p>
+                <p className="text-slate-400 text-[11px] mt-0.5">Real queries from contact & quote forms will appear here.</p>
               </div>
-            ))}
+            ) : (
+              stats.recentInquiries.map(inq => (
+                <div key={inq._id} className="p-3.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-xs space-y-1 transition backdrop-blur-md">
+                  <div className="flex items-center justify-between">
+                    <b className="text-white font-bold">{inq.name}</b>
+                    <span className="text-[10px] text-teal-300 uppercase font-mono">{inq.type}</span>
+                  </div>
+                  <p className="text-slate-300 line-clamp-1">{inq.message}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
