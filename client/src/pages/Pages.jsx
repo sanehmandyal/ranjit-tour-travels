@@ -31,6 +31,28 @@ export const getStoredCustomItems = (resourceKey, defaultList) => {
   return defaultList;
 };
 
+// Automatic background sync from laptop to live cloud server
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const hasCustom = 
+      localStorage.getItem('rjt_custom_packages') ||
+      localStorage.getItem('rjt_custom_vehicles') ||
+      localStorage.getItem('rjt_custom_destinations') ||
+      localStorage.getItem('rjt_custom_services');
+    
+    if (hasCustom && !window.__rjt_cloud_synced) {
+      window.__rjt_cloud_synced = true;
+      const payload = {
+        packages: JSON.parse(localStorage.getItem('rjt_custom_packages') || '[]'),
+        vehicles: JSON.parse(localStorage.getItem('rjt_custom_vehicles') || '[]'),
+        destinations: JSON.parse(localStorage.getItem('rjt_custom_destinations') || '[]'),
+        services: JSON.parse(localStorage.getItem('rjt_custom_services') || '[]')
+      };
+      api.post('/sync/bulk', payload).catch(() => {});
+    }
+  } catch (e) {}
+}
+
 const toSlug = (text) => (text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 // Helper to merge server items with admin customized local items without losing uploaded images

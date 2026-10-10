@@ -30,6 +30,7 @@ import statsRoutes from './routes/statsRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
 import seoRoutes from './routes/seoRoutes.js';
+import syncRoutes from './routes/syncRoutes.js';
 
 dotenv.config();
 
@@ -134,6 +135,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/sync', syncRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

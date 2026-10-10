@@ -1542,6 +1542,54 @@ function ChangePasswordSection({ user }) {
   );
 }
 
+function CloudSyncButton() {
+  const [syncing, setSyncing] = useState(false);
+  const [synced, setSynced] = useState(false);
+
+  const doSync = async () => {
+    setSyncing(true);
+    try {
+      const payload = {
+        packages: JSON.parse(localStorage.getItem('rjt_custom_packages') || '[]'),
+        vehicles: JSON.parse(localStorage.getItem('rjt_custom_vehicles') || '[]'),
+        destinations: JSON.parse(localStorage.getItem('rjt_custom_destinations') || '[]'),
+        services: JSON.parse(localStorage.getItem('rjt_custom_services') || '[]'),
+        settings: JSON.parse(localStorage.getItem('rjt_custom_settings') || 'null'),
+        testimonials: JSON.parse(localStorage.getItem('rjt_custom_testimonials') || '[]'),
+        gallery: JSON.parse(localStorage.getItem('rjt_custom_gallery') || '[]'),
+        blogs: JSON.parse(localStorage.getItem('rjt_custom_blogs') || '[]')
+      };
+      await api.post('/sync/bulk', payload);
+      setSynced(true);
+      setTimeout(() => setSynced(false), 6000);
+    } catch (err) {
+      console.warn('Sync notice:', err.message);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    doSync();
+  }, []);
+
+  return (
+    <button
+      onClick={doSync}
+      disabled={syncing}
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-lg backdrop-blur-md cursor-pointer ${
+        synced 
+          ? 'bg-emerald-500/30 border border-emerald-400 text-emerald-200 animate-pulse' 
+          : 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white'
+      }`}
+      title="Push all your updated photos and packages to cloud so mobile phones see them instantly"
+    >
+      <Sparkles size={13} className={syncing ? 'animate-spin' : ''} />
+      <span>{syncing ? 'Syncing to Mobile…' : (synced ? '✓ Live on Mobile' : '⚡ Push Edits to Mobile')}</span>
+    </button>
+  );
+}
+
 // 7. Main Admin Layout with Full-Immersion Glassmorphic Environment
 export default function Admin() {
   const [user, setUser] = useState(null);
@@ -1688,7 +1736,8 @@ export default function Admin() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 text-xs">
-            <span className="text-slate-400 hidden sm:inline">Logged in as: <b className="text-white">{user.name}</b></span>
+            <CloudSyncButton />
+            <span className="text-slate-400 hidden md:inline">Logged in as: <b className="text-white">{user.name}</b></span>
             <a
               href="/"
               target="_blank"
