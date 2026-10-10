@@ -49,3 +49,18 @@ export const updateSEOSettings = async (req, res, next) => {
     next(err);
   }
 };
+
+export const triggerSeedSync = async (req, res, next) => {
+  try {
+    const { seedDatabase } = await import('../seed/seed.js');
+    const clearFirst = req.query.clear === 'true';
+    await seedDatabase(clearFirst);
+    res.json({
+      success: true,
+      message: clearFirst ? 'Database cleared and seeded successfully' : 'Database non-destructive sync completed successfully'
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
