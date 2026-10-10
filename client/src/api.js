@@ -39,12 +39,23 @@ export const msg = error => {
 
 export const img = url => {
   if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
-    return url;
+  if (Array.isArray(url)) {
+    url = url[0] || '';
   }
-  if (url.startsWith('/images/') || url.startsWith('images/') || url.startsWith('/favicon') || url.startsWith('/icons/')) {
-    return url.startsWith('/') ? url : `/${url}`;
+  if (typeof url !== 'string') return '';
+  const trimmed = url.trim();
+  if (!trimmed) return '';
+  if (
+    trimmed.startsWith('http://') || 
+    trimmed.startsWith('https://') || 
+    trimmed.startsWith('data:') || 
+    trimmed.startsWith('blob:')
+  ) {
+    return trimmed;
+  }
+  if (trimmed.startsWith('/images/') || trimmed.startsWith('images/') || trimmed.startsWith('/favicon') || trimmed.startsWith('/icons/')) {
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   }
   const apiOrigin = import.meta.env.VITE_API_ORIGIN || cleanApiUrl.replace(/\/api\/?$/, '') || 'http://localhost:5000';
-  return `${apiOrigin}${url.startsWith('/') ? '' : '/'}${url}`;
+  return `${apiOrigin}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
 };

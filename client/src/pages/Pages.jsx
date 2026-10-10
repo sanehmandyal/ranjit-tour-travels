@@ -31,6 +31,47 @@ export const getStoredCustomItems = (resourceKey, defaultList) => {
   return defaultList;
 };
 
+// Helper to merge server items with admin customized local items without losing uploaded images
+export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems) => {
+  const localItems = getStoredCustomItems(resourceKey, fallbackItems);
+  if (!serverItems || serverItems.length === 0) {
+    return localItems;
+  }
+  
+  const merged = serverItems.map(sItem => {
+    const override = localItems.find(lItem => 
+      (lItem._id && (lItem._id === sItem._id || lItem._id === sItem.id)) || 
+      (lItem.slug && lItem.slug === sItem.slug) || 
+      (lItem.name && sItem.name && lItem.name.trim().toLowerCase() === sItem.name.trim().toLowerCase()) ||
+      (lItem.title && sItem.title && lItem.title.trim().toLowerCase() === sItem.title.trim().toLowerCase())
+    );
+    if (override) {
+      return {
+        ...sItem,
+        ...override,
+        featuredImage: override.featuredImage || override.image || (override.images && override.images[0]) || sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]),
+        image: override.image || override.featuredImage || (override.images && override.images[0]) || sItem.image || sItem.featuredImage || (sItem.images && sItem.images[0]),
+        images: (override.images && override.images.length > 0) ? override.images : sItem.images
+      };
+    }
+    return sItem;
+  });
+
+  localItems.forEach(lItem => {
+    const exists = merged.some(m => 
+      (m._id && (m._id === lItem._id || m._id === lItem.id)) || 
+      (m.slug && m.slug === lItem.slug) ||
+      (m.name && lItem.name && m.name.trim().toLowerCase() === lItem.name.trim().toLowerCase()) ||
+      (m.title && lItem.title && m.title.trim().toLowerCase() === lItem.title.trim().toLowerCase())
+    );
+    if (!exists) {
+      merged.push(lItem);
+    }
+  });
+
+  return merged;
+};
+
 // Fallback Tour Packages Data (8 Professional Packages)
 export const DEFAULT_PACKAGES = [
   {
@@ -916,36 +957,31 @@ export function Home() {
     ])
       .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
         if (dRes.data?.items && dRes.data.items.length > 0) {
-          setDestinations(dRes.data.items);
-          try { localStorage.setItem('rjt_custom_destinations', JSON.stringify(dRes.data.items)); } catch(e){}
+          setDestinations(mergeWithCustomStorage('destinations', dRes.data.items, DEFAULT_DESTINATIONS));
         } else {
           setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
         }
 
         if (pRes.data?.items && pRes.data.items.length > 0) {
-          setPackages(pRes.data.items);
-          try { localStorage.setItem('rjt_custom_packages', JSON.stringify(pRes.data.items)); } catch(e){}
+          setPackages(mergeWithCustomStorage('packages', pRes.data.items, DEFAULT_PACKAGES));
         } else {
           setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
         }
 
         if (vRes.data?.items && vRes.data.items.length > 0) {
-          setVehicles(vRes.data.items);
-          try { localStorage.setItem('rjt_custom_vehicles', JSON.stringify(vRes.data.items)); } catch(e){}
+          setVehicles(mergeWithCustomStorage('vehicles', vRes.data.items, DEFAULT_VEHICLES));
         } else {
           setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
         }
 
         if (sRes.data?.items && sRes.data.items.length > 0) {
-          setServices(sRes.data.items);
-          try { localStorage.setItem('rjt_custom_services', JSON.stringify(sRes.data.items)); } catch(e){}
+          setServices(mergeWithCustomStorage('services', sRes.data.items, DEFAULT_SERVICES));
         } else {
           setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
         }
 
         if (bRes.data?.items && bRes.data.items.length > 0) {
-          setBlogs(bRes.data.items);
-          try { localStorage.setItem('rjt_custom_blogs', JSON.stringify(bRes.data.items)); } catch(e){}
+          setBlogs(mergeWithCustomStorage('blogs', bRes.data.items, DEFAULT_BLOGS));
         } else {
           setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
         }
@@ -2039,8 +2075,7 @@ export function Listing({ kind }) {
     })
       .then(res => {
         if (res.data?.items && res.data.items.length > 0) {
-          let items = res.data.items;
-          try { localStorage.setItem(`rjt_custom_${currentCfg.resourceKey}`, JSON.stringify(items)); } catch(e){}
+          let items = mergeWithCustomStorage(currentCfg.resourceKey, res.data.items, currentCfg.fallback || []);
           if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
           setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
         } else {
@@ -2410,12 +2445,24 @@ export function Detail({ kind }) {
       kind === 'services' ? DEFAULT_SERVICES : 
       DEFAULT_BLOGS;
     const customList = getStoredCustomItems(resourceKey, fallbackList);
-    const localMatch = customList.find(item => item.slug === slug || item._id === slug);
+    const localMatch = customList.find(item => 
+      item.slug === slug || 
+      item._id === slug || 
+      (item.name && item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === slug) ||
+      (item.title && item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === slug)
+    );
 
     api.get(endpointMap[kind] || `/packages/${slug}`)
       .then(res => {
         if (res.data) {
-          setData(res.data);
+          const itemData = localMatch ? {
+            ...res.data,
+            ...localMatch,
+            featuredImage: localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || res.data.featuredImage || res.data.image || (res.data.images && res.data.images[0]),
+            image: localMatch.image || localMatch.featuredImage || (localMatch.images && localMatch.images[0]) || res.data.image || res.data.featuredImage || (res.data.images && res.data.images[0]),
+            images: (localMatch.images && localMatch.images.length > 0) ? localMatch.images : res.data.images
+          } : res.data;
+          setData(itemData);
         } else if (localMatch) {
           setData(localMatch);
         }

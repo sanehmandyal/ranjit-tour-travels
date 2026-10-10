@@ -128,6 +128,11 @@ export function Cover({ src, alt, className = '', imgClassName = '' }) {
   const [hasError, setHasError] = useState(false);
   const fallbackImg = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=1200&q=80';
 
+  useEffect(() => {
+    setHasError(false);
+    setLoaded(false);
+  }, [src]);
+
   const resolvedSrc = hasError || !src ? fallbackImg : img(src);
 
   return (

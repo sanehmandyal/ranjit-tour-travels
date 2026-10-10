@@ -379,15 +379,27 @@ function ResourceEditor({ resource, item, onDone }) {
     e.preventDefault();
     setLoading(true);
     setError('');
-    let savedItem = form;
+
+    // Ensure all photo fields are synchronized before saving
+    const preparedForm = { ...form };
+    const primaryImg = preparedForm.featuredImage || preparedForm.image || (preparedForm.images && preparedForm.images[0]) || '';
+    if (primaryImg) {
+      preparedForm.featuredImage = primaryImg;
+      preparedForm.image = primaryImg;
+      if (!preparedForm.images || preparedForm.images.length === 0) {
+        preparedForm.images = [primaryImg];
+      }
+    }
+
+    let savedItem = preparedForm;
     try {
       let res;
       if (item?._id) {
-        res = await api.put(`/${resource}/${item._id}`, form);
+        res = await api.put(`/${resource}/${item._id}`, preparedForm);
       } else if (item?.slug) {
-        res = await api.put(`/${resource}/${item.slug}`, form);
+        res = await api.put(`/${resource}/${item.slug}`, preparedForm);
       } else {
-        res = await api.post(`/${resource}`, form);
+        res = await api.post(`/${resource}`, preparedForm);
       }
       if (res?.data?.data) {
         savedItem = res.data.data;
@@ -464,7 +476,20 @@ function ResourceEditor({ resource, item, onDone }) {
                       type="text"
                       className="w-full bg-white/10 border border-white/15 rounded-xl py-2 px-3 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-teal-400"
                       value={typeof val === 'string' ? val : ''}
-                      onChange={e => setForm(setVal(form, f.key, e.target.value))}
+                      onChange={e => {
+                        const newUrl = e.target.value;
+                        setForm(prev => {
+                          let updated = setVal(prev, f.key, newUrl);
+                          if (f.key === 'featuredImage' || f.key === 'image') {
+                            updated.featuredImage = newUrl;
+                            updated.image = newUrl;
+                            if (!updated.images || updated.images.length === 0) {
+                              updated.images = [newUrl];
+                            }
+                          }
+                          return updated;
+                        });
+                      }}
                       placeholder="Or paste external image URL..."
                     />
                   </div>
