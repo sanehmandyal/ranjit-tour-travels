@@ -412,11 +412,9 @@ function ResourceEditor({ resource, item, onDone }) {
         try {
           res = await api.put(`/${resource}/${targetParam}`, payload);
         } catch (putErr) {
-          // If PUT failed (e.g. record was only in local state), create via POST
           res = await api.post(`/${resource}`, payload);
         }
       } else {
-        // Creating brand new item
         res = await api.post(`/${resource}`, payload);
       }
       if (res?.data?.data) {
@@ -424,11 +422,11 @@ function ResourceEditor({ resource, item, onDone }) {
       } else if (res?.data) {
         savedItem = { ...(res.data._id ? res.data : {}), ...preparedForm };
       }
+      onDone(savedItem);
     } catch (err) {
-      console.warn('Backend save notice (cached locally):', err.message);
+      setError(msg(err));
     } finally {
       setLoading(false);
-      onDone(savedItem);
     }
   };
 
@@ -1289,6 +1287,7 @@ function WebsiteSettingsEditor() {
     try {
       await api.put('/settings', settings);
       setNotice('Settings successfully saved and live across website!');
+      window.dispatchEvent(new CustomEvent('rjt_content_updated', { detail: { resource: 'settings' } }));
     } catch (err) {
       setNotice(msg(err));
     } finally {

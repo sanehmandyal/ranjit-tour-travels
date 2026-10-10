@@ -11,7 +11,7 @@ const itinerarySchema = new mongoose.Schema({
 const packageSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  destination: { type: mongoose.Schema.Types.ObjectId, ref: 'Destination' },
+  destination: { type: mongoose.Schema.Types.Mixed, ref: 'Destination' },
   duration: { type: String, required: true, default: '4 Nights / 5 Days' },
   price: { type: Number, required: true },
   discountedPrice: { type: Number, default: 0 },

@@ -30,11 +30,28 @@ export function SettingsProvider({ children }) {
   });
 
   useEffect(() => {
-    api.get('/settings')
-      .then(res => {
-        if (res.data) setSettings(res.data);
-      })
-      .catch(() => {});
+    const fetchSettings = () => {
+      api.get('/settings')
+        .then(res => {
+          if (res.data) setSettings(res.data);
+        })
+        .catch(() => {});
+    };
+
+    fetchSettings();
+
+    const handleUpdate = (e) => {
+      if (!e.detail || e.detail.resource === 'settings') {
+        fetchSettings();
+      }
+    };
+
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('rjt_content_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('rjt_content_updated', handleUpdate);
+    };
   }, []);
 
   return (
