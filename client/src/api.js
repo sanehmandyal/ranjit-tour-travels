@@ -1,6 +1,20 @@
 import axios from 'axios';
 
-const rawApiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getBaseApiUrl = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && !envUrl.includes('localhost')) {
+    return envUrl;
+  }
+  if (typeof window !== 'undefined') {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocalhost) {
+      return 'https://ranjit-tour-travels-api.onrender.com/api';
+    }
+  }
+  return envUrl || 'http://localhost:5000/api';
+};
+
+const rawApiUrl = getBaseApiUrl();
 const cleanApiUrl = rawApiUrl.replace(/\/+$/, '');
 const normalizedBaseURL = cleanApiUrl.endsWith('/api') ? cleanApiUrl : `${cleanApiUrl}/api`;
 
@@ -56,6 +70,18 @@ export const img = url => {
   if (trimmed.startsWith('/images/') || trimmed.startsWith('images/') || trimmed.startsWith('/favicon') || trimmed.startsWith('/icons/')) {
     return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
   }
-  const apiOrigin = import.meta.env.VITE_API_ORIGIN || cleanApiUrl.replace(/\/api\/?$/, '') || 'http://localhost:5000';
+  
+  let apiOrigin = import.meta.env.VITE_API_ORIGIN;
+  if (!apiOrigin || apiOrigin.includes('localhost')) {
+    if (typeof window !== 'undefined') {
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (!isLocalhost) {
+        apiOrigin = 'https://ranjit-tour-travels-api.onrender.com';
+      }
+    }
+  }
+  if (!apiOrigin) {
+    apiOrigin = cleanApiUrl.replace(/\/api\/?$/, '') || 'https://ranjit-tour-travels-api.onrender.com';
+  }
   return `${apiOrigin}${trimmed.startsWith('/') ? '' : '/'}${trimmed}`;
 };

@@ -15,6 +15,7 @@ client/.env
 !.env.example
 !server/.env.example
 !client/.env.example
+!client/.env.production
 
 # Build Outputs
 dist/
