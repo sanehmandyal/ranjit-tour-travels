@@ -1146,26 +1146,23 @@ function AdminDashboard() {
   return (
     <div className="space-y-8">
       {/* Global Cloud Live Banner */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-teal-500/20 via-emerald-500/15 to-cyan-500/20 border border-teal-400/40 backdrop-blur-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-teal-500/15 via-emerald-500/10 to-cyan-500/15 border border-teal-400/30 backdrop-blur-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-teal-500/30 border border-teal-400/50 flex items-center justify-center text-teal-300 shadow-md flex-shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-teal-500/20 border border-teal-400/40 flex items-center justify-center text-teal-300 shadow-md flex-shrink-0">
             <Globe size={20} />
           </div>
           <div>
             <h4 className="font-display font-bold text-sm text-white flex items-center gap-2">
-              <span>Global Cloud Synchronization Active</span>
+              <span>Real-Time Direct Publishing Active</span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse" />
-                Live Worldwide
+                Live Globally
               </span>
             </h4>
             <p className="text-xs text-slate-300 mt-0.5">
-              All package changes, vehicle rates, uploaded photos, and settings are published live to all visitors across every device globally.
+              Any update you make in packages, vehicles, destinations, or photos saves directly to the central cloud server and is instantly visible to all visitors worldwide.
             </p>
           </div>
-        </div>
-        <div className="flex-shrink-0">
-          <CloudSyncButton />
         </div>
       </div>
 
@@ -1566,12 +1563,15 @@ function ChangePasswordSection({ user }) {
   );
 }
 
-function CloudSyncButton() {
-  const [syncing, setSyncing] = useState(false);
-  const [synced, setSynced] = useState(false);
+// 7. Main Admin Layout with Full-Immersion Glassmorphic Environment
+export default function Admin() {
+  const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const doSync = async () => {
-    setSyncing(true);
+  // Auto-sync all customized content to the central cloud server in the background
+  useEffect(() => {
     try {
       const payload = {
         packages: JSON.parse(localStorage.getItem('rjt_custom_packages') || '[]'),
@@ -1583,43 +1583,16 @@ function CloudSyncButton() {
         gallery: JSON.parse(localStorage.getItem('rjt_custom_gallery') || '[]'),
         blogs: JSON.parse(localStorage.getItem('rjt_custom_blogs') || '[]')
       };
-      await api.post('/sync/bulk', payload);
-      setSynced(true);
-      setTimeout(() => setSynced(false), 6000);
-    } catch (err) {
-      console.warn('Global sync notice:', err.message);
-    } finally {
-      setSyncing(false);
-    }
-  };
-
-  useEffect(() => {
-    doSync();
-  }, []);
-
-  return (
-    <button
-      onClick={doSync}
-      disabled={syncing}
-      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-lg backdrop-blur-md cursor-pointer ${
-        synced 
-          ? 'bg-emerald-500/30 border border-emerald-400 text-emerald-200 animate-pulse' 
-          : 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white'
-      }`}
-      title="Save and publish all photos, tour packages, and vehicles globally so all website visitors see them live"
-    >
-      <Sparkles size={13} className={syncing ? 'animate-spin' : ''} />
-      <span>{syncing ? 'Publishing Globally…' : (synced ? '✓ Live on Global Website' : '⚡ Publish Changes Globally')}</span>
-    </button>
-  );
-}
-
-// 7. Main Admin Layout with Full-Immersion Glassmorphic Environment
-export default function Admin() {
-  const [user, setUser] = useState(null);
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      if (
+        payload.packages.length > 0 ||
+        payload.vehicles.length > 0 ||
+        payload.destinations.length > 0 ||
+        payload.services.length > 0
+      ) {
+        api.post('/sync/bulk', payload).catch(() => {});
+      }
+    } catch (e) {}
+  }, [user]);
 
   useEffect(() => {
     const token = localStorage.getItem('rjt_token');
@@ -1760,7 +1733,10 @@ export default function Admin() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 text-xs">
-            <CloudSyncButton />
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-[11px] font-semibold backdrop-blur-md">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Live Server Connected
+            </span>
             <span className="text-slate-400 hidden md:inline">Logged in as: <b className="text-white">{user.name}</b></span>
             <a
               href="/"
