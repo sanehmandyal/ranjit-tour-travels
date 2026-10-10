@@ -29,30 +29,35 @@ const RESOURCE_FIELDS = {
   destinations: [
     { key: 'name', label: 'Destination Name', type: 'text', required: true },
     { key: 'state', label: 'State / Region', type: 'text', required: true },
-    { key: 'category', label: 'Category', type: 'text', placeholder: 'Hill Station / Adventure' },
+    { key: 'category', label: 'Category', type: 'text', placeholder: 'Hill Station / Adventure / Pilgrimage' },
     { key: 'duration', label: 'Typical Duration', type: 'text', placeholder: '4-5 Days' },
-    { key: 'bestTime', label: 'Best Time to Visit', type: 'text' },
-    { key: 'lat', label: 'Latitude (GPS)', type: 'number' },
-    { key: 'lng', label: 'Longitude (GPS)', type: 'number' },
-    { key: 'featuredImage', label: 'Featured Image', type: 'image' },
+    { key: 'bestTime', label: 'Best Time to Visit', type: 'text', placeholder: 'March - June, Sept - Dec' },
+    { key: 'startingPrice', label: 'Starting Tour / Taxi Price (₹)', type: 'number' },
+    { key: 'featuredImage', label: 'Featured Cover Photo', type: 'image' },
+    { key: 'images', label: 'Destination Gallery Photos', type: 'image_list' },
     { key: 'shortDescription', label: 'Short Summary', type: 'textarea' },
-    { key: 'description', label: 'Full Destination Guide', type: 'textarea' },
+    { key: 'description', label: 'Full Destination Details & Overview', type: 'textarea' },
     { key: 'attractions', label: 'Key Attractions (comma separated)', type: 'list' },
     { key: 'activities', label: 'Top Activities (comma separated)', type: 'list' },
+    { key: 'isPopular', label: 'Showcase as Popular on Homepage', type: 'bool' },
     { key: 'published', label: 'Published & Live on Website', type: 'bool' }
   ],
   packages: [
     { key: 'name', label: 'Package Title', type: 'text', required: true },
-    { key: 'destination', label: 'Destination', type: 'destination_ref' },
-    { key: 'category', label: 'Package Category', type: 'select', options: ['Family', 'Honeymoon', 'Adventure', 'Spiritual', 'Group', 'Weekend'] },
+    { key: 'destination', label: 'Destination Region', type: 'destination_ref' },
+    { key: 'category', label: 'Package Category', type: 'select', options: ['Family', 'Honeymoon', 'Adventure', 'Spiritual', 'Group', 'Weekend', 'Luxury'] },
     { key: 'duration', label: 'Duration', type: 'text', placeholder: '6 Nights / 7 Days', required: true },
+    { key: 'price', label: 'Package Starting Price (₹)', type: 'number', required: true },
+    { key: 'discountedPrice', label: 'Discounted / Offer Price (₹)', type: 'number' },
+    { key: 'rating', label: 'Rating (e.g. 4.9)', type: 'number' },
     { key: 'featuredImage', label: 'Package Cover Image', type: 'image' },
+    { key: 'images', label: 'Package Gallery Photos', type: 'image_list' },
     { key: 'overview', label: 'Overview & Highlights', type: 'textarea' },
-    { key: 'itinerary', label: 'Itinerary Days (one per line: Title | Details)', type: 'lines' },
+    { key: 'itinerary', label: 'Itinerary Days (one per line: Day Title | Day Details)', type: 'lines' },
     { key: 'inclusions', label: 'Inclusions (comma separated)', type: 'list' },
     { key: 'exclusions', label: 'Exclusions (comma separated)', type: 'list' },
     { key: 'hotel', label: 'Hotel Stay Details', type: 'text' },
-    { key: 'transport', label: 'Transport / Cab Details', type: 'text' },
+    { key: 'transport', label: 'Transport / Dedicated Cab Details', type: 'text' },
     { key: 'pickup', label: 'Pickup Location', type: 'text' },
     { key: 'drop', label: 'Drop Location', type: 'text' },
     { key: 'isFeatured', label: 'Showcase on Homepage', type: 'bool' },
@@ -63,36 +68,49 @@ const RESOURCE_FIELDS = {
     { key: 'category', label: 'Category', type: 'select', options: ['Sedan', 'SUV', 'Innova', 'Innova Crysta', 'Tempo Traveller', 'Luxury', 'Bus'] },
     { key: 'seats', label: 'Passenger Seating Capacity', type: 'number', required: true },
     { key: 'luggage', label: 'Luggage Boot Bags', type: 'number' },
-    { key: 'fuel', label: 'Fuel Type', type: 'text', placeholder: 'Diesel / Petrol' },
+    { key: 'pricePerKm', label: 'Outstation Fare per Km (₹)', type: 'number' },
+    { key: 'pricePerDay', label: 'Local Full Day Fare (₹)', type: 'number' },
+    { key: 'fuel', label: 'Fuel Type', type: 'text', placeholder: 'Diesel / Petrol / CNG' },
     { key: 'transmission', label: 'Transmission', type: 'text', placeholder: 'Manual / Automatic' },
     { key: 'isAc', label: 'AC Climate Control', type: 'bool' },
     { key: 'featuredImage', label: 'Main Cover Photo', type: 'image' },
     { key: 'images', label: 'Vehicle Gallery Photos', type: 'image_list' },
-    { key: 'features', label: 'Features (comma separated)', type: 'list' },
+    { key: 'features', label: 'Features & Amenities (comma separated)', type: 'list' },
     { key: 'description', label: 'Vehicle Description', type: 'textarea' },
     { key: 'available', label: 'Available for Immediate Dispatch', type: 'bool' },
-    { key: 'published', label: 'Published', type: 'bool' }
+    { key: 'published', label: 'Published on Website', type: 'bool' }
   ],
   services: [
     { key: 'name', label: 'Service Name', type: 'text', required: true },
-    { key: 'category', label: 'Category', type: 'text', placeholder: 'Outstation / Airport Transfer' },
-    { key: 'shortDescription', label: 'Short Description', type: 'textarea' },
+    { key: 'category', label: 'Category', type: 'text', placeholder: 'Outstation / Airport Transfer / Sightseeing' },
+    { key: 'shortDescription', label: 'Short Summary', type: 'textarea' },
     { key: 'description', label: 'Full Service Details', type: 'textarea' },
     { key: 'featuredImage', label: 'Service Cover Photo', type: 'image' },
-    { key: 'images', label: 'Service Gallery / Additional Photos', type: 'image_list' },
+    { key: 'images', label: 'Service Gallery Photos', type: 'image_list' },
     { key: 'features', label: 'Features (comma separated)', type: 'list' },
-    { key: 'published', label: 'Published', type: 'bool' }
+    { key: 'benefits', label: 'Benefits (comma separated)', type: 'list' },
+    { key: 'published', label: 'Published on Website', type: 'bool' }
   ],
   blogs: [
     { key: 'title', label: 'Article Title', type: 'text', required: true },
-    { key: 'category', label: 'Category', type: 'text', placeholder: 'Travel Guide / Road Tips' },
+    { key: 'category', label: 'Category', type: 'text', placeholder: 'Travel Guide / Road Tips / Itinerary' },
     { key: 'author', label: 'Author Name', type: 'text' },
     { key: 'readTime', label: 'Estimated Read Time', type: 'text', placeholder: '5 min read' },
     { key: 'featuredImage', label: 'Article Cover Image', type: 'image' },
     { key: 'excerpt', label: 'Short Excerpt / Meta Preview', type: 'textarea' },
     { key: 'content', label: 'Full Article Content (Markdown/Text)', type: 'textarea', required: true },
     { key: 'tags', label: 'Tags (comma separated)', type: 'list' },
-    { key: 'published', label: 'Published', type: 'bool' }
+    { key: 'published', label: 'Published & Live', type: 'bool' }
+  ],
+  testimonials: [
+    { key: 'name', label: 'Customer / Traveler Name', type: 'text', required: true },
+    { key: 'rating', label: 'Star Rating (1 to 5)', type: 'number', required: true },
+    { key: 'review', label: 'Review Testimonial Text', type: 'textarea', required: true },
+    { key: 'city', label: 'City / Location', type: 'text', placeholder: 'Delhi, Mumbai, Chandigarh' },
+    { key: 'destination', label: 'Destination / Tour Visited', type: 'text', placeholder: 'Shimla Manali Tour' },
+    { key: 'tripDate', label: 'Trip Date / Month', type: 'text', placeholder: 'October 2026' },
+    { key: 'image', label: 'Traveler Photo / Avatar', type: 'image' },
+    { key: 'published', label: 'Published & Showcase on Website', type: 'bool' }
   ]
 };
 
@@ -841,7 +859,7 @@ function ResourceList({ resource }) {
                           <span className="text-slate-400 text-[11px] block truncate">{item.vehicle || item.message}</span>
                         </div>
                       ) : (
-                        <span className="line-clamp-2">{item.shortDescription || item.overview || item.excerpt || `₹${item.price || item.pricePerDay || item.startingPrice || '-'}`}</span>
+                        <span className="line-clamp-2">{item.review || item.shortDescription || item.overview || item.excerpt || (item.price ? `₹${item.price}` : '') || (item.startingPrice ? `₹${item.startingPrice}` : '') || (item.pricePerDay ? `₹${item.pricePerDay}/day` : '-')}</span>
                       )}
                     </td>
 
@@ -1441,6 +1459,7 @@ export default function Admin() {
       { key: 'services', label: 'Services', icon: Layers }
     ] : []),
     { key: 'blogs', label: 'Blog CMS', icon: FileText },
+    { key: 'testimonials', label: 'Reviews & Feedback', icon: MessageCircle },
     ...(!isEditor ? [
       { key: 'settings', label: 'Website Settings', icon: SettingsIcon }
     ] : []),
