@@ -17,7 +17,9 @@ import {
   DEFAULT_VEHICLES, 
   DEFAULT_SERVICES,
   DEFAULT_BLOGS,
-  DEFAULT_TESTIMONIALS 
+  DEFAULT_TESTIMONIALS,
+  mergeWithCustomStorage,
+  getStoredCustomItems
 } from '../pages/Pages.jsx';
 
 const DEFAULT_BOOKINGS = [];
@@ -66,7 +68,8 @@ const RESOURCE_FIELDS = {
     { key: 'fuel', label: 'Fuel Type', type: 'text', placeholder: 'Diesel / Petrol' },
     { key: 'transmission', label: 'Transmission', type: 'text', placeholder: 'Manual / Automatic' },
     { key: 'isAc', label: 'AC Climate Control', type: 'bool' },
-    { key: 'images', label: 'Vehicle Photos', type: 'image_list' },
+    { key: 'featuredImage', label: 'Main Cover Photo', type: 'image' },
+    { key: 'images', label: 'Vehicle Gallery Photos', type: 'image_list' },
     { key: 'features', label: 'Features (comma separated)', type: 'list' },
     { key: 'description', label: 'Vehicle Description', type: 'textarea' },
     { key: 'available', label: 'Available for Immediate Dispatch', type: 'bool' },
@@ -728,19 +731,42 @@ function ResourceList({ resource }) {
 
   const loadData = () => {
     setLoading(true);
+    const fb = getFallbackData();
     api.get(`/${resource}`, { params: { q, page, limit: 100, admin: true } })
       .then(res => {
         if (res.data?.items && res.data.items.length > 0) {
-          setData(res.data);
-          if (!isInbox) saveCustomItems(res.data.items);
+          if (!isInbox) {
+            const fallbackMap = {
+              packages: DEFAULT_PACKAGES,
+              destinations: DEFAULT_DESTINATIONS,
+              vehicles: DEFAULT_VEHICLES,
+              services: DEFAULT_SERVICES,
+              blogs: DEFAULT_BLOGS,
+              testimonials: DEFAULT_TESTIMONIALS
+            };
+            const merged = mergeWithCustomStorage(resource, res.data.items, fallbackMap[resource] || []);
+            let filtered = merged;
+            if (q) {
+              const qLow = q.toLowerCase();
+              filtered = filtered.filter(it => 
+                (it.name && it.name.toLowerCase().includes(qLow)) ||
+                (it.title && it.title.toLowerCase().includes(qLow)) ||
+                (it.category && it.category.toLowerCase().includes(qLow)) ||
+                (it.shortDescription && it.shortDescription.toLowerCase().includes(qLow)) ||
+                (it.state && it.state.toLowerCase().includes(qLow))
+              );
+            }
+            setData({ ...res.data, items: filtered, total: filtered.length });
+            saveCustomItems(merged);
+          } else {
+            setData(res.data);
+          }
         } else {
-          const fb = getFallbackData();
           setData(fb);
           if (!isInbox && fb.items.length > 0) saveCustomItems(fb.items);
         }
       })
       .catch(() => {
-        const fb = getFallbackData();
         setData(fb);
         if (!isInbox && fb.items.length > 0) saveCustomItems(fb.items);
       })
@@ -795,22 +821,33 @@ function ResourceList({ resource }) {
                 const label = itemToSave.name || itemToSave.title || 'item';
                 itemToSave.slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
               }
+              const photo = itemToSave.featuredImage || itemToSave.image || (itemToSave.images && itemToSave.images[0]) || '';
+              if (photo) {
+                itemToSave.featuredImage = photo;
+                itemToSave.image = photo;
+                if (!itemToSave.images || itemToSave.images.length === 0) {
+                  itemToSave.images = [photo];
+                }
+              }
+
               let updatedItems;
               if (editingItem && editingItem !== 'new') {
                 const targetId = editingItem._id;
                 const targetSlug = editingItem.slug;
                 const matchFound = currentItems.some(it => 
-                  (targetId && it._id === targetId) || 
+                  (targetId && (it._id === targetId || it.id === targetId)) || 
                   (targetSlug && it.slug === targetSlug) ||
-                  (savedForm._id && it._id === savedForm._id) ||
-                  (savedForm.slug && it.slug === savedForm.slug)
+                  (savedForm._id && (it._id === savedForm._id || it.id === savedForm._id)) ||
+                  (savedForm.slug && it.slug === savedForm.slug) ||
+                  (savedForm.name && it.name && savedForm.name.trim().toLowerCase() === it.name.trim().toLowerCase())
                 );
                 if (matchFound) {
                   updatedItems = currentItems.map(it => 
-                    ((targetId && it._id === targetId) || 
+                    ((targetId && (it._id === targetId || it.id === targetId)) || 
                      (targetSlug && it.slug === targetSlug) ||
-                     (savedForm._id && it._id === savedForm._id) ||
-                     (savedForm.slug && it.slug === savedForm.slug)) ? { ...it, ...itemToSave } : it
+                     (savedForm._id && (it._id === savedForm._id || it.id === savedForm._id)) ||
+                     (savedForm.slug && it.slug === savedForm.slug) ||
+                     (savedForm.name && it.name && savedForm.name.trim().toLowerCase() === it.name.trim().toLowerCase())) ? { ...it, ...itemToSave } : it
                   );
                 } else {
                   updatedItems = [itemToSave, ...currentItems];

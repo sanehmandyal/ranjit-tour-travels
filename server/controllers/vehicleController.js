@@ -58,10 +58,23 @@ export const getVehicleBySlug = async (req, res, next) => {
 export const createVehicle = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    if (data.published === undefined) data.published = true;
+    if (data.available === undefined) data.available = true;
     if (!data.slug && data.name) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
-    const exists = await Vehicle.findOne({ slug: data.slug });
+
+    // Sync all image fields
+    const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
+    if (photo) {
+      data.featuredImage = photo;
+      data.image = photo;
+      if (!data.images || data.images.length === 0) {
+        data.images = [photo];
+      }
+    }
+
+    const exists = await Vehicle.findOne({ $or: [{ slug: data.slug }, { name: data.name }] });
     if (exists) {
       const updated = await Vehicle.findByIdAndUpdate(exists._id, data, { new: true });
       return res.status(200).json({ success: true, data: updated });
@@ -76,8 +89,20 @@ export const createVehicle = async (req, res, next) => {
 export const updateVehicle = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    if (data.published === undefined) data.published = true;
+    if (data.available === undefined) data.available = true;
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
+    }
+
+    // Sync all image fields
+    const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
+    if (photo) {
+      data.featuredImage = photo;
+      data.image = photo;
+      if (!data.images || data.images.length === 0) {
+        data.images = [photo];
+      }
     }
 
     let vehicle = null;

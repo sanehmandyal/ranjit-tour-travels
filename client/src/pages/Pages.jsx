@@ -1702,7 +1702,7 @@ export function Home() {
                   {/* Vehicle Image Container */}
                   <div className="aspect-[16/10] overflow-hidden relative bg-slate-100">
                     <Cover 
-                      src={v.images?.[0]} 
+                      src={v.featuredImage || v.image || v.images?.[0]} 
                       alt={v.name} 
                       className="absolute inset-0 w-full h-full"
                       imgClassName="group-hover:scale-105 transition-transform duration-500" 
@@ -2254,7 +2254,7 @@ export function Listing({ kind }) {
                       {/* Vehicle Image */}
                       <div className="aspect-[16/10] relative overflow-hidden bg-slate-100">
                         <Cover 
-                          src={item.images?.[0]} 
+                          src={item.featuredImage || item.image || item.images?.[0]} 
                           alt={item.name} 
                           className="absolute inset-0 w-full h-full"
                           imgClassName="group-hover:scale-105 transition-transform duration-500" 

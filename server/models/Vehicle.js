@@ -16,6 +16,8 @@ const vehicleSchema = new mongoose.Schema({
   transmission: { type: String, default: 'Manual / Automatic' },
   pricePerKm: { type: Number, default: 14 },
   pricePerDay: { type: Number, default: 3500 },
+  featuredImage: { type: String, default: '' },
+  image: { type: String, default: '' },
   images: [{ type: String }],
   features: [{ type: String }],
   description: { type: String, default: '' },
