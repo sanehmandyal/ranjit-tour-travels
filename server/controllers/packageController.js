@@ -188,7 +188,7 @@ export const updatePackage = async (req, res, next) => {
     if (mongoose.connection.readyState === 1) {
       try {
         if (isObjectId) {
-          pkg = await TourPackage.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
+          pkg = await TourPackage.findByIdAndUpdate(req.params.id, { $set: data }, { new: true, runValidators: false });
         }
 
         if (!pkg) {
@@ -198,11 +198,15 @@ export const updatePackage = async (req, res, next) => {
           if (data.name) matchCriteria.push({ name: data.name });
 
           if (matchCriteria.length > 0) {
-            pkg = await TourPackage.findOneAndUpdate(
-              { $or: matchCriteria },
-              { $set: data },
-              { new: true, upsert: true, runValidators: false }
-            );
+            const existing = await TourPackage.findOne({ $or: matchCriteria });
+            if (existing) {
+              pkg = await TourPackage.findByIdAndUpdate(existing._id, { $set: data }, { new: true, runValidators: false });
+            } else {
+              pkg = await TourPackage.create({
+                slug: data.slug || req.params.id,
+                ...data
+              });
+            }
           } else {
             pkg = await TourPackage.create(data);
           }
@@ -212,7 +216,7 @@ export const updatePackage = async (req, res, next) => {
       }
     }
 
-    const payloadWithId = { ...data, _id: req.params.id };
+    const payloadWithId = { ...data, _id: pkg?._id ? pkg._id.toString() : req.params.id };
     const finalItem = localStore.upsertItem('packages', pkg?.toObject ? pkg.toObject() : payloadWithId);
     return res.json({ success: true, data: pkg?.toObject ? pkg.toObject() : finalItem });
   } catch (err) {

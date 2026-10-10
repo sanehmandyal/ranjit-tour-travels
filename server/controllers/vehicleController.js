@@ -182,7 +182,7 @@ export const updateVehicle = async (req, res, next) => {
     if (mongoose.connection.readyState === 1) {
       try {
         if (isObjectId) {
-          vehicle = await Vehicle.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
+          vehicle = await Vehicle.findByIdAndUpdate(req.params.id, { $set: data }, { new: true, runValidators: false });
         }
 
         if (!vehicle) {
@@ -192,11 +192,15 @@ export const updateVehicle = async (req, res, next) => {
           if (data.name) matchCriteria.push({ name: data.name });
 
           if (matchCriteria.length > 0) {
-            vehicle = await Vehicle.findOneAndUpdate(
-              { $or: matchCriteria },
-              { $set: data },
-              { new: true, upsert: true, runValidators: false }
-            );
+            const existing = await Vehicle.findOne({ $or: matchCriteria });
+            if (existing) {
+              vehicle = await Vehicle.findByIdAndUpdate(existing._id, { $set: data }, { new: true, runValidators: false });
+            } else {
+              vehicle = await Vehicle.create({
+                slug: data.slug || req.params.id,
+                ...data
+              });
+            }
           } else {
             vehicle = await Vehicle.create(data);
           }
@@ -206,7 +210,7 @@ export const updateVehicle = async (req, res, next) => {
       }
     }
 
-    const payloadWithId = { ...data, _id: req.params.id };
+    const payloadWithId = { ...data, _id: vehicle?._id ? vehicle._id.toString() : req.params.id };
     const finalItem = localStore.upsertItem('vehicles', vehicle?.toObject ? vehicle.toObject() : payloadWithId);
     return res.json({ success: true, data: vehicle?.toObject ? vehicle.toObject() : finalItem });
   } catch (err) {

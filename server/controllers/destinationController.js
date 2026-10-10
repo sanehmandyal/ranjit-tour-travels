@@ -188,7 +188,7 @@ export const updateDestination = async (req, res, next) => {
     if (mongoose.connection.readyState === 1) {
       try {
         if (isObjectId) {
-          destination = await Destination.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
+          destination = await Destination.findByIdAndUpdate(req.params.id, { $set: data }, { new: true, runValidators: false });
         }
 
         if (!destination) {
@@ -198,11 +198,15 @@ export const updateDestination = async (req, res, next) => {
           if (data.name) matchCriteria.push({ name: data.name });
 
           if (matchCriteria.length > 0) {
-            destination = await Destination.findOneAndUpdate(
-              { $or: matchCriteria },
-              { $set: data },
-              { new: true, upsert: true, runValidators: false }
-            );
+            const existing = await Destination.findOne({ $or: matchCriteria });
+            if (existing) {
+              destination = await Destination.findByIdAndUpdate(existing._id, { $set: data }, { new: true, runValidators: false });
+            } else {
+              destination = await Destination.create({
+                slug: data.slug || req.params.id,
+                ...data
+              });
+            }
           } else {
             destination = await Destination.create(data);
           }
@@ -212,7 +216,7 @@ export const updateDestination = async (req, res, next) => {
       }
     }
 
-    const payloadWithId = { ...data, _id: req.params.id };
+    const payloadWithId = { ...data, _id: destination?._id ? destination._id.toString() : req.params.id };
     const finalItem = localStore.upsertItem('destinations', destination?.toObject ? destination.toObject() : payloadWithId);
     return res.json({ success: true, data: destination?.toObject ? destination.toObject() : finalItem });
   } catch (err) {

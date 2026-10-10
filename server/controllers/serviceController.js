@@ -177,7 +177,7 @@ export const updateService = async (req, res, next) => {
     if (mongoose.connection.readyState === 1) {
       try {
         if (isObjectId) {
-          service = await Service.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
+          service = await Service.findByIdAndUpdate(req.params.id, { $set: data }, { new: true, runValidators: false });
         }
 
         if (!service) {
@@ -187,11 +187,15 @@ export const updateService = async (req, res, next) => {
           if (data.name) matchCriteria.push({ name: data.name });
 
           if (matchCriteria.length > 0) {
-            service = await Service.findOneAndUpdate(
-              { $or: matchCriteria },
-              { $set: data },
-              { new: true, upsert: true, runValidators: false }
-            );
+            const existing = await Service.findOne({ $or: matchCriteria });
+            if (existing) {
+              service = await Service.findByIdAndUpdate(existing._id, { $set: data }, { new: true, runValidators: false });
+            } else {
+              service = await Service.create({
+                slug: data.slug || req.params.id,
+                ...data
+              });
+            }
           } else {
             service = await Service.create(data);
           }
@@ -201,7 +205,7 @@ export const updateService = async (req, res, next) => {
       }
     }
 
-    const payloadWithId = { ...data, _id: req.params.id };
+    const payloadWithId = { ...data, _id: service?._id ? service._id.toString() : req.params.id };
     const finalItem = localStore.upsertItem('services', service?.toObject ? service.toObject() : payloadWithId);
     return res.json({ success: true, data: service?.toObject ? service.toObject() : finalItem });
   } catch (err) {

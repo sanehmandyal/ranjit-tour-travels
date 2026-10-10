@@ -166,11 +166,12 @@ export const updateBlog = async (req, res, next) => {
           if (data.title) matchCriteria.push({ title: data.title });
 
           if (matchCriteria.length > 0) {
-            blog = await Blog.findOneAndUpdate(
-              { $or: matchCriteria },
-              { $set: data },
-              { new: true, upsert: true, runValidators: false }
-            );
+            const existing = await Blog.findOne({ $or: matchCriteria });
+            if (existing) {
+              blog = await Blog.findByIdAndUpdate(existing._id, { $set: data }, { new: true, runValidators: false });
+            } else {
+              blog = await Blog.create(data);
+            }
           } else {
             blog = await Blog.create(data);
           }
