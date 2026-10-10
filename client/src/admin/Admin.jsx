@@ -15,21 +15,10 @@ import {
   DEFAULT_PACKAGES, 
   DEFAULT_DESTINATIONS, 
   DEFAULT_VEHICLES, 
+  DEFAULT_SERVICES,
+  DEFAULT_BLOGS,
   DEFAULT_TESTIMONIALS 
 } from '../pages/Pages.jsx';
-
-const DEFAULT_SERVICES = [
-  { _id: 'srv-1', name: 'Outstation Taxi Service', category: 'Outstation', shortDescription: 'Reliable one-way and round-trip outstation cabs across North India.', published: true },
-  { _id: 'srv-2', name: 'Airport & Railway Station Transfers', category: 'Transfer', shortDescription: 'Punctual airport pickup and drop services for Chandigarh and Delhi IGI.', published: true },
-  { _id: 'srv-3', name: 'Custom Tour & Journey Builder', category: 'Custom Tour', shortDescription: 'Tailor-made private holidays designed around your dates and stays.', published: true },
-  { _id: 'srv-4', name: 'Corporate & VIP Delegation Travel', category: 'Corporate', shortDescription: 'Discreet, punctual, premium fleet solutions for executive travel.', published: true },
-  { _id: 'srv-5', name: 'Wedding Transportation & Luxury Convoys', category: 'Wedding', shortDescription: 'Grand wedding guest shuttles, bridal luxury cars, and convoy fleet.', published: true }
-];
-
-const DEFAULT_BLOGS = [
-  { _id: 'blg-1', title: 'How to Plan the Ultimate Himachal Road Trip in 2026: Route Guide & Insider Tips', category: 'Himachal Travel Guide', excerpt: 'Complete guide on route planning, expressway corridors, and mountain driving safety.', published: true },
-  { _id: 'blg-2', title: 'Chandigarh to Delhi Airport (IGI T3) Taxi: Why Private Chauffeur Beats Trains and Flights', category: 'Travel Advice', excerpt: 'Why doorstep luxury cab transfers save hours for international departures.', published: true }
-];
 
 const DEFAULT_BOOKINGS = [];
 

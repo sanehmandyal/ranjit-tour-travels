@@ -1754,31 +1754,100 @@ export function Home() {
       {/* TRAVEL SERVICES */}
       <section className="py-16 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-mono text-teal-700 font-bold uppercase tracking-widest">Travel Concierge Services</span>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 mt-1">Complete Travel Solutions</h2>
-            <p className="text-sm text-slate-600 mt-2">
-              From Amb Andaura Railway Station pickups to multi-week royal mountain and pilgrimage circuits.
-            </p>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
+            <div>
+              <span className="text-xs font-mono text-teal-700 font-bold uppercase tracking-widest">Travel Concierge Services</span>
+              <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 mt-1">Complete Travel Solutions</h2>
+              <p className="text-sm text-slate-600 mt-1">
+                From Amb Andaura Railway Station pickups to multi-week royal mountain and pilgrimage circuits.
+              </p>
+            </div>
+            <Link to="/services" className="btn-secondary text-xs self-start sm:self-auto font-semibold">
+              <span>All Services ({services.length}+)</span>
+              <ArrowRight size={14} />
+            </Link>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((sItem) => (
-              <div key={sItem._id} className="travel-card p-6 bg-slate-50/70 border border-slate-200 hover:bg-white hover:shadow-md transition">
-                <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center mb-4 border border-teal-100">
-                  <Compass size={24} />
+              <div key={sItem._id} className="travel-card group p-6 flex flex-col justify-between bg-slate-50/70 border border-slate-200/90 rounded-2xl hover:bg-white hover:shadow-lg hover:border-teal-300/80 transition-all duration-300">
+                <div>
+                  <div className="aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-slate-100">
+                    <Cover 
+                      src={sItem.featuredImage} 
+                      alt={sItem.name} 
+                      className="absolute inset-0 w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <h3 className="font-display font-bold text-lg text-slate-900 mb-2 group-hover:text-teal-700 transition leading-snug">{sItem.name}</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed mb-4 line-clamp-3">{sItem.shortDescription}</p>
                 </div>
-                <h3 className="font-display font-bold text-lg text-slate-900 mb-2">{sItem.name}</h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-4">{sItem.shortDescription}</p>
-                <Link to={`/services/${sItem.slug}`} className="text-xs font-bold text-teal-700 flex items-center gap-1 hover:gap-2 transition">
-                  <span>Service Details</span>
-                  <ArrowRight size={14} />
+                <Link to={`/services/${sItem.slug}`} className="btn-secondary text-xs text-center w-full mt-2 font-bold">
+                  <span>Service Details & Quote</span>
+                  <ArrowRight size={13} />
                 </Link>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* TRAVEL BLOGS & ROAD GUIDES */}
+      {blogs.length > 0 && (
+        <section className="py-16 px-4 bg-slate-50/70 border-t border-slate-200">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
+              <div>
+                <span className="text-xs font-mono text-teal-700 font-bold uppercase tracking-widest">Travel Insights & Guides</span>
+                <h2 className="font-display text-3xl sm:text-4xl font-bold text-slate-900 mt-1">Travel Blogs & Mountain Road Updates</h2>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1">
+                  Expert advice on hill road safety, expressway corridors, and temple circuit routes.
+                </p>
+              </div>
+              <Link to="/blog" className="btn-secondary text-xs self-start sm:self-auto font-semibold">
+                <span>View All Blogs ({blogs.length}+)</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.map((bItem) => (
+                <article key={bItem._id} className="travel-card group flex flex-col justify-between bg-white border border-slate-200/90 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden">
+                  <div>
+                    <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
+                      <Cover 
+                        src={bItem.featuredImage} 
+                        alt={bItem.title} 
+                        className="absolute inset-0 w-full h-full"
+                        imgClassName="group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <span className="absolute top-3 left-3 z-10 bg-white/95 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold shadow-sm backdrop-blur-md">
+                        {bItem.category || 'Travel Guide'}
+                      </span>
+                    </div>
+                    <div className="p-5">
+                      <span className="text-[10px] text-slate-500 uppercase font-mono block mb-1 font-semibold">{bItem.readTime || '5 min read'} · By {bItem.author || 'Ranjit Travels'}</span>
+                      <Link to={`/blog/${bItem.slug}`}>
+                        <h3 className="font-display font-bold text-base text-slate-900 group-hover:text-teal-700 transition line-clamp-2 leading-snug">
+                          {bItem.title}
+                        </h3>
+                      </Link>
+                      <p className="text-xs text-slate-600 mt-2 line-clamp-2 leading-relaxed">{bItem.excerpt}</p>
+                    </div>
+                  </div>
+                  <div className="p-5 pt-0">
+                    <Link to={`/blog/${bItem.slug}`} className="text-xs font-bold text-teal-700 flex items-center gap-1 group-hover:gap-2 transition">
+                      <span>Read Full Article</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* AUTHENTIC GOOGLE MAPS REVIEWS (5.0 STAR RATED) */}
       {testimonials.length > 0 && (
@@ -2434,11 +2503,50 @@ export function Detail({ kind }) {
 
           {/* Overview / Body Content */}
           <section className="travel-card p-6 sm:p-8 bg-white">
-            <h2 className="font-display text-xl font-bold text-slate-900 mb-4">Overview & Details</h2>
-            <div className="text-slate-700 text-sm sm:text-base leading-relaxed whitespace-pre-line space-y-4">
-              {data.description || data.content || data.overview}
+            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+              <h2 className="font-display text-xl font-bold text-slate-900">
+                {kind === 'blog' ? 'Article & Insights' : kind === 'services' ? 'Service Overview' : 'Overview & Details'}
+              </h2>
+              {kind === 'blog' && (
+                <div className="flex items-center gap-3 text-xs text-slate-500 font-mono">
+                  <span>👤 {data.author || 'Ranjit Travels'}</span>
+                  <span>⏱ {data.readTime || '5 min read'}</span>
+                </div>
+              )}
             </div>
+            <div className="text-slate-700 text-sm sm:text-base leading-relaxed whitespace-pre-line space-y-4">
+              {data.content || data.description || data.overview}
+            </div>
+
+            {/* Tags for Blog Posts */}
+            {kind === 'blog' && data.tags && data.tags.length > 0 && (
+              <div className="mt-8 pt-4 border-t border-slate-100 flex items-center flex-wrap gap-2">
+                <span className="text-xs font-bold text-slate-500 uppercase font-mono">Tags:</span>
+                {data.tags.map((tag, tIdx) => (
+                  <span key={tIdx} className="bg-teal-50 text-teal-800 border border-teal-200 text-xs px-2.5 py-1 rounded-full font-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </section>
+
+          {/* Service Features & Inclusions */}
+          {kind === 'services' && data.features && data.features.length > 0 && (
+            <section className="travel-card p-6 sm:p-8 bg-white">
+              <h3 className="font-display font-bold text-lg text-slate-900 mb-4 flex items-center gap-2">
+                <Check size={18} className="text-teal-700" /> Key Features & Inclusions
+              </h3>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {data.features.map((feat, fIdx) => (
+                  <div key={fIdx} className="flex items-center gap-2 text-xs text-slate-800 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    <Check size={14} className="text-teal-600 flex-shrink-0" />
+                    <span>{feat}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Day by Day Itinerary (For Tour Packages) */}
           {data.itinerary && data.itinerary.length > 0 && (
@@ -2612,7 +2720,7 @@ export function Detail({ kind }) {
                 <div>
                   <span className="text-lg sm:text-xl font-bold text-teal-900 font-display flex items-center gap-1.5">
                     <Sparkles size={16} className="text-amber-500" />
-                    {kind === 'cars' ? 'Dedicated Chauffeur Driven Taxi' : kind === 'destinations' ? 'Curated Destination' : 'All-Inclusive Package'}
+                    {kind === 'cars' ? 'Dedicated Chauffeur Driven Taxi' : kind === 'destinations' ? 'Curated Destination' : kind === 'services' ? 'Professional Travel Service' : kind === 'blog' ? 'Travel Expert Assistance' : 'All-Inclusive Package'}
                   </span>
                   <span className="text-xs text-slate-500 block mt-0.5">Custom Itinerary & Quote on Request</span>
                 </div>
@@ -2620,10 +2728,10 @@ export function Detail({ kind }) {
 
               <div className="space-y-3 pt-2">
                 <Link
-                  to={`/booking?${kind === 'cars' ? 'vehicle' : kind === 'destinations' ? 'destination' : 'package'}=${encodeURIComponent(title)}`}
+                  to={`/booking?${kind === 'cars' ? 'vehicle' : kind === 'destinations' ? 'destination' : kind === 'services' ? 'service' : 'package'}=${encodeURIComponent(title)}`}
                   className="btn-primary w-full text-center"
                 >
-                  <span>Book / Request Quote</span>
+                  <span>{kind === 'blog' ? 'Plan Your Trip with Us' : 'Book / Request Quote'}</span>
                   <ArrowRight size={16} />
                 </Link>
 
@@ -2633,6 +2741,10 @@ export function Detail({ kind }) {
                       ? `Hello Ranjit Tour & Travels, I want to book / inquire about the ${title} (${data.seats || 7} Seater) cab from Amb Andaura / Himachal. Please share availability & rates.`
                       : kind === 'tour-packages'
                       ? `Hello Ranjit Tour & Travels, I want details and best quote for the "${title}" tour package (${data.duration || '6N/7D'}).`
+                      : kind === 'services'
+                      ? `Hello Ranjit Tour & Travels, I want to inquire about your service: "${title}". Please share details and pricing.`
+                      : kind === 'blog'
+                      ? `Hello Ranjit Tour & Travels, I read your article "${title}" and want to plan a trip with you.`
                       : `Hello Ranjit Tour & Travels, I want to plan a tour to ${title}. Please share custom itinerary and taxi options.`
                   }
                   label="Inquire on Admin WhatsApp"

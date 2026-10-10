@@ -4,7 +4,7 @@ const blogSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true },
   slug: { type: String, required: true, unique: true, lowercase: true, trim: true },
   excerpt: { type: String, default: '' },
-  content: { type: String, required: true },
+  content: { type: String, default: '' },
   featuredImage: { type: String, default: '' },
   author: { type: String, default: 'Ranjit Tour & Travels Editorial' },
   category: { type: String, default: 'Travel Guide' },

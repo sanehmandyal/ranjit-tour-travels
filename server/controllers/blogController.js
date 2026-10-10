@@ -58,10 +58,11 @@ export const getBlogBySlug = async (req, res, next) => {
 export const createBlog = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    if (data.published === undefined) data.published = true;
     if (!data.slug && data.title) {
       data.slug = slugify(data.title, { lower: true, strict: true });
     }
-    const exists = await Blog.findOne({ slug: data.slug });
+    const exists = await Blog.findOne({ $or: [{ slug: data.slug }, { title: data.title }] });
     if (exists) {
       const updated = await Blog.findByIdAndUpdate(exists._id, data, { new: true });
       return res.status(200).json({ success: true, data: updated });
@@ -76,6 +77,7 @@ export const createBlog = async (req, res, next) => {
 export const updateBlog = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    if (data.published === undefined) data.published = true;
     if (data.title && !data.slug) {
       data.slug = slugify(data.title, { lower: true, strict: true });
     }
