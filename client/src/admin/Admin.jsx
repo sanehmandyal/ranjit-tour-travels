@@ -17,9 +17,7 @@ import {
   DEFAULT_VEHICLES, 
   DEFAULT_SERVICES,
   DEFAULT_BLOGS,
-  DEFAULT_TESTIMONIALS,
-  mergeWithCustomStorage,
-  getStoredCustomItems
+  DEFAULT_TESTIMONIALS
 } from '../pages/Pages.jsx';
 
 const DEFAULT_BOOKINGS = [];
@@ -409,28 +407,22 @@ function ResourceEditor({ resource, item, onDone }) {
       const isEditingExisting = Boolean(item && (item._id || item.slug || item.id));
       if (isEditingExisting) {
         const targetParam = (item._id && item._id.length === 24) ? item._id : (item.slug || item._id || item.id);
-        try {
-          res = await api.put(`/${resource}/${targetParam}`, payload);
-        } catch (putErr) {
-          res = await api.post(`/${resource}`, payload);
-        }
+        res = await api.put(`/${resource}/${targetParam}`, payload);
       } else {
         res = await api.post(`/${resource}`, payload);
       }
-      if (res?.data?.data) {
-        savedItem = { ...res.data.data, ...preparedForm };
-      } else if (res?.data) {
-        savedItem = { ...(res.data._id ? res.data : {}), ...preparedForm };
+      
+      const serverSaved = res?.data?.data || res?.data;
+      if (!serverSaved) {
+        throw new Error('Server did not return the saved record.');
       }
-      onDone(savedItem);
+      onDone(serverSaved);
     } catch (err) {
-      console.warn('Backend direct save deferred, saving locally and queuing background sync:', err.message);
-      onDone(preparedForm);
+      setError(msg(err));
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <form onSubmit={handleSave} className="bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6 relative overflow-hidden text-white">
@@ -663,7 +655,7 @@ function ResourceEditor({ resource, item, onDone }) {
           disabled={loading || uploading}
           className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition cursor-pointer"
         >
-          {loading ? 'Saving…' : 'Save & Publish Live'}
+          {loading ? 'Saving to Cloud…' : 'Save & Publish Live'}
         </button>
         <button
           type="button"
@@ -688,106 +680,19 @@ function ResourceList({ resource }) {
 
   const isInbox = resource === 'bookings' || resource === 'inquiries';
 
-  const saveCustomItems = (items) => {
-    if (!isInbox) {
-      try {
-        localStorage.setItem(`rjt_custom_${resource}`, JSON.stringify(items));
-        window.dispatchEvent(new Event('storage'));
-        window.dispatchEvent(new CustomEvent('rjt_content_updated', { detail: { resource, items } }));
-      } catch (e) {
-        console.warn('Storage sync warn:', e);
-      }
-    }
-  };
-
-  const getFallbackData = () => {
-    if (!isInbox) {
-      try {
-        const stored = localStorage.getItem(`rjt_custom_${resource}`);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            let items = parsed;
-            if (q) {
-              const qLow = q.toLowerCase();
-              items = items.filter(it => 
-                (it.name && it.name.toLowerCase().includes(qLow)) ||
-                (it.title && it.title.toLowerCase().includes(qLow)) ||
-                (it.shortDescription && it.shortDescription.toLowerCase().includes(qLow)) ||
-                (it.state && it.state.toLowerCase().includes(qLow))
-              );
-            }
-            return { items, total: items.length, page: 1, pages: 1 };
-          }
-        }
-      } catch (e) {
-        console.warn('Custom storage read error:', e);
-      }
-    }
-
-    const fallbackMap = {
-      packages: DEFAULT_PACKAGES,
-      destinations: DEFAULT_DESTINATIONS,
-      vehicles: DEFAULT_VEHICLES,
-      services: DEFAULT_SERVICES,
-      blogs: DEFAULT_BLOGS,
-      testimonials: DEFAULT_TESTIMONIALS,
-      bookings: DEFAULT_BOOKINGS,
-      inquiries: DEFAULT_INQUIRIES
-    };
-    let items = fallbackMap[resource] || [];
-    if (q) {
-      const qLow = q.toLowerCase();
-      items = items.filter(it => 
-        (it.name && it.name.toLowerCase().includes(qLow)) ||
-        (it.title && it.title.toLowerCase().includes(qLow)) ||
-        (it.phone && it.phone.includes(qLow)) ||
-        (it.destination && it.destination.toLowerCase().includes(qLow))
-      );
-    }
-    return { items, total: items.length, page: 1, pages: 1 };
-  };
-
   const loadData = () => {
     setLoading(true);
-    const fb = getFallbackData();
+    setError('');
     api.get(`/${resource}`, { params: { q, page, limit: 100, admin: true } })
       .then(res => {
-        if (res.data?.items && res.data.items.length > 0) {
-          if (!isInbox) {
-            const fallbackMap = {
-              packages: DEFAULT_PACKAGES,
-              destinations: DEFAULT_DESTINATIONS,
-              vehicles: DEFAULT_VEHICLES,
-              services: DEFAULT_SERVICES,
-              blogs: DEFAULT_BLOGS,
-              testimonials: DEFAULT_TESTIMONIALS
-            };
-            const merged = mergeWithCustomStorage(resource, res.data.items, fallbackMap[resource] || []);
-            let filtered = merged;
-            if (q) {
-              const qLow = q.toLowerCase();
-              filtered = filtered.filter(it => 
-                (it.name && it.name.toLowerCase().includes(qLow)) ||
-                (it.title && it.title.toLowerCase().includes(qLow)) ||
-                (it.category && it.category.toLowerCase().includes(qLow)) ||
-                (it.shortDescription && it.shortDescription.toLowerCase().includes(qLow)) ||
-                (it.state && it.state.toLowerCase().includes(qLow))
-              );
-            }
-            setData({ ...res.data, items: filtered, total: filtered.length });
-            saveCustomItems(merged);
-          } else {
-            setData(res.data);
-          }
+        if (res.data?.items) {
+          setData(res.data);
         } else {
-          setData(fb);
-          if (!isInbox && fb.items.length > 0) saveCustomItems(fb.items);
+          setData({ items: [], total: 0, page: 1, pages: 1 });
         }
       })
-      .catch(() => {
-        setData(fb);
-        if (!isInbox && fb.items.length > 0) saveCustomItems(fb.items);
+      .catch(err => {
+        setError(msg(err));
       })
       .finally(() => setLoading(false));
   };
@@ -797,18 +702,13 @@ function ResourceList({ resource }) {
   }, [resource, page, q]);
 
   const handleDelete = async (item) => {
-    if (window.confirm(`Are you sure you want to delete this record?`)) {
+    if (window.confirm(`Are you sure you want to delete this record permanently from the database?`)) {
       try {
-        await api.delete(`/${resource}/${item._id}`);
+        const targetId = (item._id && item._id.length === 24) ? item._id : (item.slug || item._id || item.id);
+        await api.delete(`/${resource}/${targetId}`);
+        loadData();
       } catch (err) {
-        console.warn('Backend delete deferred:', err.message);
-      } finally {
-        setData(prev => {
-          if (!prev) return null;
-          const updatedItems = prev.items.filter(i => i._id !== item._id);
-          saveCustomItems(updatedItems);
-          return { ...prev, items: updatedItems, total: Math.max(0, (prev.total || 1) - 1) };
-        });
+        alert('Could not delete from server: ' + msg(err));
       }
     }
   };
@@ -816,13 +716,12 @@ function ResourceList({ resource }) {
   const handleStatusChange = async (item, newStatus) => {
     try {
       await api.put(`/${resource}/${item._id}`, { status: newStatus });
-    } catch (err) {
-      console.warn('Status update deferred:', err.message);
-    } finally {
       setData(prev => prev ? {
         ...prev,
         items: prev.items.map(i => i._id === item._id ? { ...i, status: newStatus } : i)
       } : null);
+    } catch (err) {
+      alert('Could not update status: ' + msg(err));
     }
   };
 
@@ -832,71 +731,10 @@ function ResourceList({ resource }) {
         resource={resource}
         item={editingItem === 'new' ? null : editingItem}
         onDone={(savedForm) => {
-          if (savedForm) {
-            setData(prev => {
-              const currentItems = prev?.items || getFallbackData().items;
-              const itemToSave = { ...savedForm };
-              if (!itemToSave.slug) {
-                const label = itemToSave.name || itemToSave.title || 'item';
-                itemToSave.slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-              }
-              const photo = itemToSave.featuredImage || itemToSave.image || (itemToSave.images && itemToSave.images[0]) || '';
-              if (photo) {
-                itemToSave.featuredImage = photo;
-                itemToSave.image = photo;
-                if (!itemToSave.images || itemToSave.images.length === 0) {
-                  itemToSave.images = [photo];
-                }
-              }
-
-              let updatedItems;
-              if (editingItem && editingItem !== 'new') {
-                const cleanStr = (s) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-                const targetId = (editingItem._id || editingItem.id || '').toString();
-                const targetSlug = cleanStr(editingItem.slug);
-                const targetName = cleanStr(editingItem.name || editingItem.title);
-                const saveId = (savedForm._id || savedForm.id || '').toString();
-                const saveSlug = cleanStr(savedForm.slug);
-                const saveName = cleanStr(savedForm.name || savedForm.title);
-
-                const isTargetMatch = (it) => {
-                  if (!it) return false;
-                  const itId = (it._id || it.id || '').toString();
-                  const itSlug = cleanStr(it.slug);
-                  const itName = cleanStr(it.name || it.title);
-                  return (
-                    (targetId && itId && (itId === targetId)) ||
-                    (targetSlug && itSlug && (itSlug === targetSlug)) ||
-                    (targetName && itName && (itName === targetName || itName.includes(targetName) || targetName.includes(itName))) ||
-                    (saveId && itId && (itId === saveId)) ||
-                    (saveSlug && itSlug && (itSlug === saveSlug)) ||
-                    (saveName && itName && (itName === saveName || itName.includes(saveName) || saveName.includes(itName)))
-                  );
-                };
-
-                const matchFound = currentItems.some(isTargetMatch);
-                if (matchFound) {
-                  updatedItems = currentItems.map(it => isTargetMatch(it) ? { ...it, ...itemToSave } : it);
-                } else {
-                  updatedItems = [itemToSave, ...currentItems];
-                }
-              } else {
-                const newItem = {
-                  ...itemToSave,
-                  _id: itemToSave._id || `${resource.slice(0, 3)}_${Date.now()}`
-                };
-                updatedItems = [newItem, ...currentItems];
-              }
-              saveCustomItems(updatedItems);
-              return {
-                items: updatedItems,
-                total: updatedItems.length,
-                page: 1,
-                pages: 1
-              };
-            });
-          }
           setEditingItem(null);
+          if (savedForm) {
+            loadData();
+          }
         }}
       />
     );
@@ -1414,9 +1252,6 @@ function ChangePasswordSection({ user }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState({ success: false, msg: '' });
-
   const handleChangePassword = async (e) => {
     e.preventDefault();
     setStatus({ success: false, msg: '' });
@@ -1428,27 +1263,19 @@ function ChangePasswordSection({ user }) {
       return setStatus({ success: false, msg: 'New password and confirm password do not match.' });
     }
 
-    const storedCustomPass = localStorage.getItem('rjt_custom_admin_pass');
-    const isCurrentValid = currentPassword === storedCustomPass || currentPassword === 'Ranjit@123';
-
-    if (!isCurrentValid) {
-      return setStatus({ success: false, msg: 'Current password is incorrect. Please enter your valid active password.' });
-    }
-
     setLoading(true);
     try {
-      await api.put('/auth/change-password', {
+      const res = await api.put('/auth/change-password', {
         currentPassword,
         newPassword
       });
-    } catch (err) {
-      console.warn('Backend sync deferred:', err.message);
-    } finally {
-      localStorage.setItem('rjt_custom_admin_pass', newPassword);
-      setStatus({ success: true, msg: 'Password successfully changed! Your new custom password is now active and the old password has been permanently deactivated.' });
+      setStatus({ success: true, msg: res.data?.message || 'Password successfully changed! Your new password is active.' });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+    } catch (err) {
+      setStatus({ success: false, msg: msg(err) || 'Failed to update password. Please check your current password.' });
+    } finally {
       setLoading(false);
     }
   };
@@ -1569,30 +1396,6 @@ export default function Admin() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Auto-sync all customized content to the central cloud server in the background
-  useEffect(() => {
-    try {
-      const payload = {
-        packages: JSON.parse(localStorage.getItem('rjt_custom_packages') || '[]'),
-        vehicles: JSON.parse(localStorage.getItem('rjt_custom_vehicles') || '[]'),
-        destinations: JSON.parse(localStorage.getItem('rjt_custom_destinations') || '[]'),
-        services: JSON.parse(localStorage.getItem('rjt_custom_services') || '[]'),
-        settings: JSON.parse(localStorage.getItem('rjt_custom_settings') || 'null'),
-        testimonials: JSON.parse(localStorage.getItem('rjt_custom_testimonials') || '[]'),
-        gallery: JSON.parse(localStorage.getItem('rjt_custom_gallery') || '[]'),
-        blogs: JSON.parse(localStorage.getItem('rjt_custom_blogs') || '[]')
-      };
-      if (
-        payload.packages.length > 0 ||
-        payload.vehicles.length > 0 ||
-        payload.destinations.length > 0 ||
-        payload.services.length > 0
-      ) {
-        api.post('/sync/bulk', payload).catch(() => {});
-      }
-    } catch (e) {}
-  }, [user]);
 
   useEffect(() => {
     const token = localStorage.getItem('rjt_token');

@@ -96,18 +96,13 @@ export const getServiceBySlug = async (req, res, next) => {
     }
 
     if (!service) {
-      const all = localStore.getCollection('services');
-      service = all[0] || null;
-    }
-
-    if (!service) {
       return res.status(404).json({ success: false, message: 'Service not found.' });
     }
     return res.json(service);
   } catch (err) {
-    const service = localStore.getItem('services', req.params.slug) || localStore.getCollection('services')[0];
+    const service = localStore.getItem('services', req.params.slug);
     if (service) return res.json(service);
-    next(err);
+    return res.status(404).json({ success: false, message: 'Service not found.' });
   }
 };
 

@@ -101,18 +101,13 @@ export const getVehicleBySlug = async (req, res, next) => {
     }
 
     if (!vehicle) {
-      const all = localStore.getCollection('vehicles');
-      vehicle = all[0] || null;
-    }
-
-    if (!vehicle) {
       return res.status(404).json({ success: false, message: 'Vehicle not found.' });
     }
     return res.json(vehicle);
   } catch (err) {
-    const vehicle = localStore.getItem('vehicles', req.params.slug) || localStore.getCollection('vehicles')[0];
+    const vehicle = localStore.getItem('vehicles', req.params.slug);
     if (vehicle) return res.json(vehicle);
-    next(err);
+    return res.status(404).json({ success: false, message: 'Vehicle not found.' });
   }
 };
 

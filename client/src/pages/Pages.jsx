@@ -13,155 +13,18 @@ import {
   Loading, ErrorBox, useSettings, waLink 
 } from '../components/ui.jsx';
 
-// Helper to read customized items from browser storage if modified by Admin
+// Shared fallback helpers
 export const getStoredCustomItems = (resourceKey, defaultList) => {
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const raw = localStorage.getItem(`rjt_custom_${resourceKey}`);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn(`Could not load custom ${resourceKey} storage:`, e);
-  }
-  return defaultList;
+  return defaultList || [];
 };
-
-// Automatic background sync from laptop to live cloud server
-if (typeof window !== 'undefined' && window.localStorage) {
-  try {
-    const hasCustom = 
-      localStorage.getItem('rjt_custom_packages') ||
-      localStorage.getItem('rjt_custom_vehicles') ||
-      localStorage.getItem('rjt_custom_destinations') ||
-      localStorage.getItem('rjt_custom_services');
-    
-    if (hasCustom && !window.__rjt_cloud_synced) {
-      window.__rjt_cloud_synced = true;
-      const payload = {
-        packages: JSON.parse(localStorage.getItem('rjt_custom_packages') || '[]'),
-        vehicles: JSON.parse(localStorage.getItem('rjt_custom_vehicles') || '[]'),
-        destinations: JSON.parse(localStorage.getItem('rjt_custom_destinations') || '[]'),
-        services: JSON.parse(localStorage.getItem('rjt_custom_services') || '[]')
-      };
-      api.post('/sync/bulk', payload).catch(() => {});
-    }
-  } catch (e) {}
-}
 
 const toSlug = (text) => (text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-// Helper to merge server items with admin customized local items without losing uploaded images
 export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems = []) => {
-  let customOverrides = [];
-  try {
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const raw = localStorage.getItem(`rjt_custom_${resourceKey}`);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          customOverrides = parsed;
-        }
-      }
-    }
-  } catch (e) {
-    console.warn(`Could not load custom ${resourceKey} overrides:`, e);
+  if (Array.isArray(serverItems) && serverItems.length > 0) {
+    return serverItems;
   }
-
-  if (!serverItems || serverItems.length === 0) {
-    return customOverrides.length > 0 ? customOverrides : fallbackItems;
-  }
-
-  const clean = (str) => (str || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
-
-  // Server items from MongoDB
-  const merged = serverItems.map(sItem => {
-    const sSlug = clean(sItem.slug || toSlug(sItem.name || sItem.title));
-    const sName = clean(sItem.name || sItem.title);
-    const sId = (sItem._id || sItem.id || '').toString();
-
-    const localMatch = customOverrides.find(lItem => {
-      if (!lItem) return false;
-      const lSlug = clean(lItem.slug || toSlug(lItem.name || lItem.title));
-      const lName = clean(lItem.name || lItem.title);
-      const lId = (lItem._id || lItem.id || '').toString();
-      return (
-        (lId && sId && lId === sId) ||
-        (lSlug && sSlug && (lSlug === sSlug || sSlug.includes(lSlug) || lSlug.includes(sSlug))) ||
-        (lName && sName && (lName === sName || sName.includes(lName) || lName.includes(sName)))
-      );
-    });
-
-    const serverPhoto = sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]) || (sItem.gallery && sItem.gallery[0]) || '';
-    const serverImages = (sItem.images && sItem.images.length > 0) ? sItem.images : ((sItem.gallery && sItem.gallery.length > 0) ? sItem.gallery : []);
-
-    if (localMatch) {
-      const localPhoto = localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || (localMatch.gallery && localMatch.gallery[0]) || '';
-      const localImages = (localMatch.images && localMatch.images.length > 0) ? localMatch.images : ((localMatch.gallery && localMatch.gallery.length > 0) ? localMatch.gallery : []);
-
-      const isCustomLocal = Boolean(localPhoto && !localPhoto.includes('unsplash.com'));
-      const isCustomServer = Boolean(serverPhoto && !serverPhoto.includes('unsplash.com'));
-
-      const activePhoto = isCustomServer ? serverPhoto : (isCustomLocal ? localPhoto : (serverPhoto || localPhoto));
-      const activeImages = isCustomServer && serverImages.length > 0 ? serverImages : (isCustomLocal && localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (localImages.length > 0 ? localImages : (activePhoto ? [activePhoto] : []))));
-
-      return {
-        ...sItem,
-        ...localMatch,
-        _id: sItem._id || localMatch._id,
-        slug: sItem.slug || localMatch.slug,
-        name: sItem.name || localMatch.name,
-        title: sItem.title || localMatch.title,
-        featuredImage: activePhoto,
-        image: activePhoto,
-        images: activeImages,
-        gallery: activeImages
-      };
-    }
-
-    return {
-      ...sItem,
-      featuredImage: serverPhoto,
-      image: serverPhoto,
-      images: serverImages,
-      gallery: serverImages
-    };
-  });
-
-  // Include any new records added locally in Admin that are not yet in serverItems
-  customOverrides.forEach(lItem => {
-    const lSlug = clean(lItem.slug || toSlug(lItem.name || lItem.title));
-    const lName = clean(lItem.name || lItem.title);
-    const lId = (lItem._id || lItem.id || '').toString();
-
-    const exists = merged.some(m => {
-      const mSlug = clean(m.slug || toSlug(m.name || m.title));
-      const mName = clean(m.name || m.title);
-      const mId = (m._id || m.id || '').toString();
-      return (
-        (mId && lId && mId === lId) ||
-        (mSlug && lSlug && (mSlug === lSlug || mSlug.includes(lSlug) || lSlug.includes(mSlug))) ||
-        (mName && lName && (mName === lName || mName.includes(lName) || lName.includes(mName)))
-      );
-    });
-
-    if (!exists) {
-      const lPhoto = lItem.featuredImage || lItem.image || (lItem.images && lItem.images[0]) || '';
-      const lImages = (lItem.images && lItem.images.length > 0) ? lItem.images : (lPhoto ? [lPhoto] : []);
-      merged.push({
-        ...lItem,
-        featuredImage: lPhoto,
-        image: lPhoto,
-        images: lImages
-      });
-    }
-  });
-
-  return merged;
+  return fallbackItems || [];
 };
 
 // Fallback Tour Packages Data (8 Professional Packages)
@@ -1102,11 +965,11 @@ export const DEFAULT_TESTIMONIALS = [
 export function Home() {
   const s = useSettings();
   const navigate = useNavigate();
-  const [destinations, setDestinations] = useState(() => getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
-  const [packages, setPackages] = useState(() => getStoredCustomItems('packages', DEFAULT_PACKAGES));
-  const [vehicles, setVehicles] = useState(() => getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
-  const [services, setServices] = useState(() => getStoredCustomItems('services', DEFAULT_SERVICES));
-  const [blogs, setBlogs] = useState(() => getStoredCustomItems('blogs', DEFAULT_BLOGS));
+  const [destinations, setDestinations] = useState(DEFAULT_DESTINATIONS);
+  const [packages, setPackages] = useState(DEFAULT_PACKAGES);
+  const [vehicles, setVehicles] = useState(DEFAULT_VEHICLES);
+  const [services, setServices] = useState(DEFAULT_SERVICES);
+  const [blogs, setBlogs] = useState(DEFAULT_BLOGS);
   const [testimonials, setTestimonials] = useState(DEFAULT_TESTIMONIALS);
   const [loading, setLoading] = useState(true);
 
@@ -1131,44 +994,26 @@ export function Home() {
       ])
         .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
           if (dRes.data?.items && dRes.data.items.length > 0) {
-            setDestinations(mergeWithCustomStorage('destinations', dRes.data.items, DEFAULT_DESTINATIONS));
-          } else {
-            setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
+            setDestinations(dRes.data.items);
           }
-
           if (pRes.data?.items && pRes.data.items.length > 0) {
-            setPackages(mergeWithCustomStorage('packages', pRes.data.items, DEFAULT_PACKAGES));
-          } else {
-            setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
+            setPackages(pRes.data.items);
           }
-
           if (vRes.data?.items && vRes.data.items.length > 0) {
-            setVehicles(mergeWithCustomStorage('vehicles', vRes.data.items, DEFAULT_VEHICLES));
-          } else {
-            setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
+            setVehicles(vRes.data.items);
           }
-
           if (sRes.data?.items && sRes.data.items.length > 0) {
-            setServices(mergeWithCustomStorage('services', sRes.data.items, DEFAULT_SERVICES));
-          } else {
-            setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
+            setServices(sRes.data.items);
           }
-
           if (bRes.data?.items && bRes.data.items.length > 0) {
-            setBlogs(mergeWithCustomStorage('blogs', bRes.data.items, DEFAULT_BLOGS));
-          } else {
-            setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
+            setBlogs(bRes.data.items);
           }
-
-          setTestimonials(tRes.data?.items?.length > 0 ? tRes.data.items : DEFAULT_TESTIMONIALS);
+          if (tRes.data?.items && tRes.data.items.length > 0) {
+            setTestimonials(tRes.data.items);
+          }
         })
         .catch(err => {
           console.warn('Home live load notice:', err.message);
-          setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
-          setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
-          setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
-          setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
-          setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
         })
         .finally(() => setLoading(false));
     };
@@ -1176,11 +1021,6 @@ export function Home() {
     fetchHomeData();
 
     const handleContentUpdate = () => {
-      setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
-      setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
-      setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
-      setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
-      setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
       fetchHomeData();
     };
 
@@ -2263,23 +2103,22 @@ export function Listing({ kind }) {
     setError('');
 
     const fetchListingData = () => {
-      const customList = getStoredCustomItems(currentCfg.resourceKey, currentCfg.fallback || []);
       api.get(currentCfg.endpoint, {
         params: { page, q, category, state, limit: 24 }
       })
         .then(res => {
           if (res.data?.items && res.data.items.length > 0) {
-            let items = mergeWithCustomStorage(currentCfg.resourceKey, res.data.items, currentCfg.fallback || []);
+            let items = res.data.items;
             if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
-            setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
+            setData({ ...res.data, items, total: res.data.total || items.length, pages: res.data.pages || Math.ceil(items.length / 12) || 1 });
           } else {
-            let items = customList;
+            let items = currentCfg.fallback || [];
             if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
             setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
           }
         })
         .catch(() => {
-          let items = customList;
+          let items = currentCfg.fallback || [];
           if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
           setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
         })
@@ -2667,86 +2506,40 @@ export function Detail({ kind }) {
       resourceKey === 'services' ? DEFAULT_SERVICES : 
       DEFAULT_BLOGS;
 
-    const customList = getStoredCustomItems(resourceKey, fallbackList);
-    const targetSlug = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    const findMatch = (list) => {
-      if (!list || !Array.isArray(list)) return null;
-      return list.find(item => {
-        if (!item) return false;
-        const iSlug = (item.slug || toSlug(item.name || item.title) || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-        const iName = (item.name || item.title || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-        const rawSlug = (slug || '').toLowerCase();
-        return (
-          item.slug === slug || 
-          item._id === slug || 
-          item.id === slug ||
-          iSlug === targetSlug ||
-          iName === targetSlug ||
-          (iSlug && targetSlug && (targetSlug.includes(iSlug) || iSlug.includes(targetSlug))) ||
-          (iName && targetSlug && (targetSlug.includes(iName) || iName.includes(targetSlug)))
-        );
-      });
-    };
-
-    let localMatch = findMatch(customList) || findMatch(fallbackList);
-    if (!localMatch) {
-      const allDefaults = [
-        ...DEFAULT_SERVICES,
-        ...DEFAULT_VEHICLES,
-        ...DEFAULT_PACKAGES,
-        ...DEFAULT_DESTINATIONS,
-        ...DEFAULT_BLOGS
-      ];
-      localMatch = findMatch(allDefaults);
-    }
-    if (!localMatch && fallbackList && fallbackList.length > 0) {
-      localMatch = fallbackList[0];
-    }
-
     const endpoint = endpointMap[kind] || `/services/${slug}`;
 
     api.get(endpoint)
       .then(res => {
         if (res.data && (res.data._id || res.data.name || res.data.title)) {
-          const serverPhoto = res.data.featuredImage || res.data.image || (res.data.images && res.data.images[0]) || (res.data.gallery && res.data.gallery[0]) || '';
-          const localPhoto = localMatch ? (localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || (localMatch.gallery && localMatch.gallery[0]) || '') : '';
-          const isCustomLocal = Boolean(localPhoto && !localPhoto.includes('unsplash.com'));
-          const isCustomServer = Boolean(serverPhoto && !serverPhoto.includes('unsplash.com'));
-
-          const activePhoto = isCustomServer ? serverPhoto : (isCustomLocal ? localPhoto : (serverPhoto || localPhoto));
-          const serverImages = (res.data.images && res.data.images.length > 0) ? res.data.images : ((res.data.gallery && res.data.gallery.length > 0) ? res.data.gallery : []);
-          const localImages = localMatch ? ((localMatch.images && localMatch.images.length > 0) ? localMatch.images : ((localMatch.gallery && localMatch.gallery.length > 0) ? localMatch.gallery : [])) : [];
-          const activeImages = isCustomServer && serverImages.length > 0 ? serverImages : (isCustomLocal && localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (localImages.length > 0 ? localImages : (activePhoto ? [activePhoto] : []))));
-
-          const itemData = localMatch ? {
-            ...res.data,
-            ...localMatch,
-            name: res.data.name || localMatch.name,
-            title: res.data.title || localMatch.title,
-            featuredImage: activePhoto,
-            image: activePhoto,
-            images: activeImages,
-            gallery: activeImages
-          } : {
-            ...res.data,
-            featuredImage: activePhoto,
-            image: activePhoto,
-            images: activeImages,
-            gallery: activeImages
-          };
-          setData(itemData);
-        } else if (localMatch) {
-          setData(localMatch);
+          const item = res.data;
+          const photo = item.featuredImage || item.image || (item.images && item.images[0]) || (item.gallery && item.gallery[0]) || '';
+          const images = (item.images && item.images.length > 0) ? item.images : ((item.gallery && item.gallery.length > 0) ? item.gallery : (photo ? [photo] : []));
+          setData({
+            ...item,
+            featuredImage: photo,
+            image: photo,
+            images,
+            gallery: images
+          });
         } else {
-          setData(fallbackList[0] || DEFAULT_SERVICES[0]);
+          setError('Requested item could not be found.');
         }
       })
-      .catch(() => {
-        if (localMatch) {
-          setData(localMatch);
+      .catch((err) => {
+        const status = err?.response?.status;
+        if (status === 404) {
+          setError('Requested item does not exist or has been removed.');
         } else {
-          setData(fallbackList[0] || DEFAULT_SERVICES[0]);
+          const targetSlug = (slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          const fallbackItem = fallbackList.find(i => {
+            const iSlug = (i.slug || toSlug(i.name || i.title) || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return i.slug === slug || i._id === slug || iSlug === targetSlug;
+          });
+          if (fallbackItem) {
+            setData(fallbackItem);
+          } else {
+            setError(msg(err) || 'Failed to load details. Please try again.');
+          }
         }
       })
       .finally(() => setLoading(false));

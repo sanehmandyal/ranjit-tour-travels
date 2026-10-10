@@ -87,6 +87,15 @@ const generalLimiter = rateLimit({
 });
 app.use('/api', generalLimiter);
 
+// Disable caching on all API responses so mobile & desktop clients always receive live database data
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
 // Root health check & Render ping endpoints (Resolves Render HEAD / 404)
 app.get('/', (req, res) => {
   res.status(200).json({

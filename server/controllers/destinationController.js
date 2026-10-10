@@ -107,18 +107,13 @@ export const getDestinationBySlug = async (req, res, next) => {
     }
 
     if (!destination) {
-      const all = localStore.getCollection('destinations');
-      destination = all[0] || null;
-    }
-
-    if (!destination) {
       return res.status(404).json({ success: false, message: 'Destination not found.' });
     }
     return res.json(destination);
   } catch (err) {
-    const destination = localStore.getItem('destinations', req.params.slug) || localStore.getCollection('destinations')[0];
+    const destination = localStore.getItem('destinations', req.params.slug);
     if (destination) return res.json(destination);
-    next(err);
+    return res.status(404).json({ success: false, message: 'Destination not found.' });
   }
 };
 

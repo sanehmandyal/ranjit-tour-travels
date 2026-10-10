@@ -107,18 +107,13 @@ export const getPackageBySlug = async (req, res, next) => {
     }
 
     if (!pkg) {
-      const all = localStore.getCollection('packages');
-      pkg = all[0] || null;
-    }
-
-    if (!pkg) {
       return res.status(404).json({ success: false, message: 'Package not found.' });
     }
     return res.json(pkg);
   } catch (err) {
-    const pkg = localStore.getItem('packages', req.params.slug) || localStore.getCollection('packages')[0];
+    const pkg = localStore.getItem('packages', req.params.slug);
     if (pkg) return res.json(pkg);
-    next(err);
+    return res.status(404).json({ success: false, message: 'Package not found.' });
   }
 };
 
