@@ -29,6 +29,7 @@ const getInitialData = () => {
     gallery: defaultGallery.map((g, i) => ({ ...g, _id: `gal_${i + 1}`, id: `gal_${i + 1}` })),
     coupons: defaultCoupons.map((c, i) => ({ ...c, _id: `cpn_${i + 1}`, id: `cpn_${i + 1}` })),
     settings: { ...defaultWebsiteSettings, _id: 'settings_master', id: 'settings_master' },
+    adminPassword: 'Ranjit@123',
     bookings: [],
     inquiries: []
   };
@@ -143,5 +144,17 @@ export const localStore = {
     store.settings = { ...(store.settings || defaultWebsiteSettings), ...newSettings, updatedAt: new Date().toISOString() };
     saveStore();
     return store.settings;
+  },
+
+  getAdminPassword: () => {
+    const store = loadStore();
+    return store.adminPassword || 'Ranjit@123';
+  },
+
+  setAdminPassword: (newPassword) => {
+    const store = loadStore();
+    store.adminPassword = newPassword;
+    saveStore();
+    return newPassword;
   }
 };

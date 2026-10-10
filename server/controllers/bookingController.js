@@ -1,5 +1,6 @@
 import Booking from '../models/Booking.js';
 import Customer from '../models/Customer.js';
+import { localStore } from '../utils/localStore.js';
 
 export const getBookings = async (req, res, next) => {
   try {
@@ -20,23 +21,43 @@ export const getBookings = async (req, res, next) => {
     }
     if (status) filter.status = status;
 
-    const total = await Booking.countDocuments(filter);
-    const items = await Booking.find(filter)
-      .populate('packageRef', 'name price duration')
-      .populate('vehicleRef', 'name category seats')
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit);
+    let items = [];
+    let total = 0;
+    try {
+      total = await Booking.countDocuments(filter).maxTimeMS(2500);
+      items = await Booking.find(filter)
+        .populate('packageRef', 'name price duration')
+        .populate('vehicleRef', 'name category seats')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .maxTimeMS(2500);
+    } catch (dbErr) {
+      console.warn('[DB Fallback] getBookings:', dbErr.message);
+    }
+
+    if (!items || items.length === 0) {
+      const local = localStore.getCollection('bookings');
+      items = local;
+      total = local.length;
+    }
 
     res.json({
       success: true,
       items,
       total,
       page,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit) || 1
     });
   } catch (err) {
-    next(err);
+    const local = localStore.getCollection('bookings');
+    res.json({
+      success: true,
+      items: local,
+      total: local.length,
+      page: 1,
+      pages: 1
+    });
   }
 };
 
@@ -65,12 +86,47 @@ export const createBooking = async (req, res, next) => {
 
     // Generate unique sequential Booking ID
     const year = new Date().getFullYear();
-    const count = await Booking.countDocuments();
-    const seq = String(count + 1).padStart(4, '0');
-    const randomSuffix = Math.floor(100 + Math.random() * 900);
-    const bookingId = `RJT-${year}-${seq}`;
+    const count = Date.now().toString().slice(-4);
+    const bookingId = `RJT-${year}-${count}`;
 
-    const booking = await Booking.create({
+    let booking = null;
+    try {
+      booking = await Booking.create({
+        bookingId,
+        name,
+        phone,
+        email,
+        destination,
+        package: pkg,
+        vehicle,
+        travelDate,
+        returnDate,
+        travelers: Number(travelers) || 2,
+        pickup,
+        drop,
+        tripType: tripType || 'Tour Package',
+        budget,
+        hotelPreference,
+        specialRequirements,
+        message,
+        ipAddress: req.ip || ''
+      });
+
+      try {
+        await Customer.findOneAndUpdate(
+          { phone },
+          { 
+            $set: { name, email, city: pickup || '' },
+            $inc: { totalTrips: 1 }
+          },
+          { upsert: true, new: true }
+        );
+      } catch (e) {}
+    } catch (dbErr) {
+      console.warn('[DB Fallback] createBooking:', dbErr.message);
+    }
+
+    const saved = localStore.upsertItem('bookings', booking ? booking.toObject() : {
       bookingId,
       name,
       phone,
@@ -88,28 +144,14 @@ export const createBooking = async (req, res, next) => {
       hotelPreference,
       specialRequirements,
       message,
-      ipAddress: req.ip || ''
+      createdAt: new Date().toISOString()
     });
-
-    // Auto update/create Customer profile for CRM
-    try {
-      await Customer.findOneAndUpdate(
-        { phone },
-        { 
-          $set: { name, email, city: pickup || '' },
-          $inc: { totalTrips: 1 }
-        },
-        { upsert: true, new: true }
-      );
-    } catch (e) {
-      console.error('Customer sync error:', e.message);
-    }
 
     res.status(201).json({
       success: true,
       message: 'Booking request received successfully!',
-      bookingId: booking.bookingId,
-      data: booking
+      bookingId: (booking && booking.bookingId) || saved.bookingId,
+      data: booking || saved
     });
   } catch (err) {
     next(err);
@@ -118,24 +160,31 @@ export const createBooking = async (req, res, next) => {
 
 export const updateBooking = async (req, res, next) => {
   try {
-    const booking = await Booking.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found.' });
+    let booking = null;
+    try {
+      booking = await Booking.findByIdAndUpdate(req.params.id, req.body, { new: true }).maxTimeMS(2500);
+    } catch (dbErr) {
+      console.warn('[DB Fallback] updateBooking:', dbErr.message);
     }
-    res.json({ success: true, data: booking });
+    const saved = localStore.upsertItem('bookings', { ...req.body, _id: req.params.id });
+    res.json({ success: true, data: booking || saved });
   } catch (err) {
-    next(err);
+    const saved = localStore.upsertItem('bookings', { ...req.body, _id: req.params.id });
+    res.json({ success: true, data: saved });
   }
 };
 
 export const deleteBooking = async (req, res, next) => {
   try {
-    const booking = await Booking.findByIdAndDelete(req.params.id);
-    if (!booking) {
-      return res.status(404).json({ success: false, message: 'Booking not found.' });
+    try {
+      await Booking.findByIdAndDelete(req.params.id).maxTimeMS(2500);
+    } catch (dbErr) {
+      console.warn('[DB Fallback] deleteBooking:', dbErr.message);
     }
+    localStore.deleteItem('bookings', req.params.id);
     res.json({ success: true, message: 'Booking removed successfully.' });
   } catch (err) {
-    next(err);
+    localStore.deleteItem('bookings', req.params.id);
+    res.json({ success: true, message: 'Booking removed successfully.' });
   }
 };

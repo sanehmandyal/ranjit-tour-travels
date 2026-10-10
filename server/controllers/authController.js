@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { localStore } from '../utils/localStore.js';
 
 const getJwtSecret = () => process.env.JWT_SECRET || 'RanjitTourTravels_2026_HP_RoyalRoute_SecretToken_Key#9816596713!';
 
@@ -36,11 +37,9 @@ export const login = async (req, res, next) => {
     }
     const cleanEmail = email.toLowerCase().trim();
     const masterAdminEmail = (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim();
-    const masterAdminPass = (process.env.ADMIN_PASSWORD || 'Ranjit@123').replace(/^["']|["']$/g, '').trim();
+    const currentGlobalAdminPass = (localStore.getAdminPassword() || process.env.ADMIN_PASSWORD || 'Ranjit@123').replace(/^["']|["']$/g, '').trim();
 
-    const isMasterPasswordInput = 
-      password === masterAdminPass ||
-      password === 'Ranjit@123';
+    const isMasterPasswordInput = password === currentGlobalAdminPass;
 
     let user = null;
     let dbAvailable = false;
@@ -164,43 +163,51 @@ export const changePassword = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
     }
 
+    const currentGlobalAdminPass = (localStore.getAdminPassword() || process.env.ADMIN_PASSWORD || 'Ranjit@123').replace(/^["']|["']$/g, '').trim();
+
     let user = null;
     try {
-      if (req.user._id && req.user._id !== 'master_admin_fallback_id') {
+      if (req.user && req.user._id && req.user._id !== 'master_admin_fallback_id') {
         user = await User.findById(req.user._id);
       }
     } catch (e) {}
 
-    const masterAdminPass = (process.env.ADMIN_PASSWORD || 'Ranjit@123').replace(/^["']|["']$/g, '').trim();
+    let isCurrentValid = currentPassword === currentGlobalAdminPass;
+    if (!isCurrentValid && user) {
+      try {
+        isCurrentValid = await user.comparePassword(currentPassword);
+      } catch (err) {}
+    }
 
-    if (!user) {
-      const isMasterPass = currentPassword === masterAdminPass || currentPassword === 'Ranjit@123';
-      if (!isMasterPass) {
-        return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
-      }
+    if (!isCurrentValid) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect. Please enter your valid active password.' });
+    }
+
+    // 1. Save new password globally in server store
+    localStore.setAdminPassword(newPassword);
+
+    // 2. Sync into MongoDB user document
+    if (user) {
+      user.password = newPassword;
+      await user.save();
+    } else {
       try {
         user = new User({
-          name: req.user.name || 'Super Admin (Ranjit Tours)',
-          email: req.user.email || 'admin@ranjittravels.com',
+          name: (req.user && req.user.name) || 'Super Admin (Ranjit Tours)',
+          email: (req.user && req.user.email) || 'admin@ranjittravels.com',
           password: newPassword,
           role: 'superadmin',
-          phone: req.user.phone || '+919816596713',
+          phone: (req.user && req.user.phone) || '+919816596713',
           isActive: true
         });
         await user.save();
-        return res.json({ success: true, message: 'Password updated successfully! Your new password is now active.' });
-      } catch (err) {
-        return res.json({ success: true, message: 'Password updated successfully!' });
-      }
+      } catch (saveErr) {}
     }
 
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res.status(400).json({ success: false, message: 'Current password is incorrect. Please enter your valid current password.' });
-    }
-    user.password = newPassword;
-    await user.save();
-    res.json({ success: true, message: 'Password updated successfully! Your new password is now active and required for all future logins.' });
+    return res.json({ 
+      success: true, 
+      message: 'Password successfully updated across the website! Your new password is now active and the old password is permanently deactivated.' 
+    });
   } catch (err) {
     next(err);
   }
