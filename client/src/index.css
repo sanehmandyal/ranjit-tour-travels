@@ -59,6 +59,17 @@ img, video, svg, canvas {
   height: auto;
 }
 
+.cover-img,
+[data-cover="true"],
+.travel-card img {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
 button, a, input, select, textarea {
   touch-action: manipulation;
 }

@@ -131,17 +131,30 @@ export function Cover({ src, alt, className = '', imgClassName = '' }) {
   const resolvedSrc = hasError || !src ? fallbackImg : img(src);
 
   return (
-    <div className={`w-full h-full relative overflow-hidden ${className}`}>
+    <div className={`w-full h-full relative overflow-hidden bg-slate-100 ${className}`}>
       <img
         src={resolvedSrc}
         alt={alt || 'Ranjit Tour & Travels'}
         loading="lazy"
+        data-cover="true"
         onLoad={() => setLoaded(true)}
         onError={() => {
           setHasError(true);
           setLoaded(true);
         }}
-        className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out ${loaded ? 'scale-100 opacity-100' : 'scale-105 opacity-90'} ${imgClassName}`}
+        className={`cover-img absolute inset-0 w-full h-full object-cover object-center transition-all duration-500 ease-out ${loaded ? 'scale-100 opacity-100' : 'scale-105 opacity-90'} ${imgClassName}`}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          maxWidth: 'none',
+          maxHeight: 'none',
+          objectFit: 'cover',
+          objectPosition: 'center',
+          display: 'block'
+        }}
       />
     </div>
   );
