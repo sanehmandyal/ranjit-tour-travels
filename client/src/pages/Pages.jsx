@@ -31,6 +31,8 @@ export const getStoredCustomItems = (resourceKey, defaultList) => {
   return defaultList;
 };
 
+const toSlug = (text) => (text || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
 // Helper to merge server items with admin customized local items without losing uploaded images
 export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems = []) => {
   let customOverrides = [];
@@ -52,50 +54,62 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
     return customOverrides.length > 0 ? customOverrides : fallbackItems;
   }
 
-  // Server items are authoritative from MongoDB
+  // Server items from MongoDB
   const merged = serverItems.map(sItem => {
-    const localMatch = customOverrides.find(lItem => 
-      (lItem._id && (lItem._id === sItem._id || lItem._id === sItem.id)) || 
-      (lItem.slug && lItem.slug === sItem.slug) || 
-      (lItem.name && sItem.name && lItem.name.trim().toLowerCase() === sItem.name.trim().toLowerCase()) ||
-      (lItem.title && sItem.title && lItem.title.trim().toLowerCase() === sItem.title.trim().toLowerCase())
-    );
+    const sSlug = sItem.slug || toSlug(sItem.name || sItem.title);
+    const sName = (sItem.name || sItem.title || '').trim().toLowerCase();
 
-    // Prioritize uploaded photos (Base64 data URLs, http URLs, or local overrides)
+    const localMatch = customOverrides.find(lItem => {
+      const lSlug = lItem.slug || toSlug(lItem.name || lItem.title);
+      const lName = (lItem.name || lItem.title || '').trim().toLowerCase();
+      return (
+        (lItem._id && (lItem._id === sItem._id || lItem._id === sItem.id)) ||
+        (lSlug && sSlug && lSlug === sSlug) ||
+        (lName && sName && (lName === sName || sName.includes(lName) || lName.includes(sName)))
+      );
+    });
+
     const serverPhoto = sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]) || '';
-    const localPhoto = localMatch ? (localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || '') : '';
-    const resolvedPhoto = serverPhoto || localPhoto;
-
     const serverImages = (sItem.images && sItem.images.length > 0) ? sItem.images : [];
-    const localImages = (localMatch && localMatch.images && localMatch.images.length > 0) ? localMatch.images : [];
-    const resolvedImages = serverImages.length > 0 ? serverImages : (localImages.length > 0 ? localImages : (resolvedPhoto ? [resolvedPhoto] : []));
 
     if (localMatch) {
+      const localPhoto = localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || '';
+      const activePhoto = localPhoto || serverPhoto;
+      const localImages = (localMatch.images && localMatch.images.length > 0) ? localMatch.images : [];
+      const activeImages = localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (activePhoto ? [activePhoto] : []));
+
       return {
-        ...localMatch,
         ...sItem,
-        featuredImage: resolvedPhoto,
-        image: resolvedPhoto,
-        images: resolvedImages
+        ...localMatch,
+        featuredImage: activePhoto,
+        image: activePhoto,
+        images: activeImages
       };
     }
 
     return {
       ...sItem,
-      featuredImage: resolvedPhoto,
-      image: resolvedPhoto,
-      images: resolvedImages
+      featuredImage: serverPhoto,
+      image: serverPhoto,
+      images: serverImages
     };
   });
 
   // Include any new records added locally in Admin that are not yet in serverItems
   customOverrides.forEach(lItem => {
-    const exists = merged.some(m => 
-      (m._id && (m._id === lItem._id || m._id === lItem.id)) || 
-      (m.slug && m.slug === lItem.slug) || 
-      (m.name && lItem.name && m.name.trim().toLowerCase() === lItem.name.trim().toLowerCase()) ||
-      (m.title && lItem.title && m.title.trim().toLowerCase() === lItem.title.trim().toLowerCase())
-    );
+    const lSlug = lItem.slug || toSlug(lItem.name || lItem.title);
+    const lName = (lItem.name || lItem.title || '').trim().toLowerCase();
+
+    const exists = merged.some(m => {
+      const mSlug = m.slug || toSlug(m.name || m.title);
+      const mName = (m.name || m.title || '').trim().toLowerCase();
+      return (
+        (m._id && (m._id === lItem._id || m._id === lItem.id)) ||
+        (mSlug && lSlug && mSlug === lSlug) ||
+        (mName && lName && (mName === lName || mName.includes(lName) || lName.includes(mName)))
+      );
+    });
+
     if (!exists) {
       const lPhoto = lItem.featuredImage || lItem.image || (lItem.images && lItem.images[0]) || '';
       const lImages = (lItem.images && lItem.images.length > 0) ? lItem.images : (lPhoto ? [lPhoto] : []);
@@ -2484,12 +2498,19 @@ export function Detail({ kind }) {
       kind === 'services' ? DEFAULT_SERVICES : 
       DEFAULT_BLOGS;
     const customList = getStoredCustomItems(resourceKey, fallbackList);
-    const localMatch = customList.find(item => 
-      item.slug === slug || 
-      item._id === slug || 
-      (item.name && item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === slug) ||
-      (item.title && item.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') === slug)
-    );
+    const localMatch = customList.find(item => {
+      const iSlug = item.slug || toSlug(item.name || item.title);
+      const iName = (item.name || item.title || '').trim().toLowerCase();
+      const targetSlug = slug.toLowerCase();
+      return (
+        item.slug === slug || 
+        item._id === slug || 
+        iSlug === targetSlug ||
+        iName === targetSlug ||
+        targetSlug.includes(iSlug) ||
+        iSlug.includes(targetSlug)
+      );
+    });
 
     api.get(endpointMap[kind] || `/packages/${slug}`)
       .then(res => {
