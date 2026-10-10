@@ -294,6 +294,39 @@ function AdminLogin({ onLoginSuccess }) {
   );
 }
 
+// Compress client-side uploaded photos to high quality, compact Base64 Data URL (ensures photos never disappear)
+const compressImageFile = (file, maxWidth = 1600, maxHeight = 1600, quality = 0.85) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+        if (width > maxWidth || height > maxHeight) {
+          if (width > height) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          } else {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = () => resolve(e.target.result);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 // 2. Resource Item Editor (Add / Edit Form with Glassmorphism)
 function ResourceEditor({ resource, item, onDone }) {
   const fields = RESOURCE_FIELDS[resource] || [];
@@ -313,64 +346,48 @@ function ResourceEditor({ resource, item, onDone }) {
     }
   }, [resource]);
 
-  const handleFileUpload = (fieldKey, file) => {
+  const handleFileUpload = async (fieldKey, file) => {
     if (!file) return;
     setUploading(true);
     setError('');
 
-    // Instant local file reader - loads photo immediately from admin device (phone/PC)
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64Url = e.target.result;
+    try {
+      // Compress to high quality compact Base64 Data URL (stored directly in MongoDB & localStorage permanently)
+      const base64Url = await compressImageFile(file, 1600, 1600, 0.85);
       if (fieldKey === 'images') {
         setForm(prev => ({ ...prev, images: [...(prev.images || []), base64Url] }));
       } else {
         setForm(prev => setVal(prev, fieldKey, base64Url));
       }
-
-      // Sync upload with backend
-      try {
-        const fd = new FormData();
-        fd.append('image', file);
-        const res = await api.post('/upload', fd);
-        if (res.data?.url) {
-          if (fieldKey === 'images') {
-            setForm(prev => ({
-              ...prev,
-              images: (prev.images || []).map(im => im === base64Url ? res.data.url : im)
-            }));
-          } else {
-            setForm(prev => setVal(prev, fieldKey, res.data.url));
-          }
-        }
-      } catch (err) {
-        console.warn('Backend upload notice (photo saved in document):', err.message);
-      } finally {
-        setUploading(false);
-      }
-    };
-    reader.onerror = () => {
-      setError('Could not read file from device.');
+    } catch (err) {
+      setError('Could not process image from device: ' + err.message);
+    } finally {
       setUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    let savedItem = form;
     try {
+      let res;
       if (item?._id) {
-        await api.put(`/${resource}/${item._id}`, form);
+        res = await api.put(`/${resource}/${item._id}`, form);
+      } else if (item?.slug) {
+        res = await api.put(`/${resource}/${item.slug}`, form);
       } else {
-        await api.post(`/${resource}`, form);
+        res = await api.post(`/${resource}`, form);
+      }
+      if (res?.data?.data) {
+        savedItem = res.data.data;
       }
     } catch (err) {
-      console.warn('Backend save deferred:', err.message);
+      console.warn('Backend save notice (cached locally):', err.message);
     } finally {
       setLoading(false);
-      onDone(form);
+      onDone(savedItem);
     }
   };
 
@@ -745,8 +762,25 @@ function ResourceList({ resource }) {
                 itemToSave.slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
               }
               let updatedItems;
-              if (editingItem && editingItem !== 'new' && editingItem._id) {
-                updatedItems = currentItems.map(it => it._id === editingItem._id ? { ...it, ...itemToSave } : it);
+              if (editingItem && editingItem !== 'new') {
+                const targetId = editingItem._id;
+                const targetSlug = editingItem.slug;
+                const matchFound = currentItems.some(it => 
+                  (targetId && it._id === targetId) || 
+                  (targetSlug && it.slug === targetSlug) ||
+                  (savedForm._id && it._id === savedForm._id) ||
+                  (savedForm.slug && it.slug === savedForm.slug)
+                );
+                if (matchFound) {
+                  updatedItems = currentItems.map(it => 
+                    ((targetId && it._id === targetId) || 
+                     (targetSlug && it.slug === targetSlug) ||
+                     (savedForm._id && it._id === savedForm._id) ||
+                     (savedForm.slug && it.slug === savedForm.slug)) ? { ...it, ...itemToSave } : it
+                  );
+                } else {
+                  updatedItems = [itemToSave, ...currentItems];
+                }
               } else {
                 const newItem = {
                   ...itemToSave,

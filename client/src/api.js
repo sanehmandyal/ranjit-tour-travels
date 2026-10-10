@@ -45,6 +45,6 @@ export const img = url => {
   if (url.startsWith('/images/') || url.startsWith('images/') || url.startsWith('/favicon') || url.startsWith('/icons/')) {
     return url.startsWith('/') ? url : `/${url}`;
   }
-  const apiOrigin = import.meta.env.VITE_API_ORIGIN || 'http://localhost:5000';
+  const apiOrigin = import.meta.env.VITE_API_ORIGIN || cleanApiUrl.replace(/\/api\/?$/, '') || 'http://localhost:5000';
   return `${apiOrigin}${url.startsWith('/') ? '' : '/'}${url}`;
 };

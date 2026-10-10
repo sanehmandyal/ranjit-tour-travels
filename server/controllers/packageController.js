@@ -1,14 +1,15 @@
 import TourPackage from '../models/TourPackage.js';
 import slugify from 'slugify';
+import mongoose from 'mongoose';
 
 export const getPackages = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 12;
+    const limit = parseInt(req.query.limit) || 50;
     const q = req.query.q || '';
-    const category = req.query.category || '';
     const destination = req.query.destination || '';
-    const maxPrice = req.query.maxPrice ? Number(req.query.maxPrice) : null;
+    const category = req.query.category || '';
+    const duration = req.query.duration || '';
     const publishedOnly = req.query.admin ? {} : { published: true };
 
     const filter = { ...publishedOnly };
@@ -19,14 +20,14 @@ export const getPackages = async (req, res, next) => {
         { category: { $regex: q, $options: 'i' } }
       ];
     }
-    if (category) filter.category = category;
     if (destination) filter.destination = destination;
-    if (maxPrice) filter.price = { $lte: maxPrice };
+    if (category) filter.category = category;
+    if (duration) filter.duration = duration;
 
     const total = await TourPackage.countDocuments(filter);
     const items = await TourPackage.find(filter)
-      .populate('destination', 'name slug state')
-      .sort({ isFeatured: -1, createdAt: -1 })
+      .populate('destination', 'name state')
+      .sort({ isFeatured: -1, rating: -1, createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -35,7 +36,7 @@ export const getPackages = async (req, res, next) => {
       items,
       total,
       page,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit) || 1
     });
   } catch (err) {
     next(err);
@@ -44,9 +45,12 @@ export const getPackages = async (req, res, next) => {
 
 export const getPackageBySlug = async (req, res, next) => {
   try {
-    const pkg = await TourPackage.findOne({ 
-      $or: [{ slug: req.params.slug }, { _id: req.params.slug.match(/^[0-9a-fA-F]{24}$/) ? req.params.slug : null }] 
-    }).populate('destination');
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug) && req.params.slug.length === 24;
+    const query = isObjectId
+      ? { $or: [{ _id: req.params.slug }, { slug: req.params.slug }] }
+      : { slug: req.params.slug };
+
+    const pkg = await TourPackage.findOne(query).populate('destination');
     if (!pkg) {
       return res.status(404).json({ success: false, message: 'Package not found.' });
     }
@@ -64,7 +68,8 @@ export const createPackage = async (req, res, next) => {
     }
     const exists = await TourPackage.findOne({ slug: data.slug });
     if (exists) {
-      data.slug = `${data.slug}-${Date.now()}`;
+      const updated = await TourPackage.findByIdAndUpdate(exists._id, data, { new: true });
+      return res.status(200).json({ success: true, data: updated });
     }
     const pkg = await TourPackage.create(data);
     res.status(201).json({ success: true, data: pkg });
@@ -79,10 +84,27 @@ export const updatePackage = async (req, res, next) => {
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
-    const pkg = await TourPackage.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
-    if (!pkg) {
-      return res.status(404).json({ success: false, message: 'Package not found.' });
+
+    let pkg = null;
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
+
+    if (isObjectId) {
+      pkg = await TourPackage.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
     }
+
+    if (!pkg) {
+      const matchCriteria = [];
+      if (data.slug) matchCriteria.push({ slug: data.slug });
+      if (req.params.id) matchCriteria.push({ slug: req.params.id });
+      if (data.name) matchCriteria.push({ name: data.name });
+
+      pkg = await TourPackage.findOneAndUpdate(
+        { $or: matchCriteria },
+        { $set: data },
+        { new: true, upsert: true, runValidators: false }
+      );
+    }
+
     res.json({ success: true, data: pkg });
   } catch (err) {
     next(err);
@@ -91,7 +113,13 @@ export const updatePackage = async (req, res, next) => {
 
 export const deletePackage = async (req, res, next) => {
   try {
-    const pkg = await TourPackage.findByIdAndDelete(req.params.id);
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
+    let pkg = null;
+    if (isObjectId) {
+      pkg = await TourPackage.findByIdAndDelete(req.params.id);
+    } else {
+      pkg = await TourPackage.findOneAndDelete({ $or: [{ slug: req.params.id }, { name: req.params.id }] });
+    }
     if (!pkg) {
       return res.status(404).json({ success: false, message: 'Package not found.' });
     }

@@ -909,49 +909,45 @@ export function Home() {
     Promise.all([
       api.get('/destinations?limit=12'),
       api.get('/packages?limit=12'),
-      api.get('/vehicles?limit=8'),
-      api.get('/services?limit=6'),
-      api.get('/blogs?limit=6'),
-      api.get('/testimonials?limit=6')
+      api.get('/vehicles?limit=12'),
+      api.get('/services?limit=12'),
+      api.get('/blogs?limit=12'),
+      api.get('/testimonials?limit=12')
     ])
       .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
-        const customDests = getStoredCustomItems('destinations', null);
-        if (customDests && customDests.length > 0) {
-          setDestinations(customDests);
-        } else if (dRes.data?.items && dRes.data.items.length > 0) {
+        if (dRes.data?.items && dRes.data.items.length > 0) {
           setDestinations(dRes.data.items);
+          try { localStorage.setItem('rjt_custom_destinations', JSON.stringify(dRes.data.items)); } catch(e){}
+        } else {
+          setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
         }
 
-        const customPkgs = getStoredCustomItems('packages', null);
-        if (customPkgs && customPkgs.length > 0) {
-          setPackages(customPkgs);
-        } else if (pRes.data?.items && pRes.data.items.length > 0) {
+        if (pRes.data?.items && pRes.data.items.length > 0) {
           setPackages(pRes.data.items);
+          try { localStorage.setItem('rjt_custom_packages', JSON.stringify(pRes.data.items)); } catch(e){}
+        } else {
+          setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
         }
 
-        const customVehs = getStoredCustomItems('vehicles', null);
-        if (customVehs && customVehs.length > 0) {
-          setVehicles(customVehs);
-        } else if (vRes.data?.items && vRes.data.items.length > 0) {
+        if (vRes.data?.items && vRes.data.items.length > 0) {
           setVehicles(vRes.data.items);
+          try { localStorage.setItem('rjt_custom_vehicles', JSON.stringify(vRes.data.items)); } catch(e){}
+        } else {
+          setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
         }
 
-        const customSrvs = getStoredCustomItems('services', null);
-        if (customSrvs && customSrvs.length > 0) {
-          setServices(customSrvs);
-        } else if (sRes.data?.items && sRes.data.items.length > 0) {
+        if (sRes.data?.items && sRes.data.items.length > 0) {
           setServices(sRes.data.items);
+          try { localStorage.setItem('rjt_custom_services', JSON.stringify(sRes.data.items)); } catch(e){}
         } else {
-          setServices(DEFAULT_SERVICES);
+          setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
         }
 
-        const customBlgs = getStoredCustomItems('blogs', null);
-        if (customBlgs && customBlgs.length > 0) {
-          setBlogs(customBlgs);
-        } else if (bRes.data?.items && bRes.data.items.length > 0) {
+        if (bRes.data?.items && bRes.data.items.length > 0) {
           setBlogs(bRes.data.items);
+          try { localStorage.setItem('rjt_custom_blogs', JSON.stringify(bRes.data.items)); } catch(e){}
         } else {
-          setBlogs(DEFAULT_BLOGS);
+          setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
         }
 
         setTestimonials(tRes.data?.items?.length > 0 ? tRes.data.items : DEFAULT_TESTIMONIALS);
@@ -1970,18 +1966,14 @@ export function Listing({ kind }) {
     const customList = getStoredCustomItems(currentCfg.resourceKey, currentCfg.fallback || []);
 
     api.get(currentCfg.endpoint, {
-      params: { page, q, category, state, limit: 12 }
+      params: { page, q, category, state, limit: 24 }
     })
       .then(res => {
         if (res.data?.items && res.data.items.length > 0) {
-          const stored = localStorage.getItem(`rjt_custom_${currentCfg.resourceKey}`);
-          if (stored) {
-            let items = customList;
-            if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
-            setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
-          } else {
-            setData(res.data);
-          }
+          let items = res.data.items;
+          try { localStorage.setItem(`rjt_custom_${currentCfg.resourceKey}`, JSON.stringify(items)); } catch(e){}
+          if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
+          setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
         } else {
           let items = customList;
           if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
@@ -2353,10 +2345,10 @@ export function Detail({ kind }) {
 
     api.get(endpointMap[kind] || `/packages/${slug}`)
       .then(res => {
-        if (localMatch) {
-          setData({ ...res.data, ...localMatch });
-        } else {
+        if (res.data) {
           setData(res.data);
+        } else if (localMatch) {
+          setData(localMatch);
         }
       })
       .catch(err => {

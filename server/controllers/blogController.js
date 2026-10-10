@@ -1,10 +1,11 @@
 import Blog from '../models/Blog.js';
 import slugify from 'slugify';
+import mongoose from 'mongoose';
 
 export const getBlogs = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = parseInt(req.query.limit) || 50;
     const q = req.query.q || '';
     const category = req.query.category || '';
     const publishedOnly = req.query.admin ? {} : { published: true };
@@ -30,7 +31,7 @@ export const getBlogs = async (req, res, next) => {
       items,
       total,
       page,
-      pages: Math.ceil(total / limit)
+      pages: Math.ceil(total / limit) || 1
     });
   } catch (err) {
     next(err);
@@ -39,9 +40,12 @@ export const getBlogs = async (req, res, next) => {
 
 export const getBlogBySlug = async (req, res, next) => {
   try {
-    const blog = await Blog.findOne({
-      $or: [{ slug: req.params.slug }, { _id: req.params.slug.match(/^[0-9a-fA-F]{24}$/) ? req.params.slug : null }]
-    });
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.slug) && req.params.slug.length === 24;
+    const query = isObjectId
+      ? { $or: [{ _id: req.params.slug }, { slug: req.params.slug }] }
+      : { slug: req.params.slug };
+
+    const blog = await Blog.findOne(query);
     if (!blog) {
       return res.status(404).json({ success: false, message: 'Blog article not found.' });
     }
@@ -59,7 +63,8 @@ export const createBlog = async (req, res, next) => {
     }
     const exists = await Blog.findOne({ slug: data.slug });
     if (exists) {
-      data.slug = `${data.slug}-${Date.now()}`;
+      const updated = await Blog.findByIdAndUpdate(exists._id, data, { new: true });
+      return res.status(200).json({ success: true, data: updated });
     }
     const blog = await Blog.create(data);
     res.status(201).json({ success: true, data: blog });
@@ -74,10 +79,27 @@ export const updateBlog = async (req, res, next) => {
     if (data.title && !data.slug) {
       data.slug = slugify(data.title, { lower: true, strict: true });
     }
-    const blog = await Blog.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
-    if (!blog) {
-      return res.status(404).json({ success: false, message: 'Blog article not found.' });
+
+    let blog = null;
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
+
+    if (isObjectId) {
+      blog = await Blog.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: false });
     }
+
+    if (!blog) {
+      const matchCriteria = [];
+      if (data.slug) matchCriteria.push({ slug: data.slug });
+      if (req.params.id) matchCriteria.push({ slug: req.params.id });
+      if (data.title) matchCriteria.push({ title: data.title });
+
+      blog = await Blog.findOneAndUpdate(
+        { $or: matchCriteria },
+        { $set: data },
+        { new: true, upsert: true, runValidators: false }
+      );
+    }
+
     res.json({ success: true, data: blog });
   } catch (err) {
     next(err);
@@ -86,7 +108,13 @@ export const updateBlog = async (req, res, next) => {
 
 export const deleteBlog = async (req, res, next) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
+    const isObjectId = mongoose.Types.ObjectId.isValid(req.params.id) && req.params.id.length === 24;
+    let blog = null;
+    if (isObjectId) {
+      blog = await Blog.findByIdAndDelete(req.params.id);
+    } else {
+      blog = await Blog.findOneAndDelete({ $or: [{ slug: req.params.id }, { title: req.params.id }] });
+    }
     if (!blog) {
       return res.status(404).json({ success: false, message: 'Blog article not found.' });
     }
