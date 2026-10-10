@@ -6,6 +6,8 @@ const serviceSchema = new mongoose.Schema({
   shortDescription: { type: String, default: '' },
   description: { type: String, default: '' },
   featuredImage: { type: String, default: '' },
+  image: { type: String, default: '' },
+  images: [{ type: String }],
   features: [{ type: String }],
   benefits: [{ type: String }],
   faqs: [{

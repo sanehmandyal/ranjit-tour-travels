@@ -74,9 +74,11 @@ const RESOURCE_FIELDS = {
   ],
   services: [
     { key: 'name', label: 'Service Name', type: 'text', required: true },
+    { key: 'category', label: 'Category', type: 'text', placeholder: 'Outstation / Airport Transfer' },
     { key: 'shortDescription', label: 'Short Description', type: 'textarea' },
     { key: 'description', label: 'Full Service Details', type: 'textarea' },
-    { key: 'featuredImage', label: 'Service Photo', type: 'image' },
+    { key: 'featuredImage', label: 'Service Cover Photo', type: 'image' },
+    { key: 'images', label: 'Service Gallery / Additional Photos', type: 'image_list' },
     { key: 'features', label: 'Features (comma separated)', type: 'list' },
     { key: 'published', label: 'Published', type: 'bool' }
   ],
@@ -344,9 +346,27 @@ function ResourceEditor({ resource, item, onDone }) {
       // Compress to high quality compact Base64 Data URL (stored directly in MongoDB & localStorage permanently)
       const base64Url = await compressImageFile(file, 1600, 1600, 0.85);
       if (fieldKey === 'images') {
-        setForm(prev => ({ ...prev, images: [...(prev.images || []), base64Url] }));
+        setForm(prev => {
+          const updatedImages = [...(prev.images || []), base64Url];
+          return {
+            ...prev,
+            images: updatedImages,
+            featuredImage: prev.featuredImage || base64Url,
+            image: prev.image || base64Url
+          };
+        });
       } else {
-        setForm(prev => setVal(prev, fieldKey, base64Url));
+        setForm(prev => {
+          let updated = setVal(prev, fieldKey, base64Url);
+          if (fieldKey === 'featuredImage' || fieldKey === 'image') {
+            updated.featuredImage = base64Url;
+            updated.image = base64Url;
+            if (!updated.images || updated.images.length === 0) {
+              updated.images = [base64Url];
+            }
+          }
+          return updated;
+        });
       }
     } catch (err) {
       setError('Could not process image from device: ' + err.message);
@@ -460,7 +480,7 @@ function ResourceEditor({ resource, item, onDone }) {
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md space-y-3">
                   <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 border border-teal-400/40 text-teal-200 text-xs font-bold cursor-pointer transition">
                     <Upload size={14} />
-                    <span>{uploading ? 'Uploading Photo…' : 'Add Vehicle Photo'}</span>
+                    <span>{uploading ? 'Uploading Photo…' : (resource === 'services' ? 'Add Service Photo' : (resource === 'vehicles' ? 'Add Vehicle Photo' : 'Add Photo'))}</span>
                     <input
                       type="file"
                       accept="image/*"

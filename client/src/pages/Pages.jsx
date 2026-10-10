@@ -1774,7 +1774,7 @@ export function Home() {
                 <div>
                   <div className="aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-slate-100">
                     <Cover 
-                      src={sItem.featuredImage} 
+                      src={sItem.featuredImage || sItem.image || sItem.images?.[0]} 
                       alt={sItem.name} 
                       className="absolute inset-0 w-full h-full"
                       imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2305,7 +2305,7 @@ export function Listing({ kind }) {
                     <div>
                       <div className="aspect-[16/9] rounded-xl overflow-hidden mb-4 relative bg-slate-100">
                         <Cover 
-                          src={item.featuredImage} 
+                          src={item.featuredImage || item.image || item.images?.[0]} 
                           alt={item.name} 
                           className="absolute inset-0 w-full h-full"
                           imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2435,7 +2435,7 @@ export function Detail({ kind }) {
 
   const title = data.name || data.title;
   const description = data.seo?.description || data.shortDescription || data.excerpt || data.overview || '';
-  const heroImage = data.featuredImage || data.images?.[0];
+  const heroImage = data.featuredImage || data.image || data.images?.[0];
 
   // Stop array for signature journey route
   const packageStops = kind === 'tour-packages' 

@@ -60,6 +60,17 @@ export const createService = async (req, res, next) => {
     if (!data.slug && data.name) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
+
+    // Sync all image fields
+    const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
+    if (photo) {
+      data.featuredImage = photo;
+      data.image = photo;
+      if (!data.images || data.images.length === 0) {
+        data.images = [photo];
+      }
+    }
+
     const exists = await Service.findOne({ $or: [{ slug: data.slug }, { name: data.name }] });
     if (exists) {
       const updated = await Service.findByIdAndUpdate(exists._id, data, { new: true });
@@ -78,6 +89,16 @@ export const updateService = async (req, res, next) => {
     if (data.published === undefined) data.published = true;
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
+    }
+
+    // Sync all image fields
+    const photo = data.featuredImage || data.image || (data.images && data.images[0]) || '';
+    if (photo) {
+      data.featuredImage = photo;
+      data.image = photo;
+      if (!data.images || data.images.length === 0) {
+        data.images = [photo];
+      }
     }
 
     let service = null;
