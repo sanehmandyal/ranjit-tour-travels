@@ -75,6 +75,15 @@ export const createDestination = async (req, res, next) => {
     if (!data.slug && data.name) {
       data.slug = slugify(data.name, { lower: true, strict: true });
     }
+
+    const photo = data.featuredImage || data.image || (data.images && data.images[0]) || (data.gallery && data.gallery[0]) || '';
+    if (photo) {
+      data.featuredImage = photo;
+      if (!data.gallery || data.gallery.length === 0) {
+        data.gallery = (data.images && data.images.length > 0) ? data.images : [photo];
+      }
+    }
+
     const matchCriteria = [];
     if (data.slug) matchCriteria.push({ slug: data.slug });
     if (data.name) matchCriteria.push({ name: data.name });
@@ -102,6 +111,14 @@ export const updateDestination = async (req, res, next) => {
     delete data.id;
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
+    }
+
+    const photo = data.featuredImage || data.image || (data.images && data.images[0]) || (data.gallery && data.gallery[0]) || '';
+    if (photo) {
+      data.featuredImage = photo;
+      if (!data.gallery || data.gallery.length === 0) {
+        data.gallery = (data.images && data.images.length > 0) ? data.images : [photo];
+      }
     }
 
     let destination = null;

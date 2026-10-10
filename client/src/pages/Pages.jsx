@@ -74,26 +74,30 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
       );
     });
 
-    const serverPhoto = sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]) || '';
-    const serverImages = (sItem.images && sItem.images.length > 0) ? sItem.images : [];
+    const serverPhoto = sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]) || (sItem.gallery && sItem.gallery[0]) || '';
+    const serverImages = (sItem.images && sItem.images.length > 0) ? sItem.images : ((sItem.gallery && sItem.gallery.length > 0) ? sItem.gallery : []);
 
     if (localMatch) {
-      const localPhoto = localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || '';
-      // Local custom photo set by admin takes 100% priority over default server/seed photo!
-      const activePhoto = localPhoto || serverPhoto;
-      const localImages = (localMatch.images && localMatch.images.length > 0) ? localMatch.images : [];
-      const activeImages = localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (activePhoto ? [activePhoto] : []));
+      const localPhoto = localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || (localMatch.gallery && localMatch.gallery[0]) || '';
+      const localImages = (localMatch.images && localMatch.images.length > 0) ? localMatch.images : ((localMatch.gallery && localMatch.gallery.length > 0) ? localMatch.gallery : []);
+
+      const isCustomLocal = Boolean(localPhoto && !localPhoto.includes('unsplash.com'));
+      const isCustomServer = Boolean(serverPhoto && !serverPhoto.includes('unsplash.com'));
+
+      const activePhoto = isCustomServer ? serverPhoto : (isCustomLocal ? localPhoto : (serverPhoto || localPhoto));
+      const activeImages = isCustomServer && serverImages.length > 0 ? serverImages : (isCustomLocal && localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (localImages.length > 0 ? localImages : (activePhoto ? [activePhoto] : []))));
 
       return {
         ...sItem,
         ...localMatch,
         _id: sItem._id || localMatch._id,
         slug: sItem.slug || localMatch.slug,
-        name: localMatch.name || sItem.name,
-        title: localMatch.title || sItem.title,
+        name: sItem.name || localMatch.name,
+        title: sItem.title || localMatch.title,
         featuredImage: activePhoto,
         image: activePhoto,
-        images: activeImages
+        images: activeImages,
+        gallery: activeImages
       };
     }
 
@@ -101,7 +105,8 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
       ...sItem,
       featuredImage: serverPhoto,
       image: serverPhoto,
-      images: serverImages
+      images: serverImages,
+      gallery: serverImages
     };
   });
 
@@ -1497,7 +1502,7 @@ export function Home() {
                 <div>
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
                     <Cover 
-                      src={pkg.featuredImage} 
+                      src={pkg.featuredImage || pkg.image || pkg.gallery?.[0] || pkg.images?.[0]} 
                       alt={pkg.name} 
                       className="absolute inset-0 w-full h-full"
                       imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -1801,7 +1806,7 @@ export function Home() {
                   {/* Auto-fit Edge-to-Edge Image Container */}
                   <div className="aspect-[16/10] sm:aspect-[4/3] w-full relative overflow-hidden bg-slate-100">
                     <Cover 
-                      src={d.featuredImage} 
+                      src={d.featuredImage || d.image || d.gallery?.[0] || d.images?.[0]} 
                       alt={d.name} 
                       className="absolute inset-0 w-full h-full"
                       imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2019,7 +2024,7 @@ export function Home() {
                   <div>
                     <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
                       <Cover 
-                        src={bItem.featuredImage} 
+                        src={bItem.featuredImage || bItem.image || bItem.images?.[0]} 
                         alt={bItem.title} 
                         className="absolute inset-0 w-full h-full"
                         imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2342,7 +2347,7 @@ export function Listing({ kind }) {
                       {/* Auto-fit Edge-to-Edge Image Container */}
                       <div className="aspect-[16/10] sm:aspect-[4/3] w-full relative overflow-hidden bg-slate-100">
                         <Cover 
-                          src={item.featuredImage} 
+                          src={item.featuredImage || item.image || item.gallery?.[0] || item.images?.[0]} 
                           alt={item.name} 
                           className="absolute inset-0 w-full h-full"
                           imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2384,7 +2389,7 @@ export function Listing({ kind }) {
                     <div>
                       <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
                         <Cover 
-                          src={item.featuredImage} 
+                          src={item.featuredImage || item.image || item.gallery?.[0] || item.images?.[0]} 
                           alt={item.name} 
                           className="absolute inset-0 w-full h-full"
                           imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2543,7 +2548,7 @@ export function Listing({ kind }) {
                     <div>
                       <div className="aspect-[16/9] relative overflow-hidden bg-slate-100">
                         <Cover 
-                          src={item.featuredImage} 
+                          src={item.featuredImage || item.image || item.images?.[0]} 
                           alt={item.title} 
                           className="absolute inset-0 w-full h-full"
                           imgClassName="group-hover:scale-105 transition-transform duration-500"
@@ -2682,13 +2687,32 @@ export function Detail({ kind }) {
     api.get(endpoint)
       .then(res => {
         if (res.data && (res.data._id || res.data.name || res.data.title)) {
+          const serverPhoto = res.data.featuredImage || res.data.image || (res.data.images && res.data.images[0]) || (res.data.gallery && res.data.gallery[0]) || '';
+          const localPhoto = localMatch ? (localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || (localMatch.gallery && localMatch.gallery[0]) || '') : '';
+          const isCustomLocal = Boolean(localPhoto && !localPhoto.includes('unsplash.com'));
+          const isCustomServer = Boolean(serverPhoto && !serverPhoto.includes('unsplash.com'));
+
+          const activePhoto = isCustomServer ? serverPhoto : (isCustomLocal ? localPhoto : (serverPhoto || localPhoto));
+          const serverImages = (res.data.images && res.data.images.length > 0) ? res.data.images : ((res.data.gallery && res.data.gallery.length > 0) ? res.data.gallery : []);
+          const localImages = localMatch ? ((localMatch.images && localMatch.images.length > 0) ? localMatch.images : ((localMatch.gallery && localMatch.gallery.length > 0) ? localMatch.gallery : [])) : [];
+          const activeImages = isCustomServer && serverImages.length > 0 ? serverImages : (isCustomLocal && localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (localImages.length > 0 ? localImages : (activePhoto ? [activePhoto] : []))));
+
           const itemData = localMatch ? {
             ...res.data,
             ...localMatch,
-            featuredImage: localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || res.data.featuredImage || res.data.image || (res.data.images && res.data.images[0]),
-            image: localMatch.image || localMatch.featuredImage || (localMatch.images && localMatch.images[0]) || res.data.image || res.data.featuredImage || (res.data.images && res.data.images[0]),
-            images: (localMatch.images && localMatch.images.length > 0) ? localMatch.images : (res.data.images || [])
-          } : res.data;
+            name: res.data.name || localMatch.name,
+            title: res.data.title || localMatch.title,
+            featuredImage: activePhoto,
+            image: activePhoto,
+            images: activeImages,
+            gallery: activeImages
+          } : {
+            ...res.data,
+            featuredImage: activePhoto,
+            image: activePhoto,
+            images: activeImages,
+            gallery: activeImages
+          };
           setData(itemData);
         } else if (localMatch) {
           setData(localMatch);
@@ -2713,7 +2737,7 @@ export function Detail({ kind }) {
 
   const title = data.name || data.title;
   const description = data.seo?.description || data.shortDescription || data.excerpt || data.overview || '';
-  const heroImage = data.featuredImage || data.image || data.images?.[0];
+  const heroImage = data.featuredImage || data.image || data.gallery?.[0] || data.images?.[0];
 
   // Stop array for signature journey route
   const packageStops = kind === 'tour-packages' 
