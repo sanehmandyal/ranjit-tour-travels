@@ -1596,35 +1596,33 @@ export function Home() {
               <Link to={`/destinations/${d.slug}`} className="flex flex-col h-full justify-between">
                 <div>
                   {/* Auto-fit Edge-to-Edge Image Container */}
-                  <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-900">
+                  <div className="aspect-[16/10] sm:aspect-[4/3] w-full relative overflow-hidden bg-slate-100">
                     <Cover 
                       src={d.featuredImage} 
                       alt={d.name} 
-                      className="w-full h-full"
+                      className="absolute inset-0 w-full h-full"
                       imgClassName="group-hover:scale-105 transition-transform duration-500"
                     />
                     
                     {/* State badge */}
                     <div className="absolute top-3 left-3 z-10">
                       <span className="bg-slate-900/85 backdrop-blur-md text-teal-300 border border-teal-500/30 text-xs px-2.5 py-1 rounded-full font-bold shadow-md">
-                        {d.state || 'Himachal'}
+                        {d.state || 'Himachal Pradesh'}
                       </span>
                     </div>
+                  </div>
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent pointer-events-none" />
-
-                    <div className="absolute bottom-3 left-4 right-4 z-10">
-                      <h3 className="font-display text-xl font-bold text-white group-hover:text-teal-300 transition drop-shadow-md">
-                        {d.name}
-                      </h3>
-                      <p className="text-xs text-slate-200 line-clamp-1 mt-0.5">
-                        {d.shortDescription}
-                      </p>
-                    </div>
+                  <div className="p-5 space-y-2">
+                    <h3 className="font-display font-bold text-lg sm:text-xl text-slate-900 group-hover:text-teal-700 transition leading-snug">
+                      {d.name}
+                    </h3>
+                    <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                      {d.shortDescription}
+                    </p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+                <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
                   <div>
                     <span className="text-xs font-bold text-teal-800 flex items-center gap-1">
                       <Sparkles size={13} className="text-amber-500" />
@@ -1633,7 +1631,7 @@ export function Home() {
                     <span className="text-[10px] text-slate-500 block font-medium">Custom Quote on Request</span>
                   </div>
                   <span className="text-xs text-teal-700 flex items-center gap-1 group-hover:translate-x-1 transition font-semibold">
-                    Explore Details <ArrowRight size={14} />
+                    Explore <ArrowRight size={14} />
                   </span>
                 </div>
               </Link>
@@ -2057,19 +2055,18 @@ export function Listing({ kind }) {
                   >
                     <div>
                       {/* Auto-fit Edge-to-Edge Image Container */}
-                      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-900">
+                      <div className="aspect-[16/10] sm:aspect-[4/3] w-full relative overflow-hidden bg-slate-100">
                         <Cover 
                           src={item.featuredImage} 
                           alt={item.name} 
-                          className="w-full h-full"
+                          className="absolute inset-0 w-full h-full"
                           imgClassName="group-hover:scale-105 transition-transform duration-500"
                         />
                         <div className="absolute top-3 left-3 z-10">
                           <span className="bg-slate-900/85 backdrop-blur-md text-teal-300 border border-teal-500/30 text-xs px-2.5 py-1 rounded-full font-bold shadow-md">
-                            {item.state}
+                            {item.state || 'Himachal Pradesh'}
                           </span>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                       </div>
 
                       <div className="p-5 space-y-2">
