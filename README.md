@@ -103,8 +103,8 @@ npm run install:all
 npm run seed
 ```
 > **Default Admin Credentials:**  
-> **Email:** `admin@ranjittravels.com`  
-> **Password:** `admin123`  
+> **Email:** `admin@ranjittravels.com` (or `admin@ranjittourandtravels.in`)  
+> **Password:** `admin@123`  
 > *(Editor Account: `editor@ranjittravels.com` / `editor123`)*
 
 ### 3. Start Development Servers

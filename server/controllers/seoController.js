@@ -6,7 +6,7 @@ import Blog from '../models/Blog.js';
 
 export const getSitemap = async (req, res, next) => {
   try {
-    const baseUrl = process.env.CLIENT_URL || 'https://ranjittourandtravels.com';
+  const baseUrl = process.env.CLIENT_URL || 'https://ranjittourandtravels.in';
 
     const [destinations, packages, vehicles, services, blogs] = await Promise.all([
       Destination.find({ published: true }).select('slug updatedAt'),
@@ -72,7 +72,7 @@ export const getSitemap = async (req, res, next) => {
 };
 
 export const getRobots = (req, res) => {
-  const baseUrl = process.env.CLIENT_URL || 'https://ranjittourandtravels.com';
+  const baseUrl = process.env.CLIENT_URL || 'https://ranjittourandtravels.in';
   const robots = `User-agent: *
 Allow: /
 Disallow: /admin

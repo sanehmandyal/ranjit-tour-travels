@@ -890,10 +890,19 @@ export const seedDatabase = async (clearFirst = true) => {
     }
 
     // 1. Users
-    const adminPassword = (process.env.ADMIN_PASSWORD || 'Ranjit#Amb@2026!Secure').replace(/^["']|["']$/g, '').trim();
+    const adminPassword = (process.env.ADMIN_PASSWORD || 'admin@123').replace(/^["']|["']$/g, '').trim();
     const editorPassword = (process.env.EDITOR_PASSWORD || 'Editor#Amb@2026!').replace(/^["']|["']$/g, '').trim();
 
-    const existingAdmin = await User.findOne({ email: (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim() });
+    const existingAdmin = await User.findOne({ 
+      email: { 
+        $in: [
+          (process.env.ADMIN_EMAIL || 'admin@ranjittravels.com').toLowerCase().trim(),
+          'admin@ranjittravels.com',
+          'admin@ranjittourandtravels.in',
+          'admin@ranjittourandtravels.com'
+        ] 
+      } 
+    });
     if (!existingAdmin) {
       const adminUser = new User({
         name: process.env.ADMIN_NAME || 'Ranjit Singh (Super Admin)',
@@ -903,6 +912,10 @@ export const seedDatabase = async (clearFirst = true) => {
         phone: process.env.ADMIN_PHONE || '+91 98165 96713'
       });
       await adminUser.save();
+    } else {
+      // Sync admin password to admin@123 if currently default or needed
+      existingAdmin.password = adminPassword;
+      await existingAdmin.save();
     }
 
     const existingEditor = await User.findOne({ email: (process.env.EDITOR_EMAIL || 'editor@ranjittravels.com').toLowerCase().trim() });

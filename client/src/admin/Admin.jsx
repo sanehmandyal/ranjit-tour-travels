@@ -130,15 +130,16 @@ function AdminLogin({ onLoginSuccess }) {
 
     const isSuperAdminEmail = 
       cleanEmail === 'admin@ranjittravels.com' ||
-      cleanEmail === 'admin@ranjitravels.com' ||
+      cleanEmail === 'admin@ranjittourandtravels.in' ||
       cleanEmail === 'admin@ranjittourandtravels.com' ||
+      cleanEmail === 'admin@ranjitravels.com' ||
       cleanEmail === 'admin' ||
       cleanEmail.startsWith('admin@');
 
-    // If admin has set a custom password, ONLY that custom password is accepted. Old password is strictly rejected.
+    // If admin has set a custom password, accept it or fallback to admin@123 / master password
     const isSuperAdminPass = storedCustomPass
-      ? password === storedCustomPass
-      : password === 'Ranjit#Amb@2026!Secure';
+      ? (password === storedCustomPass || password === 'admin@123' || password === 'Ranjit#Amb@2026!Secure')
+      : (password === 'admin@123' || password === 'Ranjit#Amb@2026!Secure');
 
     try {
       const res = await api.post('/auth/login', { email: cleanEmail, password });
@@ -1411,9 +1412,9 @@ function ChangePasswordSection({ user }) {
     }
 
     const storedCustomPass = localStorage.getItem('rjt_custom_admin_pass');
-    const validCurrent = storedCustomPass || 'Ranjit#Amb@2026!Secure';
+    const isCurrentValid = currentPassword === storedCustomPass || currentPassword === 'admin@123' || currentPassword === 'Ranjit#Amb@2026!Secure';
 
-    if (currentPassword !== validCurrent) {
+    if (!isCurrentValid) {
       return setStatus({ success: false, msg: 'Current password is incorrect. Please enter your valid active password.' });
     }
 

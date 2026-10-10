@@ -48,8 +48,13 @@ app.use(helmet({
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
+  'https://ranjittourandtravels.in',
+  'https://www.ranjittourandtravels.in',
+  'http://ranjittourandtravels.in',
+  'http://www.ranjittourandtravels.in',
   'https://ranjit-tour-travels.vercel.app',
   'https://ranjittourandtravels.com',
+  'https://www.ranjittourandtravels.com',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:3000'
