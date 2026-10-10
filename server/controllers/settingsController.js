@@ -1,29 +1,43 @@
 import WebsiteSettings from '../models/WebsiteSettings.js';
 import SEOSettings from '../models/SEOSettings.js';
+import { localStore } from '../utils/localStore.js';
 
 export const getSettings = async (req, res, next) => {
   try {
-    let settings = await WebsiteSettings.findOne();
-    if (!settings) {
-      settings = await WebsiteSettings.create({});
+    let settings = null;
+    try {
+      settings = await WebsiteSettings.findOne().maxTimeMS(2500);
+      if (!settings) {
+        settings = await WebsiteSettings.create({});
+      }
+    } catch (dbErr) {
+      console.warn('[DB Fallback] getSettings:', dbErr.message);
     }
-    res.json(settings);
+    const finalSettings = settings ? settings.toObject() : localStore.getSettings();
+    res.json(finalSettings);
   } catch (err) {
-    next(err);
+    res.json(localStore.getSettings());
   }
 };
 
 export const updateSettings = async (req, res, next) => {
   try {
-    let settings = await WebsiteSettings.findOne();
-    if (!settings) {
-      settings = await WebsiteSettings.create(req.body);
-    } else {
-      settings = await WebsiteSettings.findByIdAndUpdate(settings._id, req.body, { new: true });
+    let settings = null;
+    try {
+      settings = await WebsiteSettings.findOne().maxTimeMS(2500);
+      if (!settings) {
+        settings = await WebsiteSettings.create(req.body);
+      } else {
+        settings = await WebsiteSettings.findByIdAndUpdate(settings._id, req.body, { new: true }).maxTimeMS(2500);
+      }
+    } catch (dbErr) {
+      console.warn('[DB Fallback] updateSettings:', dbErr.message);
     }
-    res.json(settings);
+    const finalSettings = localStore.updateSettings(req.body);
+    res.json(settings || finalSettings);
   } catch (err) {
-    next(err);
+    const finalSettings = localStore.updateSettings(req.body);
+    res.json(finalSettings);
   }
 };
 

@@ -845,13 +845,65 @@ export const defaultWebsiteSettings = {
   },
   heroTitle: 'Your Journey. Our Route.',
   heroSubtitle: 'Curating authentic royal journeys, mountain expeditions, and premium outstation taxi services across North India.',
-  heroText: 'Experience luxury road journeys across Himachal, Punjab, Kashmir, Ladakh and Rajasthan. Travel with certified mountain chauffeurs, modern sanitized vehicles, and 24/7 dedicated route concierge.',
   heroBadge: '30.9010° N · 75.8573° E — Royal Route Experience',
   ctaText: 'Plan My Journey',
   footerAbout: 'Ranjit Tour & Travels is your premier north India travel concierge, operating customized tour packages, luxury sedans, Innova Crystas, and tempo travellers across Himachal, Punjab, Kashmir, Ladakh & Rajasthan.',
   analyticsId: 'G-RANJIT2026',
   googleSearchConsole: 'google-site-verification=rjt_google_verification_code'
 };
+
+export const defaultPackages = [
+  {
+    name: 'Royal Himachal 7 Days Grand Tour (Shimla, Kullu, Manali)',
+    slug: 'royal-himachal-7-days',
+    destination: 'manali',
+    duration: '6 Nights / 7 Days',
+    price: 24999,
+    discountedPrice: 19999,
+    featuredImage: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=1200&q=80',
+    gallery: [
+      'https://images.unsplash.com/photo-1562670652-e5947bddb335?auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=800&q=80'
+    ],
+    overview: 'Experience the ultimate Himachal journey in absolute comfort. From the colonial heritage of Shimla and horse trails of Kufri to river rafting in Kullu and snow vistas in Solang & Atal Tunnel.',
+    itinerary: [
+      { day: 1, title: 'Chandigarh / Amb Andaura to Shimla Drive', details: 'Pickup in private AC cab, scenic drive along Himalayan highway to Shimla. Evening Mall Road & Ridge walk.', meals: 'Dinner', hotel: 'Royal Tulip / Radisson Shimla' },
+      { day: 2, title: 'Kufri & Historic Shimla Sightseeing', details: 'Full day excursion to Kufri snow point, Himalayan Wildlife Zoo, Jakhoo ropeway, and British era Viceregal Lodge.', meals: 'Breakfast & Dinner', hotel: 'Royal Tulip / Radisson Shimla' },
+      { day: 3, title: 'Shimla to Manali via Kullu Valley & Pandoh Dam', details: 'Scenic journey across Sundernagar Lake, Pandoh Dam, Hanogi Temple, and Shawl factory in Kullu with optional river rafting.', meals: 'Breakfast & Dinner', hotel: 'The Himalayan Resort / Apple Country Manali' },
+      { day: 4, title: 'Local Manali Culture & Hidden Waterfalls', details: 'Visit 500-year-old Hadimba Devi Temple, Tibetan Monastery, Vashisht Sulphur Springs, and nature trek to Jogini Waterfall.', meals: 'Breakfast & Dinner', hotel: 'The Himalayan Resort / Apple Country Manali' },
+      { day: 5, title: 'Solang Valley, Atal Tunnel & Sissu (Lahaul)', details: 'Thrilling mountain safari through the world-famous Atal Tunnel (9.02 km) to Sissu waterfall in Lahaul Valley. Adventure sports at Solang.', meals: 'Breakfast & Dinner', hotel: 'The Himalayan Resort / Apple Country Manali' },
+      { day: 6, title: 'Naggar Castle & Old Manali Heritage', details: 'Tour of historic Naggar Castle (Nicholas Roerich art gallery), trout fishing spot, and bohemian cafes in Old Manali.', meals: 'Breakfast & Dinner', hotel: 'The Himalayan Resort / Apple Country Manali' },
+      { day: 7, title: 'Manali to Departure Drop', details: 'Leisurely breakfast, checkout, and comfortable return transfer to Chandigarh / Amb Andaura.', meals: 'Breakfast', hotel: 'Departure' }
+    ],
+    inclusions: [
+      '6 Nights accommodation in premium 4-star hotels with balcony mountain views',
+      'Daily buffet breakfast and multi-cuisine dinner',
+      'Private dedicated AC Innova Crysta / Sedan for all transfers & sightseeing',
+      'All toll taxes, state tourist permits, parking charges & driver allowances',
+      'Atal Tunnel & Sissu excursion permit assistance',
+      '24/7 dedicated trip concierge and emergency support'
+    ],
+    exclusions: [
+      'Airfare or train tickets',
+      'Adventure sports charges (Paragliding, River Rafting, Skiing)',
+      'Personal expenses, tips and monument entry fees'
+    ],
+    hotel: 'Premium 4-Star Mountain View Resorts (Radisson / The Himalayan)',
+    transport: 'Private Dedicated Sanitized Innova Crysta with certified hills driver',
+    pickup: 'Chandigarh / Amb Andaura / Delhi',
+    drop: 'Chandigarh / Amb Andaura / Delhi',
+    category: 'Family & Honeymoon',
+    difficulty: 'Easy',
+    isFeatured: true,
+    published: true,
+    rating: 4.9,
+    reviewsCount: 38,
+    seo: {
+      title: '7 Days Himachal Tour Package (Shimla, Kullu, Manali) | Ranjit Travels',
+      description: 'Book comprehensive 7 days Himachal holiday tour with private Innova Crysta cab, 4-star mountain view stays, Solang snow sports, and Atal Tunnel safari.'
+    }
+  }
+];
 
 const safeUpsertAll = async (Model, items, keyField = 'slug') => {
   for (const item of items) {
