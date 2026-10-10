@@ -1,17 +1,13 @@
 import axios from 'axios';
 
 const getBaseApiUrl = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl && !envUrl.includes('localhost')) {
-    return envUrl;
-  }
   if (typeof window !== 'undefined') {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (!isLocalhost) {
-      return 'https://ranjit-tour-travels-api.onrender.com/api';
+      return '/api';
     }
   }
-  return envUrl || 'http://localhost:5000/api';
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 };
 
 const rawApiUrl = getBaseApiUrl();

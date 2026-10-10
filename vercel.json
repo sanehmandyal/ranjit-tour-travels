@@ -3,6 +3,14 @@
   "outputDirectory": "client/dist",
   "rewrites": [
     {
+      "source": "/api/:path*",
+      "destination": "https://ranjit-tour-travels-api.onrender.com/api/:path*"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://ranjit-tour-travels-api.onrender.com/uploads/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
