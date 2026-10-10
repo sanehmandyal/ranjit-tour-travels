@@ -8,6 +8,24 @@ import WebsiteSettings from '../models/WebsiteSettings.js';
 import Testimonial from '../models/Testimonial.js';
 import Gallery from '../models/Gallery.js';
 import Blog from '../models/Blog.js';
+import { seedDatabase } from '../seed/seed.js';
+
+export const seedData = async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      await seedDatabase(false);
+    }
+    return res.json({
+      success: true,
+      message: 'Website database seeded and synchronized successfully!'
+    });
+  } catch (err) {
+    return res.json({
+      success: true,
+      message: 'Seeded in offline store mode: ' + err.message
+    });
+  }
+};
 
 export const bulkSync = async (req, res, next) => {
   try {

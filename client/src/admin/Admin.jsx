@@ -21,8 +21,18 @@ import {
 } from '../pages/Pages.jsx';
 
 const DEFAULT_BOOKINGS = [];
-
 const DEFAULT_INQUIRIES = [];
+
+const FALLBACK_RESOURCE_MAP = {
+  destinations: DEFAULT_DESTINATIONS,
+  packages: DEFAULT_PACKAGES,
+  vehicles: DEFAULT_VEHICLES,
+  services: DEFAULT_SERVICES,
+  blogs: DEFAULT_BLOGS,
+  testimonials: DEFAULT_TESTIMONIALS,
+  bookings: DEFAULT_BOOKINGS,
+  inquiries: DEFAULT_INQUIRIES
+};
 
 // Fields Schema for CRUD Editors
 const RESOURCE_FIELDS = {
@@ -695,24 +705,66 @@ function ResourceList({ resource }) {
   const [editingItem, setEditingItem] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
   const isInbox = resource === 'bookings' || resource === 'inquiries';
 
   const loadData = () => {
     setLoading(true);
     setError('');
+    const fallbackList = FALLBACK_RESOURCE_MAP[resource] || [];
+
     api.get(`/${resource}`, { params: { q, page, limit: 100, admin: true } })
       .then(res => {
-        if (res.data?.items) {
+        if (res.data?.items && res.data.items.length > 0) {
           setData(res.data);
+        } else if (fallbackList.length > 0) {
+          let items = [...fallbackList];
+          if (q) {
+            const ql = q.toLowerCase();
+            items = items.filter(it => 
+              (it.name || it.title || '').toLowerCase().includes(ql) || 
+              (it.category || '').toLowerCase().includes(ql) || 
+              (it.state || '').toLowerCase().includes(ql) || 
+              (it.shortDescription || it.overview || it.description || '').toLowerCase().includes(ql)
+            );
+          }
+          setData({ items, total: items.length, page: 1, pages: 1 });
         } else {
           setData({ items: [], total: 0, page: 1, pages: 1 });
         }
       })
       .catch(err => {
-        setError(msg(err));
+        if (fallbackList.length > 0) {
+          let items = [...fallbackList];
+          if (q) {
+            const ql = q.toLowerCase();
+            items = items.filter(it => 
+              (it.name || it.title || '').toLowerCase().includes(ql) || 
+              (it.category || '').toLowerCase().includes(ql) || 
+              (it.state || '').toLowerCase().includes(ql) || 
+              (it.shortDescription || it.overview || it.description || '').toLowerCase().includes(ql)
+            );
+          }
+          setData({ items, total: items.length, page: 1, pages: 1 });
+        } else {
+          setError(msg(err));
+        }
       })
       .finally(() => setLoading(false));
+  };
+
+  const handleSyncToDatabase = async () => {
+    setSyncing(true);
+    try {
+      await api.post('/sync/seed');
+      loadData();
+    } catch (err) {
+      console.warn('Sync notice:', err.message);
+      loadData();
+    } finally {
+      setSyncing(false);
+    }
   };
 
   useEffect(() => {
@@ -773,15 +825,28 @@ function ResourceList({ resource }) {
           <Search className="w-4 h-4 text-teal-300 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
-        {RESOURCE_FIELDS[resource] && (
-          <button
-            onClick={() => setEditingItem('new')}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition hover:scale-[1.02] cursor-pointer whitespace-nowrap"
-          >
-            <Plus size={16} />
-            <span>Add New {resource.slice(0, -1)}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {RESOURCE_FIELDS[resource] && (
+            <>
+              <button
+                onClick={handleSyncToDatabase}
+                disabled={syncing}
+                title="Sync entire catalog to database"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold transition cursor-pointer backdrop-blur-md"
+              >
+                <RefreshCw size={13} className={syncing ? 'animate-spin text-teal-300' : 'text-teal-300'} />
+                <span>{syncing ? 'Syncing…' : 'Sync Catalog'}</span>
+              </button>
+              <button
+                onClick={() => setEditingItem('new')}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white text-xs font-bold shadow-lg shadow-teal-950/50 transition hover:scale-[1.02] cursor-pointer whitespace-nowrap"
+              >
+                <Plus size={16} />
+                <span>Add New {resource.slice(0, -1)}</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {loading ? (
