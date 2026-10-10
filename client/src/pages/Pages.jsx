@@ -81,6 +81,7 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
       return {
         ...sItem,
         ...localMatch,
+        _id: sItem._id || localMatch._id,
         featuredImage: activePhoto,
         image: activePhoto,
         images: activeImages
@@ -1000,56 +1001,76 @@ export function Home() {
   });
 
   useEffect(() => {
-    Promise.all([
-      api.get('/destinations?limit=12'),
-      api.get('/packages?limit=12'),
-      api.get('/vehicles?limit=12'),
-      api.get('/services?limit=12'),
-      api.get('/blogs?limit=12'),
-      api.get('/testimonials?limit=12')
-    ])
-      .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
-        if (dRes.data?.items && dRes.data.items.length > 0) {
-          setDestinations(mergeWithCustomStorage('destinations', dRes.data.items, DEFAULT_DESTINATIONS));
-        } else {
+    const fetchHomeData = () => {
+      Promise.all([
+        api.get('/destinations?limit=12'),
+        api.get('/packages?limit=12'),
+        api.get('/vehicles?limit=12'),
+        api.get('/services?limit=12'),
+        api.get('/blogs?limit=12'),
+        api.get('/testimonials?limit=12')
+      ])
+        .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
+          if (dRes.data?.items && dRes.data.items.length > 0) {
+            setDestinations(mergeWithCustomStorage('destinations', dRes.data.items, DEFAULT_DESTINATIONS));
+          } else {
+            setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
+          }
+
+          if (pRes.data?.items && pRes.data.items.length > 0) {
+            setPackages(mergeWithCustomStorage('packages', pRes.data.items, DEFAULT_PACKAGES));
+          } else {
+            setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
+          }
+
+          if (vRes.data?.items && vRes.data.items.length > 0) {
+            setVehicles(mergeWithCustomStorage('vehicles', vRes.data.items, DEFAULT_VEHICLES));
+          } else {
+            setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
+          }
+
+          if (sRes.data?.items && sRes.data.items.length > 0) {
+            setServices(mergeWithCustomStorage('services', sRes.data.items, DEFAULT_SERVICES));
+          } else {
+            setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
+          }
+
+          if (bRes.data?.items && bRes.data.items.length > 0) {
+            setBlogs(mergeWithCustomStorage('blogs', bRes.data.items, DEFAULT_BLOGS));
+          } else {
+            setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
+          }
+
+          setTestimonials(tRes.data?.items?.length > 0 ? tRes.data.items : DEFAULT_TESTIMONIALS);
+        })
+        .catch(err => {
+          console.warn('Home live load notice:', err.message);
           setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
-        }
-
-        if (pRes.data?.items && pRes.data.items.length > 0) {
-          setPackages(mergeWithCustomStorage('packages', pRes.data.items, DEFAULT_PACKAGES));
-        } else {
           setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
-        }
-
-        if (vRes.data?.items && vRes.data.items.length > 0) {
-          setVehicles(mergeWithCustomStorage('vehicles', vRes.data.items, DEFAULT_VEHICLES));
-        } else {
           setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
-        }
-
-        if (sRes.data?.items && sRes.data.items.length > 0) {
-          setServices(mergeWithCustomStorage('services', sRes.data.items, DEFAULT_SERVICES));
-        } else {
           setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
-        }
-
-        if (bRes.data?.items && bRes.data.items.length > 0) {
-          setBlogs(mergeWithCustomStorage('blogs', bRes.data.items, DEFAULT_BLOGS));
-        } else {
           setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
-        }
+        })
+        .finally(() => setLoading(false));
+    };
 
-        setTestimonials(tRes.data?.items?.length > 0 ? tRes.data.items : DEFAULT_TESTIMONIALS);
-      })
-      .catch(err => {
-        console.warn('Home live load notice:', err.message);
-        setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
-        setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
-        setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
-        setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
-        setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
-      })
-      .finally(() => setLoading(false));
+    fetchHomeData();
+
+    const handleContentUpdate = () => {
+      setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
+      setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
+      setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
+      setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
+      setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
+      fetchHomeData();
+    };
+
+    window.addEventListener('storage', handleContentUpdate);
+    window.addEventListener('rjt_content_updated', handleContentUpdate);
+    return () => {
+      window.removeEventListener('storage', handleContentUpdate);
+      window.removeEventListener('rjt_content_updated', handleContentUpdate);
+    };
   }, []);
 
   const handleSearchSubmit = (e) => {
@@ -2121,28 +2142,43 @@ export function Listing({ kind }) {
   useEffect(() => {
     setLoading(true);
     setError('');
-    const customList = getStoredCustomItems(currentCfg.resourceKey, currentCfg.fallback || []);
 
-    api.get(currentCfg.endpoint, {
-      params: { page, q, category, state, limit: 24 }
-    })
-      .then(res => {
-        if (res.data?.items && res.data.items.length > 0) {
-          let items = mergeWithCustomStorage(currentCfg.resourceKey, res.data.items, currentCfg.fallback || []);
-          if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
-          setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
-        } else {
+    const fetchListingData = () => {
+      const customList = getStoredCustomItems(currentCfg.resourceKey, currentCfg.fallback || []);
+      api.get(currentCfg.endpoint, {
+        params: { page, q, category, state, limit: 24 }
+      })
+        .then(res => {
+          if (res.data?.items && res.data.items.length > 0) {
+            let items = mergeWithCustomStorage(currentCfg.resourceKey, res.data.items, currentCfg.fallback || []);
+            if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
+            setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
+          } else {
+            let items = customList;
+            if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
+            setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
+          }
+        })
+        .catch(() => {
           let items = customList;
           if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
           setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
-        }
-      })
-      .catch(() => {
-        let items = customList;
-        if (q) items = items.filter(p => (p.name || p.title || '').toLowerCase().includes(q.toLowerCase()) || (p.overview || p.shortDescription || '').toLowerCase().includes(q.toLowerCase()));
-        setData({ items, total: items.length, pages: Math.ceil(items.length / 12) || 1 });
-      })
-      .finally(() => setLoading(false));
+        })
+        .finally(() => setLoading(false));
+    };
+
+    fetchListingData();
+
+    const handleUpdate = () => {
+      fetchListingData();
+    };
+
+    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('rjt_content_updated', handleUpdate);
+    return () => {
+      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('rjt_content_updated', handleUpdate);
+    };
   }, [kind, page, q, category, state]);
 
   const handleSearchKey = (e) => {

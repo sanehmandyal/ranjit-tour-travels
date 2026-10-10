@@ -394,18 +394,30 @@ function ResourceEditor({ resource, item, onDone }) {
       }
     }
 
+    if (!preparedForm.slug && (preparedForm.name || preparedForm.title)) {
+      const label = preparedForm.name || preparedForm.title || '';
+      preparedForm.slug = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    }
+
+    const payload = { ...preparedForm };
+    if (payload._id && payload._id.length !== 24) {
+      delete payload._id;
+    }
+    if (payload.id && payload.id.length !== 24) {
+      delete payload.id;
+    }
+
     let savedItem = preparedForm;
     try {
       let res;
-      if (item?._id) {
-        res = await api.put(`/${resource}/${item._id}`, preparedForm);
-      } else if (item?.slug) {
-        res = await api.put(`/${resource}/${item.slug}`, preparedForm);
+      const targetParam = (item?._id && item._id.length === 24) ? item._id : (item?.slug || preparedForm.slug || item?._id);
+      if (targetParam) {
+        res = await api.put(`/${resource}/${targetParam}`, payload);
       } else {
-        res = await api.post(`/${resource}`, preparedForm);
+        res = await api.post(`/${resource}`, payload);
       }
       if (res?.data?.data) {
-        savedItem = res.data.data;
+        savedItem = { ...preparedForm, ...res.data.data };
       }
     } catch (err) {
       console.warn('Backend save notice (cached locally):', err.message);
@@ -675,6 +687,8 @@ function ResourceList({ resource }) {
     if (!isInbox) {
       try {
         localStorage.setItem(`rjt_custom_${resource}`, JSON.stringify(items));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new CustomEvent('rjt_content_updated', { detail: { resource, items } }));
       } catch (e) {
         console.warn('Storage sync warn:', e);
       }

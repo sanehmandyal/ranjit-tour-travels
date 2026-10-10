@@ -58,6 +58,8 @@ export const getVehicleBySlug = async (req, res, next) => {
 export const createVehicle = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    delete data._id;
+    delete data.id;
     if (data.published === undefined) data.published = true;
     if (data.available === undefined) data.available = true;
     if (!data.slug && data.name) {
@@ -74,9 +76,17 @@ export const createVehicle = async (req, res, next) => {
       }
     }
 
-    const exists = await Vehicle.findOne({ $or: [{ slug: data.slug }, { name: data.name }] });
+    const matchCriteria = [];
+    if (data.slug) matchCriteria.push({ slug: data.slug });
+    if (data.name) matchCriteria.push({ name: data.name });
+
+    let exists = null;
+    if (matchCriteria.length > 0) {
+      exists = await Vehicle.findOne({ $or: matchCriteria });
+    }
+
     if (exists) {
-      const updated = await Vehicle.findByIdAndUpdate(exists._id, data, { new: true });
+      const updated = await Vehicle.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
       return res.status(200).json({ success: true, data: updated });
     }
     const vehicle = await Vehicle.create(data);
@@ -89,6 +99,8 @@ export const createVehicle = async (req, res, next) => {
 export const updateVehicle = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    delete data._id;
+    delete data.id;
     if (data.published === undefined) data.published = true;
     if (data.available === undefined) data.available = true;
     if (data.name && !data.slug) {
@@ -115,14 +127,18 @@ export const updateVehicle = async (req, res, next) => {
     if (!vehicle) {
       const matchCriteria = [];
       if (data.slug) matchCriteria.push({ slug: data.slug });
-      if (req.params.id) matchCriteria.push({ slug: req.params.id });
+      if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
       if (data.name) matchCriteria.push({ name: data.name });
 
-      vehicle = await Vehicle.findOneAndUpdate(
-        { $or: matchCriteria },
-        { $set: data },
-        { new: true, upsert: true, runValidators: false }
-      );
+      if (matchCriteria.length > 0) {
+        vehicle = await Vehicle.findOneAndUpdate(
+          { $or: matchCriteria },
+          { $set: data },
+          { new: true, upsert: true, runValidators: false }
+        );
+      } else {
+        vehicle = await Vehicle.create(data);
+      }
     }
 
     res.json({ success: true, data: vehicle });

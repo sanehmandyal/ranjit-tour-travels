@@ -56,6 +56,8 @@ export const getServiceBySlug = async (req, res, next) => {
 export const createService = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    delete data._id;
+    delete data.id;
     if (data.published === undefined) data.published = true;
     if (!data.slug && data.name) {
       data.slug = slugify(data.name, { lower: true, strict: true });
@@ -71,9 +73,17 @@ export const createService = async (req, res, next) => {
       }
     }
 
-    const exists = await Service.findOne({ $or: [{ slug: data.slug }, { name: data.name }] });
+    const matchCriteria = [];
+    if (data.slug) matchCriteria.push({ slug: data.slug });
+    if (data.name) matchCriteria.push({ name: data.name });
+
+    let exists = null;
+    if (matchCriteria.length > 0) {
+      exists = await Service.findOne({ $or: matchCriteria });
+    }
+
     if (exists) {
-      const updated = await Service.findByIdAndUpdate(exists._id, data, { new: true });
+      const updated = await Service.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
       return res.status(200).json({ success: true, data: updated });
     }
     const service = await Service.create(data);
@@ -86,6 +96,8 @@ export const createService = async (req, res, next) => {
 export const updateService = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    delete data._id;
+    delete data.id;
     if (data.published === undefined) data.published = true;
     if (data.name && !data.slug) {
       data.slug = slugify(data.name, { lower: true, strict: true });
@@ -111,14 +123,18 @@ export const updateService = async (req, res, next) => {
     if (!service) {
       const matchCriteria = [];
       if (data.slug) matchCriteria.push({ slug: data.slug });
-      if (req.params.id) matchCriteria.push({ slug: req.params.id });
+      if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
       if (data.name) matchCriteria.push({ name: data.name });
 
-      service = await Service.findOneAndUpdate(
-        { $or: matchCriteria },
-        { $set: data },
-        { new: true, upsert: true, runValidators: false }
-      );
+      if (matchCriteria.length > 0) {
+        service = await Service.findOneAndUpdate(
+          { $or: matchCriteria },
+          { $set: data },
+          { new: true, upsert: true, runValidators: false }
+        );
+      } else {
+        service = await Service.create(data);
+      }
     }
 
     res.json({ success: true, data: service });

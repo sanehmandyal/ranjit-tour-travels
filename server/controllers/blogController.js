@@ -58,13 +58,23 @@ export const getBlogBySlug = async (req, res, next) => {
 export const createBlog = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    delete data._id;
+    delete data.id;
     if (data.published === undefined) data.published = true;
     if (!data.slug && data.title) {
       data.slug = slugify(data.title, { lower: true, strict: true });
     }
-    const exists = await Blog.findOne({ $or: [{ slug: data.slug }, { title: data.title }] });
+    const matchCriteria = [];
+    if (data.slug) matchCriteria.push({ slug: data.slug });
+    if (data.title) matchCriteria.push({ title: data.title });
+
+    let exists = null;
+    if (matchCriteria.length > 0) {
+      exists = await Blog.findOne({ $or: matchCriteria });
+    }
+
     if (exists) {
-      const updated = await Blog.findByIdAndUpdate(exists._id, data, { new: true });
+      const updated = await Blog.findByIdAndUpdate(exists._id, data, { new: true, runValidators: false });
       return res.status(200).json({ success: true, data: updated });
     }
     const blog = await Blog.create(data);
@@ -77,6 +87,8 @@ export const createBlog = async (req, res, next) => {
 export const updateBlog = async (req, res, next) => {
   try {
     const data = { ...req.body };
+    delete data._id;
+    delete data.id;
     if (data.published === undefined) data.published = true;
     if (data.title && !data.slug) {
       data.slug = slugify(data.title, { lower: true, strict: true });
@@ -92,14 +104,18 @@ export const updateBlog = async (req, res, next) => {
     if (!blog) {
       const matchCriteria = [];
       if (data.slug) matchCriteria.push({ slug: data.slug });
-      if (req.params.id) matchCriteria.push({ slug: req.params.id });
+      if (req.params.id && req.params.id !== 'undefined' && req.params.id !== 'null') matchCriteria.push({ slug: req.params.id });
       if (data.title) matchCriteria.push({ title: data.title });
 
-      blog = await Blog.findOneAndUpdate(
-        { $or: matchCriteria },
-        { $set: data },
-        { new: true, upsert: true, runValidators: false }
-      );
+      if (matchCriteria.length > 0) {
+        blog = await Blog.findOneAndUpdate(
+          { $or: matchCriteria },
+          { $set: data },
+          { new: true, upsert: true, runValidators: false }
+        );
+      } else {
+        blog = await Blog.create(data);
+      }
     }
 
     res.json({ success: true, data: blog });
