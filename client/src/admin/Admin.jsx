@@ -126,8 +126,6 @@ function AdminLogin({ onLoginSuccess }) {
     setLoading(true);
     setError('');
     const cleanEmail = email.trim().toLowerCase();
-    const storedCustomPass = localStorage.getItem('rjt_custom_admin_pass');
-
     const isSuperAdminEmail = 
       cleanEmail === 'admin@ranjittravels.com' ||
       cleanEmail === 'admin@ranjittourandtravels.in' ||
@@ -136,10 +134,8 @@ function AdminLogin({ onLoginSuccess }) {
       cleanEmail === 'admin' ||
       cleanEmail.startsWith('admin@');
 
-    // Require strictly Ranjit@123 or admin updated password
-    const isSuperAdminPass = storedCustomPass
-      ? (password === storedCustomPass || password === 'Ranjit@123')
-      : (password === 'Ranjit@123');
+    // Enforce strictly Ranjit@123 only
+    const isSuperAdminPass = password === 'Ranjit@123';
 
     try {
       const res = await api.post('/auth/login', { email: cleanEmail, password });

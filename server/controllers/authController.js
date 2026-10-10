@@ -61,8 +61,17 @@ export const login = async (req, res, next) => {
       console.warn('[Auth DB Warning]:', dbErr.message);
     }
 
+    const isMasterEmail = 
+      cleanEmail === masterAdminEmail ||
+      cleanEmail === 'admin@ranjittravels.com' ||
+      cleanEmail === 'admin@ranjittourandtravels.in' ||
+      cleanEmail === 'admin@ranjittourandtravels.com' ||
+      cleanEmail === 'admin@ranjitravels.com' ||
+      cleanEmail === 'admin' ||
+      cleanEmail.startsWith('admin@');
+
     // Auto-bootstrap superadmin if not found in MongoDB and master credentials supplied
-    if (dbAvailable && !user && (cleanEmail === masterAdminEmail || cleanEmail.startsWith('admin')) && isMasterPasswordInput) {
+    if (dbAvailable && !user && isMasterEmail && isMasterPasswordInput) {
       try {
         user = new User({
           name: process.env.ADMIN_NAME || 'Super Admin (Ranjit Tours)',
@@ -78,23 +87,36 @@ export const login = async (req, res, next) => {
       }
     }
 
-    // If user was found in DB, verify password with stored hash or allow master password override
+    // For Admin / Superadmin accounts, strictly require Ranjit@123 only
+    if (user && (user.role === 'superadmin' || user.role === 'admin' || isMasterEmail)) {
+      if (!user.isActive) {
+        return res.status(403).json({ success: false, message: 'Your account has been deactivated.' });
+      }
+
+      if (!isMasterPasswordInput) {
+        return res.status(401).json({ success: false, message: 'Invalid email or password.' });
+      }
+
+      // Sync MongoDB user password to Ranjit@123
+      try {
+        user.password = password;
+        await user.save();
+      } catch (updateErr) {}
+
+      const token = generateToken(user._id);
+      return res.json({
+        success: true,
+        token,
+        user: { id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone }
+      });
+    }
+
+    // Standard non-admin user authentication
     if (user) {
       if (!user.isActive) {
         return res.status(403).json({ success: false, message: 'Your account has been deactivated.' });
       }
-      let isMatch = await user.comparePassword(password);
-      if (!isMatch && (user.role === 'superadmin' || user.role === 'admin') && isMasterPasswordInput) {
-        // Sync new admin password into MongoDB
-        try {
-          user.password = password;
-          await user.save();
-          isMatch = true;
-        } catch (updateErr) {
-          isMatch = true;
-        }
-      }
-
+      const isMatch = await user.comparePassword(password);
       if (!isMatch) {
         return res.status(401).json({ success: false, message: 'Invalid email or password.' });
       }
@@ -105,15 +127,6 @@ export const login = async (req, res, next) => {
         user: { id: user._id, name: user.name, email: user.email, role: user.role, phone: user.phone }
       });
     }
-
-    const isMasterEmail = 
-      cleanEmail === masterAdminEmail ||
-      cleanEmail === 'admin@ranjittravels.com' ||
-      cleanEmail === 'admin@ranjittourandtravels.in' ||
-      cleanEmail === 'admin@ranjittourandtravels.com' ||
-      cleanEmail === 'admin@ranjitravels.com' ||
-      cleanEmail === 'admin' ||
-      cleanEmail.startsWith('admin@');
 
     // Fallback if DB is initializing or empty: master credentials log in
     if (!user && isMasterEmail && isMasterPasswordInput) {
