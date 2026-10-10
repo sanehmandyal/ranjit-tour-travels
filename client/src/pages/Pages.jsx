@@ -32,40 +32,79 @@ export const getStoredCustomItems = (resourceKey, defaultList) => {
 };
 
 // Helper to merge server items with admin customized local items without losing uploaded images
-export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems) => {
-  const localItems = getStoredCustomItems(resourceKey, fallbackItems);
-  if (!serverItems || serverItems.length === 0) {
-    return localItems;
+export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems = []) => {
+  let customOverrides = [];
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const raw = localStorage.getItem(`rjt_custom_${resourceKey}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          customOverrides = parsed;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(`Could not load custom ${resourceKey} overrides:`, e);
   }
-  
+
+  if (!serverItems || serverItems.length === 0) {
+    return customOverrides.length > 0 ? customOverrides : fallbackItems;
+  }
+
+  // Server items are authoritative from MongoDB
   const merged = serverItems.map(sItem => {
-    const override = localItems.find(lItem => 
+    const localMatch = customOverrides.find(lItem => 
       (lItem._id && (lItem._id === sItem._id || lItem._id === sItem.id)) || 
       (lItem.slug && lItem.slug === sItem.slug) || 
       (lItem.name && sItem.name && lItem.name.trim().toLowerCase() === sItem.name.trim().toLowerCase()) ||
       (lItem.title && sItem.title && lItem.title.trim().toLowerCase() === sItem.title.trim().toLowerCase())
     );
-    if (override) {
+
+    // Prioritize uploaded photos (Base64 data URLs, http URLs, or local overrides)
+    const serverPhoto = sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]) || '';
+    const localPhoto = localMatch ? (localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || '') : '';
+    const resolvedPhoto = serverPhoto || localPhoto;
+
+    const serverImages = (sItem.images && sItem.images.length > 0) ? sItem.images : [];
+    const localImages = (localMatch && localMatch.images && localMatch.images.length > 0) ? localMatch.images : [];
+    const resolvedImages = serverImages.length > 0 ? serverImages : (localImages.length > 0 ? localImages : (resolvedPhoto ? [resolvedPhoto] : []));
+
+    if (localMatch) {
       return {
+        ...localMatch,
         ...sItem,
-        ...override,
-        featuredImage: override.featuredImage || override.image || (override.images && override.images[0]) || sItem.featuredImage || sItem.image || (sItem.images && sItem.images[0]),
-        image: override.image || override.featuredImage || (override.images && override.images[0]) || sItem.image || sItem.featuredImage || (sItem.images && sItem.images[0]),
-        images: (override.images && override.images.length > 0) ? override.images : sItem.images
+        featuredImage: resolvedPhoto,
+        image: resolvedPhoto,
+        images: resolvedImages
       };
     }
-    return sItem;
+
+    return {
+      ...sItem,
+      featuredImage: resolvedPhoto,
+      image: resolvedPhoto,
+      images: resolvedImages
+    };
   });
 
-  localItems.forEach(lItem => {
+  // Include any new records added locally in Admin that are not yet in serverItems
+  customOverrides.forEach(lItem => {
     const exists = merged.some(m => 
       (m._id && (m._id === lItem._id || m._id === lItem.id)) || 
-      (m.slug && m.slug === lItem.slug) ||
+      (m.slug && m.slug === lItem.slug) || 
       (m.name && lItem.name && m.name.trim().toLowerCase() === lItem.name.trim().toLowerCase()) ||
       (m.title && lItem.title && m.title.trim().toLowerCase() === lItem.title.trim().toLowerCase())
     );
     if (!exists) {
-      merged.push(lItem);
+      const lPhoto = lItem.featuredImage || lItem.image || (lItem.images && lItem.images[0]) || '';
+      const lImages = (lItem.images && lItem.images.length > 0) ? lItem.images : (lPhoto ? [lPhoto] : []);
+      merged.push({
+        ...lItem,
+        featuredImage: lPhoto,
+        image: lPhoto,
+        images: lImages
+      });
     }
   });
 

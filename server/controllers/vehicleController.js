@@ -8,7 +8,7 @@ export const getVehicles = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 50;
     const q = req.query.q || '';
     const category = req.query.category || '';
-    const publishedOnly = req.query.admin ? {} : { published: true };
+    const publishedOnly = req.query.admin ? {} : { published: { $ne: false } };
 
     const filter = { ...publishedOnly };
     if (q) {

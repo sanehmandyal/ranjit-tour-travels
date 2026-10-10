@@ -7,7 +7,7 @@ export const getServices = async (req, res, next) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const q = req.query.q || '';
-    const publishedOnly = req.query.admin ? {} : { published: true };
+    const publishedOnly = req.query.admin ? {} : { published: { $ne: false } };
 
     const filter = { ...publishedOnly };
     if (q) {

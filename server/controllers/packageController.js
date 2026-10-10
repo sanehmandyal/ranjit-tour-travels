@@ -10,7 +10,7 @@ export const getPackages = async (req, res, next) => {
     const destination = req.query.destination || '';
     const category = req.query.category || '';
     const duration = req.query.duration || '';
-    const publishedOnly = req.query.admin ? {} : { published: true };
+    const publishedOnly = req.query.admin ? {} : { published: { $ne: false } };
 
     const filter = { ...publishedOnly };
     if (q) {

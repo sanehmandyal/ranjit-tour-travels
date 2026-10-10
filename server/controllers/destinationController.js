@@ -9,7 +9,7 @@ export const getDestinations = async (req, res, next) => {
     const q = req.query.q || '';
     const state = req.query.state || '';
     const category = req.query.category || '';
-    const publishedOnly = req.query.admin ? {} : { published: true };
+    const publishedOnly = req.query.admin ? {} : { published: { $ne: false } };
 
     const filter = { ...publishedOnly };
     if (q) {
