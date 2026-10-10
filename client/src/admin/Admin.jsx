@@ -1145,6 +1145,30 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Global Cloud Live Banner */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-teal-500/20 via-emerald-500/15 to-cyan-500/20 border border-teal-400/40 backdrop-blur-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-teal-500/30 border border-teal-400/50 flex items-center justify-center text-teal-300 shadow-md flex-shrink-0">
+            <Globe size={20} />
+          </div>
+          <div>
+            <h4 className="font-display font-bold text-sm text-white flex items-center gap-2">
+              <span>Global Cloud Synchronization Active</span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-pulse" />
+                Live Worldwide
+              </span>
+            </h4>
+            <p className="text-xs text-slate-300 mt-0.5">
+              All package changes, vehicle rates, uploaded photos, and settings are published live to all visitors across every device globally.
+            </p>
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          <CloudSyncButton />
+        </div>
+      </div>
+
       {/* Metric Counters Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {metricCards.map((mc, idx) => {
@@ -1563,7 +1587,7 @@ function CloudSyncButton() {
       setSynced(true);
       setTimeout(() => setSynced(false), 6000);
     } catch (err) {
-      console.warn('Sync notice:', err.message);
+      console.warn('Global sync notice:', err.message);
     } finally {
       setSyncing(false);
     }
@@ -1577,15 +1601,15 @@ function CloudSyncButton() {
     <button
       onClick={doSync}
       disabled={syncing}
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-lg backdrop-blur-md cursor-pointer ${
+      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition shadow-lg backdrop-blur-md cursor-pointer ${
         synced 
           ? 'bg-emerald-500/30 border border-emerald-400 text-emerald-200 animate-pulse' 
           : 'bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white'
       }`}
-      title="Push all your updated photos and packages to cloud so mobile phones see them instantly"
+      title="Save and publish all photos, tour packages, and vehicles globally so all website visitors see them live"
     >
       <Sparkles size={13} className={syncing ? 'animate-spin' : ''} />
-      <span>{syncing ? 'Syncing to Mobile…' : (synced ? '✓ Live on Mobile' : '⚡ Push Edits to Mobile')}</span>
+      <span>{syncing ? 'Publishing Globally…' : (synced ? '✓ Live on Global Website' : '⚡ Publish Changes Globally')}</span>
     </button>
   );
 }
