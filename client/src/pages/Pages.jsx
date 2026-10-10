@@ -618,6 +618,188 @@ export const DEFAULT_VEHICLES = [
   }
 ];
 
+// Fallback Professional Services Data
+export const DEFAULT_SERVICES = [
+  {
+    _id: 'srv-1',
+    name: 'Outstation Cab & Round-Trip Taxi Rentals',
+    slug: 'outstation-taxi-service',
+    category: 'Outstation Cabs',
+    shortDescription: 'Reliable, sanitized outstation cabs for one-way drops and multi-day round trips across Himachal, Punjab, Haryana, Uttarakhand & Delhi NCR.',
+    description: `Ranjit Tour & Travels delivers professional outstation cab services across North India with zero hidden charges. Whether you need a one-way transfer from Amb Andaura Railway Station to Chandigarh or a multi-day family holiday across Shimla, Kullu, and Manali, our verified hill chauffeurs guarantee safe, punctual, and comfortable mountain travel.\n\nAll our commercial fleet vehicles undergo daily sanitization, carry comprehensive all-India tourist permits, and are driven by hill-certified drivers with 10+ years of driving on high passes and winding ghats.`,
+    featuredImage: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80',
+    features: [
+      'Doorstep pickup and drop from railway stations, airports, and hotels',
+      'All toll taxes, state tourist road permits, and driver DA included upfront',
+      'Experienced mountain chauffeurs specializing in Rohtang, Jalori & Spiti passes',
+      '24/7 dedicated dispatch and emergency breakdown backup'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-2',
+    name: 'Amb Andaura Station & Vande Bharat Express Taxi Pickup',
+    slug: 'amb-andaura-station-taxi',
+    category: 'Railway Transfer',
+    shortDescription: 'Dedicated private cab reception directly outside Amb Andaura Railway Station platform for Vande Bharat Express (22447/22448) passengers.',
+    description: `Direct private taxi transfers connecting New Delhi–Amb Andaura Vande Bharat Express passengers to Mata Chintpurni (30 mins), Maa Jwala Ji (45 mins), Kangra Devi, Dharamshala, and Kullu Manali.\n\nOur chauffeurs coordinate with train arrival times, waiting at the station exit with placards and helping with luggage. Enjoy seamless immediate departure without waiting or haggling with local counters.`,
+    featuredImage: 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=1200&q=80',
+    features: [
+      'Guaranteed station platform reception aligned with Vande Bharat arrival timings',
+      'Direct doorstep drops to temple hotels and Dharamshala/Manali resorts',
+      'Luggage assistance and child/senior-citizen friendly comfortable seating',
+      'Fixed transparent pricing with zero surge rates'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-3',
+    name: 'Himachal 9 Devi Darshan & Sacred Temple Pilgrimage',
+    slug: 'himachal-devi-darshan-pilgrimage-cabs',
+    category: 'Pilgrimage & Spiritual',
+    shortDescription: 'Reverent, senior-citizen friendly temple circuit cabs covering Mata Chintpurni, Jwala Ji, Kangra Brajeshwari, Chamunda Devi, Naina Devi, and Baglamukhi.',
+    description: `Experience the sacred Shaktipeeth circuits of Himachal Pradesh and Punjab with respectful, knowledgeable chauffeurs. We coordinate temple gate drops, Aarti timings, and VIP darshan assistance across:\n- Maa Chintpurni Devi\n- Maa Jwala Ji (Eternal Flame)\n- Maa Baglamukhi Temple Bankhandi\n- Maa Kangra Brajeshwari Devi\n- Maa Chamunda Devi\n- Mata Naina Devi (with ropeway coordination)\n- Anandpur Sahib & Mansa Devi Panchkula.`,
+    featuredImage: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=80',
+    features: [
+      'Tailored pacing with ground-level temple drop-offs for senior citizens',
+      'Knowledge of temple Aarti and Pooja timings to avoid long queues',
+      'Pure vegetarian dining stop recommendations along the highway',
+      'Dedicated AC Innova Crysta, Dzire sedan, or Tempo Traveller for family groups'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-4',
+    name: 'Airport Pickup & Drop (Chandigarh IXC & Delhi IGI T3)',
+    slug: 'airport-transfer-services',
+    category: 'Airport Transfer',
+    shortDescription: 'Flight-tracked airport transfers between Chandigarh International (IXC), Delhi IGI Airport (DEL), and Himachal mountain destinations.',
+    description: `Never miss a flight or wait after a long journey. Our airport transfer concierge monitors your flight status in real time. We provide seamless doorstep pickups between Chandigarh Airport (IXC), New Delhi Airport (IGI T3), Mohali, Panchkula, and all major Himachal resorts.\n\nComplimentary bottled water, luggage assistance, and express highway routing via modern toll expressways.`,
+    featuredImage: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1200&q=80',
+    features: [
+      'Real-time flight radar tracking with automated delay compensation',
+      'Direct highway transit via Kiratpur-Manali & Delhi-Chandigarh Expressways',
+      'Spacious luggage capacity for international and family bags',
+      'Receipts and GST invoicing for corporate business travel'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-5',
+    name: 'Custom Tour Package & Personalized Road Concierge',
+    slug: 'custom-tour-package-builder',
+    category: 'Custom Tours',
+    shortDescription: 'Tailor-made mountain itineraries customized around your preferred travel dates, hotel categories (3-Star to 5-Star), and adventure activities.',
+    description: `Craft your dream mountain holiday with our destination architects. Choose your starting city, duration, preferred vehicle (Innova Crysta, Fortuner 4x4, Dzire, or Maharaja Urbania), and stay preferences.\n\nWe customize full itineraries for honeymooners, family vacations, corporate offsites, and high-altitude photography expeditions across Shimla, Manali, Kasol, Jibhi, Spiti Valley, and Leh Ladakh.`,
+    featuredImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+    features: [
+      '100% customizable daily route pacing and sightseeing stops',
+      'Handpicked luxury partner hotels with private balcony mountain views',
+      'Dedicated 24/7 on-road concierge for permits, weather, and activity passes',
+      'Special arrangements for riverside dinners, campfires, and paragliding'
+    ],
+    published: true
+  },
+  {
+    _id: 'srv-6',
+    name: 'Luxury Tempo Traveller & Force Urbania Group Fleet',
+    slug: 'tempo-traveller-group-rental',
+    category: 'Group Fleet',
+    shortDescription: '12-Seater, 17-Seater, and 26-Seater luxury Maharaja Tempo Travellers and Force Urbanias with pushback seats and high-roof cabin.',
+    description: `The ultimate group travel comfort for large families, wedding delegations, corporate teams, and pilgrimage tours. Equipped with 1x1 Maharaja pushback recliner seats, individual AC vents, LED entertainment, onboard fast chargers, and cavernous rear luggage boots.\n\nDriven by expert heavy-vehicle hill chauffeurs who make group mountain journeys effortless and enjoyable.`,
+    featuredImage: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1200&q=80',
+    features: [
+      '12 to 26 passenger seating configurations with individual pushback recliners',
+      'Dual chilled AC cooling and heating for mountain winters',
+      'Integrated sound system, LED mood lighting, and USB charging ports',
+      'Heavy-duty rooftop carrier for excess luggage and trekking gear'
+    ],
+    published: true
+  }
+];
+
+// Fallback Travel Blogs & Road Guides
+export const DEFAULT_BLOGS = [
+  {
+    _id: 'blg-1',
+    title: 'How to Plan the Ultimate Himachal Road Trip in 2026: Route Guide & Mountain Driving Safety',
+    slug: 'himachal-road-trip-guide-2026',
+    category: 'Himachal Travel Guide',
+    author: 'Ranjit Singh',
+    readTime: '6 min read',
+    featuredImage: 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Complete master guide on route planning, new four-lane expressways, high-altitude passes, and mountain driving advice for Manali, Shimla, and Dharamshala.',
+    content: `Himachal Pradesh, known as Devbhoomi (Land of Gods), is home to some of the world's most spectacular mountain roads. Planning a road trip across the Western Himalayas requires knowing the seasonal weather, road conditions, and scenic shortcuts.\n\n### 1. Best Time to Visit Himachal\n- **Summer (April to June):** Pleasant weather (15°C to 28°C), clear roads, and blossoming apple orchards. Perfect for family vacations in Shimla, Manali, and Dharamshala.\n- **Monsoon (July to August):** Lush greenery and roaring waterfalls, but requires seasoned mountain chauffeurs due to occasional landslides.\n- **Winter (November to February):** Heavy snowfall in Solang Valley, Rohtang, and Kufri. Ideal for snow sports lovers and honeymooners.\n\n### 2. The New Kiratpur-Nerchowk Four-Lane Expressway\nThe newly opened 4-lane highway has slashed travel time from Chandigarh to Kullu-Manali from 9 hours down to just 5.5 hours. Traveling via tunnel corridors bypasses narrow ghat choke points.\n\n### 3. Why Private Chauffeur Driven Cabs Beat Self-Drive\nMountain driving demands instant reflexes on steep hairpin bends, black ice, and single-lane bridges. Hiring an experienced hill chauffeur from Ranjit Tour & Travels allows you to relax and enjoy the scenic pine horizons without road fatigue.`,
+    tags: ['Himachal Road Trip', 'Manali Guide', 'Mountain Safety', 'Taxi Booking'],
+    published: true
+  },
+  {
+    _id: 'blg-2',
+    title: 'Amb Andaura Railway Station to Mata Chintpurni & Jwala Ji: Cab Guide & Distance',
+    slug: 'amb-andaura-to-chintpurni-taxi-guide',
+    category: 'Pilgrimage Advice',
+    author: 'Travel Desk',
+    readTime: '4 min read',
+    featuredImage: 'https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Detailed guide for Vande Bharat Express travelers arriving at Amb Andaura Station (AADR) and traveling to Chintpurni, Jwala Ji, and Kangra Devi temples.',
+    content: `Amb Andaura Railway Station (Station Code: AADR) in Una district has become the primary gateway for pilgrims visiting the sacred Shaktipeeth temples of Himachal Pradesh, thanks to the direct New Delhi-Amb Andaura Vande Bharat Express.\n\n### Distance Chart from Amb Andaura Station:\n- **Mata Chintpurni Temple:** 26 km (approx. 35 mins via NH 503A)\n- **Maa Jwala Ji Temple:** 48 km (approx. 1 hour via Bharwain road)\n- **Maa Baglamukhi Temple (Bankhandi):** 52 km (approx. 1 hr 15 mins)\n- **Kangra Brajeshwari Devi:** 72 km (approx. 1 hr 45 mins)\n- **Chamunda Devi Shrine:** 85 km (approx. 2 hours)\n\n### Pro Tips for Pilgrims:\n1. Book your taxi in advance with Ranjit Tour & Travels (+91 98165 96713) so your driver is stationed right at the platform exit upon train arrival.\n2. Morning Vande Bharat arrives at Amb Andaura around 11:05 AM, allowing you to comfortably complete Chintpurni and Jwala Ji Darshan on the very same day.\n3. Request ground-floor hotel bookings if traveling with senior citizens.`,
+    tags: ['Amb Andaura Taxi', 'Chintpurni Temple', 'Vande Bharat', 'Devi Darshan'],
+    published: true
+  },
+  {
+    _id: 'blg-3',
+    title: 'Chandigarh to Manali via Four-Lane Expressway: Travel Time, Tunnels & Scenic Pitstops',
+    slug: 'chandigarh-manali-four-lane-route-guide',
+    category: 'Highway Updates',
+    author: 'Ranjit Singh',
+    readTime: '5 min read',
+    featuredImage: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Experience the world-class Kiratpur-Nerchowk expressway connecting Chandigarh to Kullu-Manali with 5 scenic tunnels, bypass bridges, and river views.',
+    content: `The Chandigarh to Manali highway has transformed into one of India's most modern and picturesque mountain expressways. Here is everything you need to know before your trip.\n\n### Key Highlights of the Route:\n- **Total Distance:** 270 km\n- **Average Travel Time:** 5 to 6 hours in a private AC cab (previously 8-10 hours)\n- **Scenic Tunnels:** 5 state-of-the-art tunnels eliminating steep hairpin loops around Bilaspur\n- **Major Stops:** Anandpur Sahib, Kiratpur, Sundernagar Lake, Pandoh Dam, Hanogi Mata Temple, and Kullu Shawl weaving centers.\n\n### Recommended Taxi Choice:\nFor small families, a Toyota Innova Crysta or Maruti Dzire offers maximum comfort, whisper-quiet cabin acoustics, and seamless hill climbing torque.`,
+    tags: ['Chandigarh to Manali', 'Four Lane Highway', 'Innova Taxi', 'Travel Tips'],
+    published: true
+  },
+  {
+    _id: 'blg-4',
+    title: 'Himachal 9 Devi Darshan Yatra: Sacred Shaktipeeth Itinerary & Route Map',
+    slug: 'himachal-9-devi-darshan-yatra-itinerary',
+    category: 'Spiritual Tourism',
+    author: 'Ranjit Tour & Travels',
+    readTime: '7 min read',
+    featuredImage: 'https://images.unsplash.com/photo-1514222134-b57cbb8ce073?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Complete 5-day spiritual pilgrimage plan starting from Amb Andaura Station covering all 9 sacred Goddess shrines in Himachal Pradesh & Punjab.',
+    content: `The 9 Devi Darshan circuit is one of the most auspicious pilgrimages in Hinduism. Starting from Amb Andaura or Chandigarh, travelers can comfortably seek blessings at all nine divine shrines.\n\n### The 5-Day Signature Itinerary:\n- **Day 1:** Arrival at Amb Andaura Station -> Mata Mansa Devi & Mata Chintpurni Devi Darshan.\n- **Day 2:** Maa Jwala Ji (Eternal Flame) -> Maa Baglamukhi Temple (Havan & Pooja).\n- **Day 3:** Nagarkot Kangra Brajeshwari Devi -> Maa Chamunda Nandikeshwar Dham.\n- **Day 4:** Mata Naina Devi (Ropeway & Hilltop View) -> Takht Sri Keshgarh Sahib Anandpur.\n- **Day 5:** Return drop to Chandigarh / Amb Andaura Railway Station with divine prasad.\n\n### Pilgrim Hospitality by Ranjit Travels:\nWe provide clean sanitized vehicles, drivers who assist elderly parents, and pure vegetarian meal arrangements throughout the journey.`,
+    tags: ['9 Devi Darshan', 'Himachal Pilgrimage', 'Chintpurni', 'Jwala Ji'],
+    published: true
+  },
+  {
+    _id: 'blg-5',
+    title: 'Why Innova Crysta is the Gold Standard for Himachal Mountain Family Holidays',
+    slug: 'innova-crysta-himachal-family-tour-guide',
+    category: 'Fleet Reviews',
+    author: 'Fleet Manager',
+    readTime: '4 min read',
+    featuredImage: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Explore why Toyota Innova Crysta with captain seats, dual-zone AC, and high clearance is the undisputed favorite taxi for North India hill stations.',
+    content: `When traveling with family or elders across the twisting roads of Shimla, Kullu, Manali, and Rohtang Pass, vehicle choice determines your overall comfort.\n\n### Key Advantages of Innova Crysta:\n1. **Captain Recliner Seats:** Individual middle-row armchairs prevent motion sickness and provide lumbar support on long ghat drives.\n2. **High Ground Clearance:** Effortlessly navigates uneven valley trails, speed bumps, and snow-melt patches.\n3. **Whisper-Quiet Cabin:** Advanced sound insulation lets your family sleep peacefully during scenic highway transits.\n4. **Ample Luggage Boot:** Holds 5+ large suitcases with ease.\n\nBook your dedicated Innova Crysta with certified hill chauffeur from Ranjit Tour & Travels for guaranteed reliability.`,
+    tags: ['Innova Crysta', 'Himachal Taxi', 'Family Tour', 'Comfort Travel'],
+    published: true
+  },
+  {
+    _id: 'blg-6',
+    title: 'Spiti Valley 4x4 Road Expedition: Best Months, High Mountain Passes & Packing Checklist',
+    slug: 'spiti-valley-expedition-route-guide',
+    category: 'Adventure Expeditions',
+    author: 'Ranjit Singh',
+    readTime: '8 min read',
+    featuredImage: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=1200&q=80',
+    excerpt: 'Essential road expedition guide for the Middle Land: Kunzum Pass (4,551m), Chandratal Lake, Key Monastery, Kaza, and high-altitude travel tips.',
+    content: `Spiti Valley—the cold desert mountain valley nestled between Tibet and India—is one of the most raw and exhilarating road trip destinations on Earth.\n\n### Route Options:\n- **Shimla to Kaza (via Kinnaur):** Open year-round, gradual altitude acclimatization via Reckong Peo, Nako, Tabo, and Dhankar.\n- **Manali to Kaza (via Atal Tunnel & Kunzum Pass):** Open June to October, high-altitude mountain river crossings at Batal and Chhatru.\n\n### Essential Checklist:\n- Warm thermals and windproof jackets (temperatures dip below -5°C at night).\n- High-clearance 4x4 SUV (Mahindra Scorpio or Fortuner) equipped with snow chains and oxygen canisters.\n- Cash currency (ATMs in Kaza can be intermittent).\n\nContact Ranjit Tour & Travels for custom 4x4 Spiti Valley expedition packages with experienced high-altitude expedition drivers.`,
+    tags: ['Spiti Valley', '4x4 Expedition', 'Kunzum Pass', 'Adventure Travel'],
+    published: true
+  }
+];
+
 // Fallback Authentic Google Maps Reviews (Ranjit Travels & Tours Services, Amb Andaura)
 export const DEFAULT_TESTIMONIALS = [
   {
@@ -709,8 +891,8 @@ export function Home() {
   const [destinations, setDestinations] = useState(() => getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
   const [packages, setPackages] = useState(() => getStoredCustomItems('packages', DEFAULT_PACKAGES));
   const [vehicles, setVehicles] = useState(() => getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
-  const [services, setServices] = useState(() => getStoredCustomItems('services', []));
-  const [blogs, setBlogs] = useState(() => getStoredCustomItems('blogs', []));
+  const [services, setServices] = useState(() => getStoredCustomItems('services', DEFAULT_SERVICES));
+  const [blogs, setBlogs] = useState(() => getStoredCustomItems('blogs', DEFAULT_BLOGS));
   const [testimonials, setTestimonials] = useState(DEFAULT_TESTIMONIALS);
   const [loading, setLoading] = useState(true);
 
@@ -728,53 +910,59 @@ export function Home() {
       api.get('/destinations?limit=12'),
       api.get('/packages?limit=12'),
       api.get('/vehicles?limit=8'),
-      api.get('/services?limit=4'),
-      api.get('/blogs?limit=3'),
-      api.get('/testimonials?limit=3')
+      api.get('/services?limit=6'),
+      api.get('/blogs?limit=6'),
+      api.get('/testimonials?limit=6')
     ])
       .then(([dRes, pRes, vRes, sRes, bRes, tRes]) => {
         const customDests = getStoredCustomItems('destinations', null);
         if (customDests && customDests.length > 0) {
           setDestinations(customDests);
-        } else if (dRes.data.items && dRes.data.items.length > 0) {
+        } else if (dRes.data?.items && dRes.data.items.length > 0) {
           setDestinations(dRes.data.items);
         }
 
         const customPkgs = getStoredCustomItems('packages', null);
         if (customPkgs && customPkgs.length > 0) {
           setPackages(customPkgs);
-        } else if (pRes.data.items && pRes.data.items.length > 0) {
+        } else if (pRes.data?.items && pRes.data.items.length > 0) {
           setPackages(pRes.data.items);
         }
 
         const customVehs = getStoredCustomItems('vehicles', null);
         if (customVehs && customVehs.length > 0) {
           setVehicles(customVehs);
-        } else if (vRes.data.items && vRes.data.items.length > 0) {
+        } else if (vRes.data?.items && vRes.data.items.length > 0) {
           setVehicles(vRes.data.items);
         }
 
         const customSrvs = getStoredCustomItems('services', null);
         if (customSrvs && customSrvs.length > 0) {
           setServices(customSrvs);
-        } else if (sRes.data.items && sRes.data.items.length > 0) {
+        } else if (sRes.data?.items && sRes.data.items.length > 0) {
           setServices(sRes.data.items);
+        } else {
+          setServices(DEFAULT_SERVICES);
         }
 
         const customBlgs = getStoredCustomItems('blogs', null);
         if (customBlgs && customBlgs.length > 0) {
           setBlogs(customBlgs);
-        } else if (bRes.data.items && bRes.data.items.length > 0) {
+        } else if (bRes.data?.items && bRes.data.items.length > 0) {
           setBlogs(bRes.data.items);
+        } else {
+          setBlogs(DEFAULT_BLOGS);
         }
 
-        setTestimonials(tRes.data.items || DEFAULT_TESTIMONIALS);
+        setTestimonials(tRes.data?.items?.length > 0 ? tRes.data.items : DEFAULT_TESTIMONIALS);
       })
       .catch(err => {
         console.warn('Home live load notice:', err.message);
         setDestinations(getStoredCustomItems('destinations', DEFAULT_DESTINATIONS));
         setPackages(getStoredCustomItems('packages', DEFAULT_PACKAGES));
         setVehicles(getStoredCustomItems('vehicles', DEFAULT_VEHICLES));
+        setServices(getStoredCustomItems('services', DEFAULT_SERVICES));
+        setBlogs(getStoredCustomItems('blogs', DEFAULT_BLOGS));
       })
       .finally(() => setLoading(false));
   }, []);
@@ -1745,7 +1933,7 @@ export function Listing({ kind }) {
       title: 'Our Travel Services',
       subtitle: 'Outstation cabs, one-way transfers, airport pickups, and corporate fleets.',
       searchPlaceholder: 'Search services...',
-      fallback: []
+      fallback: DEFAULT_SERVICES
     },
     blog: {
       endpoint: '/blogs',
@@ -1753,7 +1941,7 @@ export function Listing({ kind }) {
       title: 'Travel Blogs & Road Guides',
       subtitle: 'Expert itineraries, mountain road updates, and local travel advice.',
       searchPlaceholder: 'Search travel guides and tips...',
-      fallback: []
+      fallback: DEFAULT_BLOGS
     }
   };
 
@@ -2099,7 +2287,12 @@ export function Detail({ kind }) {
     setLoading(true);
     setError('');
     const resourceKey = kind === 'tour-packages' ? 'packages' : (kind === 'cars' ? 'vehicles' : (kind === 'blog' ? 'blogs' : kind));
-    const fallbackList = kind === 'tour-packages' ? DEFAULT_PACKAGES : (kind === 'destinations' ? DEFAULT_DESTINATIONS : (kind === 'cars' ? DEFAULT_VEHICLES : []));
+    const fallbackList = 
+      kind === 'tour-packages' ? DEFAULT_PACKAGES : 
+      kind === 'destinations' ? DEFAULT_DESTINATIONS : 
+      kind === 'cars' ? DEFAULT_VEHICLES : 
+      kind === 'services' ? DEFAULT_SERVICES : 
+      DEFAULT_BLOGS;
     const customList = getStoredCustomItems(resourceKey, fallbackList);
     const localMatch = customList.find(item => item.slug === slug || item._id === slug);
 
