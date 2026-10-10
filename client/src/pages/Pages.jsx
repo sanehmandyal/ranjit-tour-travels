@@ -54,17 +54,22 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
     return customOverrides.length > 0 ? customOverrides : fallbackItems;
   }
 
+  const clean = (str) => (str || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+
   // Server items from MongoDB
   const merged = serverItems.map(sItem => {
-    const sSlug = sItem.slug || toSlug(sItem.name || sItem.title);
-    const sName = (sItem.name || sItem.title || '').trim().toLowerCase();
+    const sSlug = clean(sItem.slug || toSlug(sItem.name || sItem.title));
+    const sName = clean(sItem.name || sItem.title);
+    const sId = (sItem._id || sItem.id || '').toString();
 
     const localMatch = customOverrides.find(lItem => {
-      const lSlug = lItem.slug || toSlug(lItem.name || lItem.title);
-      const lName = (lItem.name || lItem.title || '').trim().toLowerCase();
+      if (!lItem) return false;
+      const lSlug = clean(lItem.slug || toSlug(lItem.name || lItem.title));
+      const lName = clean(lItem.name || lItem.title);
+      const lId = (lItem._id || lItem.id || '').toString();
       return (
-        (lItem._id && (lItem._id === sItem._id || lItem._id === sItem.id)) ||
-        (lSlug && sSlug && lSlug === sSlug) ||
+        (lId && sId && lId === sId) ||
+        (lSlug && sSlug && (lSlug === sSlug || sSlug.includes(lSlug) || lSlug.includes(sSlug))) ||
         (lName && sName && (lName === sName || sName.includes(lName) || lName.includes(sName)))
       );
     });
@@ -74,6 +79,7 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
 
     if (localMatch) {
       const localPhoto = localMatch.featuredImage || localMatch.image || (localMatch.images && localMatch.images[0]) || '';
+      // Local custom photo set by admin takes 100% priority over default server/seed photo!
       const activePhoto = localPhoto || serverPhoto;
       const localImages = (localMatch.images && localMatch.images.length > 0) ? localMatch.images : [];
       const activeImages = localImages.length > 0 ? localImages : (serverImages.length > 0 ? serverImages : (activePhoto ? [activePhoto] : []));
@@ -82,6 +88,9 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
         ...sItem,
         ...localMatch,
         _id: sItem._id || localMatch._id,
+        slug: sItem.slug || localMatch.slug,
+        name: localMatch.name || sItem.name,
+        title: localMatch.title || sItem.title,
         featuredImage: activePhoto,
         image: activePhoto,
         images: activeImages
@@ -98,15 +107,17 @@ export const mergeWithCustomStorage = (resourceKey, serverItems, fallbackItems =
 
   // Include any new records added locally in Admin that are not yet in serverItems
   customOverrides.forEach(lItem => {
-    const lSlug = lItem.slug || toSlug(lItem.name || lItem.title);
-    const lName = (lItem.name || lItem.title || '').trim().toLowerCase();
+    const lSlug = clean(lItem.slug || toSlug(lItem.name || lItem.title));
+    const lName = clean(lItem.name || lItem.title);
+    const lId = (lItem._id || lItem.id || '').toString();
 
     const exists = merged.some(m => {
-      const mSlug = m.slug || toSlug(m.name || m.title);
-      const mName = (m.name || m.title || '').trim().toLowerCase();
+      const mSlug = clean(m.slug || toSlug(m.name || m.title));
+      const mName = clean(m.name || m.title);
+      const mId = (m._id || m.id || '').toString();
       return (
-        (m._id && (m._id === lItem._id || m._id === lItem.id)) ||
-        (mSlug && lSlug && mSlug === lSlug) ||
+        (mId && lId && mId === lId) ||
+        (mSlug && lSlug && (mSlug === lSlug || mSlug.includes(lSlug) || lSlug.includes(mSlug))) ||
         (mName && lName && (mName === lName || mName.includes(lName) || lName.includes(mName)))
       );
     });
@@ -882,7 +893,7 @@ export const DEFAULT_SERVICES = [
     category: 'Wedding',
     shortDescription: 'Grand wedding guest shuttles, bridal luxury cars, and coordinated multi-vehicle convoy management for destination weddings.',
     description: 'Make your royal Punjabi or destination Himachal wedding effortless. We coordinate luxury decorated bridal sedans, vintage cars, and fleets of Innova Crystas and Tempo Travellers to transport Baraat and guests seamlessly between venues and hotels.',
-    featuredImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
+    featuredImage: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
     features: [
       'Decorated Luxury Bridal Mercedes, Audi, BMW and Fortuner options',
       'On-ground logistics supervisor at airport and hotels',

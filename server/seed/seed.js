@@ -584,7 +584,7 @@ export const defaultServices = [
     slug: 'wedding-transportation',
     shortDescription: 'Grand wedding guest shuttles, bridal luxury cars, and coordinated multi-vehicle convoy management for destination weddings.',
     description: 'Make your royal Punjabi or destination Himachal wedding effortless. We coordinate luxury decorated bridal sedans, vintage cars, and fleets of Innova Crystas and Tempo Travellers to transport Baraat and guests seamlessly between venues and hotels.',
-    featuredImage: 'https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1000&q=80',
+    featuredImage: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=1200&q=80',
     features: [
       'Decorated Luxury Bridal Mercedes, Audi, BMW and Fortuner options',
       'On-ground logistics supervisor at airport and hotels',

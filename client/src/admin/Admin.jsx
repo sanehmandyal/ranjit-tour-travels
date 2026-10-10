@@ -288,8 +288,8 @@ function AdminLogin({ onLoginSuccess }) {
   );
 }
 
-// Compress client-side uploaded photos to high quality, compact Base64 Data URL (ensures photos never disappear)
-const compressImageFile = (file, maxWidth = 1600, maxHeight = 1600, quality = 0.85) => {
+// Compress client-side uploaded photos to high quality, compact Base64 Data URL (ensures photos never disappear or exceed storage quotas)
+const compressImageFile = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -347,10 +347,10 @@ function ResourceEditor({ resource, item, onDone }) {
 
     try {
       // Compress to high quality compact Base64 Data URL (stored directly in MongoDB & localStorage permanently)
-      const base64Url = await compressImageFile(file, 1600, 1600, 0.85);
+      const base64Url = await compressImageFile(file, 1200, 1200, 0.8);
       if (fieldKey === 'images') {
         setForm(prev => {
-          const updatedImages = [...(prev.images || []), base64Url];
+          const updatedImages = [base64Url, ...(prev.images || [])];
           return {
             ...prev,
             images: updatedImages,
@@ -364,9 +364,8 @@ function ResourceEditor({ resource, item, onDone }) {
           if (fieldKey === 'featuredImage' || fieldKey === 'image') {
             updated.featuredImage = base64Url;
             updated.image = base64Url;
-            if (!updated.images || updated.images.length === 0) {
-              updated.images = [base64Url];
-            }
+            const existingOtherImages = (prev.images || []).filter(pic => pic && !pic.includes('unsplash.com'));
+            updated.images = [base64Url, ...existingOtherImages];
           }
           return updated;
         });
@@ -424,9 +423,9 @@ function ResourceEditor({ resource, item, onDone }) {
         res = await api.post(`/${resource}`, payload);
       }
       if (res?.data?.data) {
-        savedItem = { ...preparedForm, ...res.data.data };
+        savedItem = { ...res.data.data, ...preparedForm };
       } else if (res?.data) {
-        savedItem = { ...preparedForm, ...(res.data._id ? res.data : {}) };
+        savedItem = { ...(res.data._id ? res.data : {}), ...preparedForm };
       }
     } catch (err) {
       console.warn('Backend save notice (cached locally):', err.message);
@@ -856,23 +855,32 @@ function ResourceList({ resource }) {
 
               let updatedItems;
               if (editingItem && editingItem !== 'new') {
-                const targetId = editingItem._id;
-                const targetSlug = editingItem.slug;
-                const matchFound = currentItems.some(it => 
-                  (targetId && (it._id === targetId || it.id === targetId)) || 
-                  (targetSlug && it.slug === targetSlug) ||
-                  (savedForm._id && (it._id === savedForm._id || it.id === savedForm._id)) ||
-                  (savedForm.slug && it.slug === savedForm.slug) ||
-                  (savedForm.name && it.name && savedForm.name.trim().toLowerCase() === it.name.trim().toLowerCase())
-                );
-                if (matchFound) {
-                  updatedItems = currentItems.map(it => 
-                    ((targetId && (it._id === targetId || it.id === targetId)) || 
-                     (targetSlug && it.slug === targetSlug) ||
-                     (savedForm._id && (it._id === savedForm._id || it.id === savedForm._id)) ||
-                     (savedForm.slug && it.slug === savedForm.slug) ||
-                     (savedForm.name && it.name && savedForm.name.trim().toLowerCase() === it.name.trim().toLowerCase())) ? { ...it, ...itemToSave } : it
+                const cleanStr = (s) => (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, '');
+                const targetId = (editingItem._id || editingItem.id || '').toString();
+                const targetSlug = cleanStr(editingItem.slug);
+                const targetName = cleanStr(editingItem.name || editingItem.title);
+                const saveId = (savedForm._id || savedForm.id || '').toString();
+                const saveSlug = cleanStr(savedForm.slug);
+                const saveName = cleanStr(savedForm.name || savedForm.title);
+
+                const isTargetMatch = (it) => {
+                  if (!it) return false;
+                  const itId = (it._id || it.id || '').toString();
+                  const itSlug = cleanStr(it.slug);
+                  const itName = cleanStr(it.name || it.title);
+                  return (
+                    (targetId && itId && (itId === targetId)) ||
+                    (targetSlug && itSlug && (itSlug === targetSlug)) ||
+                    (targetName && itName && (itName === targetName || itName.includes(targetName) || targetName.includes(itName))) ||
+                    (saveId && itId && (itId === saveId)) ||
+                    (saveSlug && itSlug && (itSlug === saveSlug)) ||
+                    (saveName && itName && (itName === saveName || itName.includes(saveName) || saveName.includes(itName)))
                   );
+                };
+
+                const matchFound = currentItems.some(isTargetMatch);
+                if (matchFound) {
+                  updatedItems = currentItems.map(it => isTargetMatch(it) ? { ...it, ...itemToSave } : it);
                 } else {
                   updatedItems = [itemToSave, ...currentItems];
                 }
