@@ -942,7 +942,7 @@ export const seedDatabase = async (clearFirst = true) => {
     }
 
     // 1. Users
-    const adminPassword = (process.env.ADMIN_PASSWORD || 'admin@123').replace(/^["']|["']$/g, '').trim();
+    const adminPassword = (process.env.ADMIN_PASSWORD || 'Ranjit@123').replace(/^["']|["']$/g, '').trim();
     const editorPassword = (process.env.EDITOR_PASSWORD || 'Editor#Amb@2026!').replace(/^["']|["']$/g, '').trim();
 
     const existingAdmin = await User.findOne({ 
@@ -965,7 +965,7 @@ export const seedDatabase = async (clearFirst = true) => {
       });
       await adminUser.save();
     } else {
-      // Sync admin password to admin@123 if currently default or needed
+      // Sync admin password to Ranjit@123 if currently default or needed
       existingAdmin.password = adminPassword;
       await existingAdmin.save();
     }
