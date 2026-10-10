@@ -123,15 +123,17 @@ export function Logo({ compact = false, light = false, showFullImage = false }) 
   );
 }
 
-export function Cover({ src, alt, className = '' }) {
+export function Cover({ src, alt, className = '', imgClassName = '' }) {
   const [loaded, setLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const fallbackImg = 'https://images.unsplash.com/photo-1597074866923-dc0589150358?auto=format&fit=crop&w=1200&q=80';
 
+  const resolvedSrc = hasError || !src ? fallbackImg : img(src);
+
   return (
-    <div className={`relative overflow-hidden w-full h-full bg-slate-200 ${className}`}>
+    <div className={`relative overflow-hidden w-full h-full bg-slate-900 ${className}`}>
       <img
-        src={hasError || !src ? fallbackImg : img(src)}
+        src={resolvedSrc}
         alt={alt || 'Ranjit Tour & Travels'}
         loading="lazy"
         onLoad={() => setLoaded(true)}
@@ -139,7 +141,7 @@ export function Cover({ src, alt, className = '' }) {
           setHasError(true);
           setLoaded(true);
         }}
-        className={`w-full h-full object-cover transition-all duration-500 ${loaded ? 'scale-100 opacity-100' : 'scale-105 opacity-80'}`}
+        className={`w-full h-full object-cover object-center transition-all duration-500 ease-out ${loaded ? 'scale-100 opacity-100' : 'scale-105 opacity-80'} ${imgClassName}`}
       />
     </div>
   );

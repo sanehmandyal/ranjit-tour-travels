@@ -1586,30 +1586,41 @@ export function Home() {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {destinations.map((d, i) => (
             <motion.div 
-              key={d._id} 
-              className="travel-card group block relative bg-white border border-slate-200 shadow-sm hover:shadow-md transition"
+              key={d._id || i} 
+              className="travel-card group flex flex-col justify-between bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
+              transition={{ delay: i * 0.08 }}
             >
-              <Link to={`/destinations/${d.slug}`}>
-                <div className="aspect-[4/3] relative overflow-hidden">
-                  <Cover src={d.featuredImage} alt={d.name} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent" />
-                  
-                  {/* State badge */}
-                  <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-teal-900 text-xs px-2.5 py-1 rounded-full font-bold shadow-sm">
-                    {d.state}
-                  </span>
+              <Link to={`/destinations/${d.slug}`} className="flex flex-col h-full justify-between">
+                <div>
+                  {/* Auto-fit Edge-to-Edge Image Container */}
+                  <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-900">
+                    <Cover 
+                      src={d.featuredImage} 
+                      alt={d.name} 
+                      className="w-full h-full"
+                      imgClassName="group-hover:scale-105 transition-transform duration-500"
+                    />
+                    
+                    {/* State badge */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="bg-slate-900/85 backdrop-blur-md text-teal-300 border border-teal-500/30 text-xs px-2.5 py-1 rounded-full font-bold shadow-md">
+                        {d.state || 'Himachal'}
+                      </span>
+                    </div>
 
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="font-display text-xl font-bold text-white group-hover:text-teal-300 transition">
-                      {d.name}
-                    </h3>
-                    <p className="text-xs text-slate-200 line-clamp-1 mt-0.5">
-                      {d.shortDescription}
-                    </p>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent pointer-events-none" />
+
+                    <div className="absolute bottom-3 left-4 right-4 z-10">
+                      <h3 className="font-display text-xl font-bold text-white group-hover:text-teal-300 transition drop-shadow-md">
+                        {d.name}
+                      </h3>
+                      <p className="text-xs text-slate-200 line-clamp-1 mt-0.5">
+                        {d.shortDescription}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
@@ -1619,7 +1630,7 @@ export function Home() {
                       <Sparkles size={13} className="text-amber-500" />
                       {d.duration || 'Himachal Circuit'}
                     </span>
-                    <span className="text-[10px] text-slate-500 block">Custom Quote on Request</span>
+                    <span className="text-[10px] text-slate-500 block font-medium">Custom Quote on Request</span>
                   </div>
                   <span className="text-xs text-teal-700 flex items-center gap-1 group-hover:translate-x-1 transition font-semibold">
                     Explore Details <ArrowRight size={14} />
@@ -2039,28 +2050,47 @@ export function Listing({ kind }) {
             {data.items.map((item) => {
               if (kind === 'destinations') {
                 return (
-                  <Link key={item._id} to={`/destinations/${item.slug}`} className="travel-card group block bg-white">
-                    <div className="aspect-[4/3] relative overflow-hidden">
-                      <Cover src={item.featuredImage} alt={item.name} />
-                      <span className="absolute top-3 left-3 bg-white/90 text-teal-800 text-xs px-2.5 py-1 rounded-full font-bold shadow-sm">
-                        {item.state}
-                      </span>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-display font-bold text-lg text-slate-900 group-hover:text-teal-700 transition">
-                        {item.name}
-                      </h3>
-                      <p className="text-xs text-slate-600 mt-1 line-clamp-2">{item.shortDescription}</p>
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                        <div>
-                          <span className="text-xs font-bold text-teal-800 flex items-center gap-1">
-                            <Sparkles size={13} className="text-amber-500" />
-                            {item.duration || 'Himachal Tour'}
+                  <Link 
+                    key={item._id} 
+                    to={`/destinations/${item.slug}`} 
+                    className="travel-card group flex flex-col justify-between bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-xl hover:border-teal-300/80 transition-all duration-300 overflow-hidden"
+                  >
+                    <div>
+                      {/* Auto-fit Edge-to-Edge Image Container */}
+                      <div className="aspect-[4/3] w-full relative overflow-hidden bg-slate-900">
+                        <Cover 
+                          src={item.featuredImage} 
+                          alt={item.name} 
+                          className="w-full h-full"
+                          imgClassName="group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute top-3 left-3 z-10">
+                          <span className="bg-slate-900/85 backdrop-blur-md text-teal-300 border border-teal-500/30 text-xs px-2.5 py-1 rounded-full font-bold shadow-md">
+                            {item.state}
                           </span>
-                          <span className="text-[10px] text-slate-500 block">Custom Quote on Request</span>
                         </div>
-                        <span className="text-xs text-teal-700 flex items-center gap-1 font-semibold">Explore <ArrowRight size={14} /></span>
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                       </div>
+
+                      <div className="p-5 space-y-2">
+                        <h3 className="font-display font-bold text-lg text-slate-900 group-hover:text-teal-700 transition leading-snug">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{item.shortDescription}</p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-teal-800 flex items-center gap-1">
+                          <Sparkles size={13} className="text-amber-500" />
+                          {item.duration || 'Himachal Tour'}
+                        </span>
+                        <span className="text-[10px] text-slate-500 block font-medium">Custom Quote on Request</span>
+                      </div>
+                      <span className="text-xs text-teal-700 flex items-center gap-1 font-semibold group-hover:translate-x-1 transition">
+                        Explore <ArrowRight size={14} />
+                      </span>
                     </div>
                   </Link>
                 );
