@@ -79,10 +79,11 @@ export const getServiceBySlug = async (req, res, next) => {
       try {
         service = await Service.findOne(query);
         if (!service && !isObjectId) {
+          const escapedSlug = rawSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           service = await Service.findOne({
             $or: [
-              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+              { slug: { $regex: `^${escapedSlug}$`, $options: 'i' } },
+              { name: { $regex: escapedSlug.replace(/-/g, ' '), $options: 'i' } }
             ]
           });
         }

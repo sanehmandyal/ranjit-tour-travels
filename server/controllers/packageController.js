@@ -90,10 +90,11 @@ export const getPackageBySlug = async (req, res, next) => {
       try {
         pkg = await TourPackage.findOne(query).populate('destination');
         if (!pkg && !isObjectId) {
+          const escapedSlug = rawSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           pkg = await TourPackage.findOne({
             $or: [
-              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+              { slug: { $regex: `^${escapedSlug}$`, $options: 'i' } },
+              { name: { $regex: escapedSlug.replace(/-/g, ' '), $options: 'i' } }
             ]
           }).populate('destination');
         }

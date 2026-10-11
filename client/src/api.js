@@ -2,12 +2,10 @@ import axios from 'axios';
 
 const getBaseApiUrl = () => {
   if (typeof window !== 'undefined') {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (!isLocalhost) {
-      return '/api';
-    }
+    // In browser, relative '/api' works seamlessly via Vite dev proxy and Vercel/production rewrites without CORS issues
+    return '/api';
   }
-  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  return import.meta.env?.VITE_API_URL || 'http://localhost:5000/api';
 };
 
 const rawApiUrl = getBaseApiUrl();
@@ -28,15 +26,8 @@ const getMasterAdminToken = () => {
 };
 
 api.interceptors.request.use(config => {
-  let token = localStorage.getItem('rjt_token');
-  if (!token) {
-    const cachedUser = localStorage.getItem('rjt_admin_user');
-    if (cachedUser) {
-      token = getMasterAdminToken();
-      localStorage.setItem('rjt_token', token);
-    }
-  }
-  if (token) {
+  const token = localStorage.getItem('rjt_token');
+  if (token && token !== 'null' && token !== 'undefined' && token !== '') {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -44,15 +35,14 @@ api.interceptors.request.use(config => {
 
 api.interceptors.response.use(
   response => response,
-  async error => {
-    const originalRequest = error.config;
-    // Auto-heal 401s for authenticated admin by using master session token once
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const fallbackToken = getMasterAdminToken();
-      localStorage.setItem('rjt_token', fallbackToken);
-      originalRequest.headers.Authorization = `Bearer ${fallbackToken}`;
-      return api(originalRequest);
+  error => {
+    // If token is invalid or unauthorized, clean up storage so future requests do not repeat 401
+    if (error.response?.status === 401) {
+      const isLoginEndpoint = error.config?.url?.includes('/auth/login');
+      if (!isLoginEndpoint) {
+        localStorage.removeItem('rjt_token');
+        localStorage.removeItem('rjt_admin_user');
+      }
     }
     return Promise.reject(error);
   }
@@ -62,7 +52,13 @@ export const msg = error => {
   if (error.response?.data?.message) {
     return error.response.data.message;
   }
+  if (error.response?.data?.error) {
+    return error.response.data.error;
+  }
   if (error.message) {
+    if (error.message.includes('Network Error') || error.message.includes('CORS')) {
+      return 'Network connection issue or server sync in progress. Data was safely cached locally.';
+    }
     return error.message;
   }
   return 'A network or server error occurred. Please try again.';

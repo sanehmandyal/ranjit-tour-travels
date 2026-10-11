@@ -2535,7 +2535,20 @@ export function Detail({ kind }) {
             const iSlug = (i.slug || toSlug(i.name || i.title) || '').toLowerCase().replace(/[^a-z0-9]/g, '');
             return i.slug === slug || i._id === slug || iSlug === targetSlug;
           });
-          if (fallbackItem) {
+          let localItem = null;
+          try {
+            const localRaw = localStorage.getItem(`rjt_local_${resourceKey}`);
+            if (localRaw) {
+              const localList = JSON.parse(localRaw);
+              localItem = localList.find(i => i.slug === slug || i._id === slug || ((i.slug || '').replace(/[^a-z0-9]/g, '') === targetSlug));
+            }
+          } catch (e) {}
+
+          if (localItem) {
+            const photo = localItem.featuredImage || localItem.image || (localItem.images && localItem.images[0]) || '';
+            const images = (localItem.images && localItem.images.length > 0) ? localItem.images : (photo ? [photo] : []);
+            setData({ ...localItem, featuredImage: photo, image: photo, images, gallery: images });
+          } else if (fallbackItem) {
             setData(fallbackItem);
           } else {
             setError(msg(err) || 'Failed to load details. Please try again.');

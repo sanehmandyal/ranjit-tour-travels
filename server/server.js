@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import mongoose from 'mongoose';
 import { connectDB } from './config/db.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -35,21 +36,7 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const app = express();
-
-// Connect Database
-connectDB();
-
-// Ensure DB connected on requests
-app.use(async (req, res, next) => {
-  try {
-    if (mongoose.connection.readyState === 0) {
-      await connectDB();
-    }
-  } catch (e) {}
-  next();
-});
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 const buildAllowedOrigins = () => {
   const configuredOrigins = [
@@ -83,6 +70,8 @@ const isAllowedOrigin = (origin) => {
   }
 };
 
+const app = express();
+
 // CORS middleware: allow the configured client origins plus local development hosts.
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -107,6 +96,20 @@ app.use((req, res, next) => {
 });
 
 app.options('*', (req, res) => res.status(204).end());
+
+// Connect Database
+connectDB();
+
+// Ensure DB connected on requests
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose && mongoose.connection && mongoose.connection.readyState === 0) {
+      await connectDB();
+    }
+  } catch (e) {}
+  next();
+});
+
 // 3. Security & Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }

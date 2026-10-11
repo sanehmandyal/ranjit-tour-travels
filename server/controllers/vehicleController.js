@@ -84,10 +84,11 @@ export const getVehicleBySlug = async (req, res, next) => {
       try {
         vehicle = await Vehicle.findOne(query);
         if (!vehicle && !isObjectId) {
+          const escapedSlug = rawSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           vehicle = await Vehicle.findOne({
             $or: [
-              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-              { name: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+              { slug: { $regex: `^${escapedSlug}$`, $options: 'i' } },
+              { name: { $regex: escapedSlug.replace(/-/g, ' '), $options: 'i' } }
             ]
           });
         }

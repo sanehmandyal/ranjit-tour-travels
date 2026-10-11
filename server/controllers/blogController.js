@@ -73,10 +73,11 @@ export const getBlogBySlug = async (req, res, next) => {
       try {
         blog = await Blog.findOne(query);
         if (!blog && !isObjectId) {
+          const escapedSlug = rawSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           blog = await Blog.findOne({
             $or: [
-              { slug: { $regex: `^${rawSlug}$`, $options: 'i' } },
-              { title: { $regex: rawSlug.replace(/-/g, ' '), $options: 'i' } }
+              { slug: { $regex: `^${escapedSlug}$`, $options: 'i' } },
+              { title: { $regex: escapedSlug.replace(/-/g, ' '), $options: 'i' } }
             ]
           });
         }
