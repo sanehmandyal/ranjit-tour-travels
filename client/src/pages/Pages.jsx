@@ -1040,20 +1040,45 @@ export function Home() {
   return (
     <>
       <Seo 
-        title="Royal Route Mountain Journeys & Luxury Cabs"
-        description="Ranjit Tour & Travels is North India's premier travel concierge. Book Shimla, Manali, Spiti & Ladakh customized tour packages and outstation cabs."
+        title="Best Taxi Service in Amb Andaura & Himachal Tour Packages"
+        description="Book 24/7 outstation taxi from Amb Andaura Railway Station, Himachal 9 Devi Darshan yatra, customized Manali, Shimla, Spiti & Ladakh tour packages, and luxury Innova Crysta cabs."
+        keywords={[
+          "taxi service in amb andaura",
+          "taxi from amb andaura railway station",
+          "amb andaura to chintpurni taxi",
+          "himachal tour packages",
+          "manali tour package",
+          "shimla tour package",
+          "devi darshan taxi himachal",
+          "ranjit tour and travels",
+          "innova crysta rental himachal",
+          "vande bharat amb andaura cab"
+        ]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "TravelAgency",
+          "@id": "https://www.ranjittourandtravels.in/#organization",
           "name": s.businessName || "Ranjit Tour & Travels",
-          "telephone": s.phone || "+919876543210",
+          "telephone": s.phone || "+919816596713",
           "email": s.email || "info@ranjittravels.com",
+          "url": "https://www.ranjittourandtravels.in",
           "address": {
             "@type": "PostalAddress",
-            "streetAddress": s.address || "SCO 142-143, Sector 17-C",
-            "addressLocality": s.city || "Chandigarh",
-            "postalCode": s.pincode || "160017",
+            "streetAddress": s.address || "Near Railway Station, Amb Andaura",
+            "addressLocality": s.city || "Una",
+            "addressRegion": s.state || "Himachal Pradesh",
+            "postalCode": s.pincode || "177203",
             "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 31.8080,
+            "longitude": 76.1360
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "184"
           }
         }}
       />
