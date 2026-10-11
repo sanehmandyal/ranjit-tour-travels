@@ -42,6 +42,16 @@ const app = express();
 // Connect Database
 connectDB();
 
+// Ensure DB connected on requests
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState === 0) {
+      await connectDB();
+    }
+  } catch (e) {}
+  next();
+});
+
 // 1. Universal CORS & Preflight Handler (Always First)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -155,6 +165,10 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`[Ranjit Tour & Travels Server] running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`[Ranjit Tour & Travels Server] running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
