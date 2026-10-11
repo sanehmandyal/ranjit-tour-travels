@@ -2,12 +2,42 @@ export const errorHandler = (err, req, res, next) => {
   console.error('[API Error]:', err);
 
   const origin = req.headers.origin;
+  const allowedOrigins = [
+    process.env.CLIENT_URL,
+    process.env.VITE_SITE_URL,
+    process.env.VITE_API_ORIGIN,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://localhost:5173',
+    'https://127.0.0.1:5173',
+    'https://ranjittourandtravels.in',
+    'https://www.ranjittourandtravels.in'
+  ].filter(Boolean);
+
   if (origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+    const hostname = (() => {
+      try {
+        return new URL(origin).hostname;
+      } catch {
+        return '';
+      }
+    })();
+
+    if (allowedOrigins.includes(origin) || hostname.endsWith('.vercel.app') || hostname.endsWith('.netlify.app')) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader('Vary', 'Origin');
+    } else {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    }
   } else {
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range, Client-Version');
 
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message || 'Internal Server Error';

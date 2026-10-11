@@ -1,7 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
 dotenv.config();
-import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
@@ -52,15 +51,50 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// 1. Universal CORS & Preflight Handler (Always First)
+const buildAllowedOrigins = () => {
+  const configuredOrigins = [
+    process.env.CLIENT_URL,
+    process.env.VITE_SITE_URL,
+    process.env.VITE_API_ORIGIN,
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://localhost:5173',
+    'https://127.0.0.1:5173',
+    'https://ranjittourandtravels.in',
+    'https://www.ranjittourandtravels.in'
+  ].filter(Boolean);
+
+  return [...new Set(configuredOrigins)];
+};
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+
+  const allowedOrigins = buildAllowedOrigins();
+  if (allowedOrigins.includes(origin)) return true;
+
+  try {
+    const hostname = new URL(origin).hostname;
+    return hostname.endsWith('.vercel.app') || hostname.endsWith('.netlify.app');
+  } catch {
+    return false;
+  }
+};
+
+// CORS middleware: allow the configured client origins plus local development hosts.
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin) {
+
+  if (origin && isAllowedOrigin(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
-  } else {
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Vary', 'Origin');
+  } else if (!origin) {
     res.setHeader('Access-Control-Allow-Origin', '*');
   }
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Range, Client-Version');
   res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range, Authorization');
@@ -68,17 +102,11 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
   }
+
   next();
 });
 
-// 2. Cors package for Express route compatibility
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS']
-}));
-app.options('*', cors({ origin: true, credentials: true }));
-
+app.options('*', (req, res) => res.status(204).end());
 // 3. Security & Middlewares
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
